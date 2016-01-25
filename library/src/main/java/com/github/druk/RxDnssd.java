@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.druk;
+package com.github.druk;
 
 import com.apple.dnssd.DNSSD;
 import com.apple.dnssd.DNSSDException;
@@ -35,12 +35,12 @@ import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
 
-public class RxDNSSD {
+public class RxDnssd {
 
-    private final static RxDNSSD INSTANCE = new RxDNSSD();
+    private final static RxDnssd INSTANCE = new RxDnssd();
     private Context context;
 
-    private RxDNSSD(){}
+    private RxDnssd(){}
 
     public static void init(Context ctx) {
         INSTANCE.context = ctx.getApplicationContext();

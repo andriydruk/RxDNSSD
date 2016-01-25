@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.druk;
+package com.github.druk;
 
 import android.os.Parcel;
 import android.os.Parcelable;

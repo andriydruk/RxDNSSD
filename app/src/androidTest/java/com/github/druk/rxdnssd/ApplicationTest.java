@@ -1,4 +1,4 @@
-package com.druk.rxdnssd;
+package com.github.druk.rxdnssd;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

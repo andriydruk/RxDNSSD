@@ -1,0 +1,3 @@
+[submodule "library/src/main/jni/mdnsresponder"]
+	path = library/src/main/jni/mdnsresponder
+	url = https://android.googlesource.com/platform/external/mdnsresponder

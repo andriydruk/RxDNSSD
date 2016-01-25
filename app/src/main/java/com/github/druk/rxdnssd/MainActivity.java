@@ -1,4 +1,4 @@
-package com.druk.rxdnssd;
+package com.github.druk.rxdnssd;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
