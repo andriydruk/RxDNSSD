@@ -22,7 +22,10 @@ import com.apple.dnssd.TXTRecord;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 
+import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
@@ -87,10 +90,60 @@ public class RxDnssd {
                         if ((bs.getFlags() & BonjourService.DELETED) == BonjourService.DELETED) {
                             return Observable.just(bs);
                         }
+                        final BonjourService.Builder builder = new BonjourService.Builder(bs);
                         return INSTANCE.createObservable(new DNSSDServiceCreator<BonjourService>() {
                             @Override
                             public DNSSDService getService(Subscriber<? super BonjourService> subscriber) throws DNSSDException {
-                                return DNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 1 /* ns_t_a */, 1 /* ns_c_in */, new QueryListener(subscriber, bs));
+                                return DNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 1 /* ns_t_a */, 1 /* ns_c_in */, new QueryListener(subscriber, builder));
+                            }
+                        }).mergeWith(INSTANCE.createObservable(new DNSSDServiceCreator<BonjourService>() {
+                            @Override
+                            public DNSSDService getService(Subscriber<? super BonjourService> subscriber) throws DNSSDException {
+                                return DNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 28 /* ns_t_aaaa */, 1 /* ns_c_in */, new QueryListener(subscriber, builder));
+                            }
+                        }));
+                    }
+                });
+            }
+        };
+    }
+
+    public static Observable.Transformer<BonjourService, BonjourService> queryIPV4Records() {
+        return new Observable.Transformer<BonjourService, BonjourService>() {
+            @Override
+            public Observable<BonjourService> call(Observable<BonjourService> observable) {
+                return observable.flatMap(new Func1<BonjourService, Observable<? extends BonjourService>>() {
+                    @Override
+                    public Observable<? extends BonjourService> call(final BonjourService bs) {
+                        if ((bs.getFlags() & BonjourService.DELETED) == BonjourService.DELETED) {
+                            return Observable.just(bs);
+                        }
+                        return INSTANCE.createObservable(new DNSSDServiceCreator<BonjourService>() {
+                            @Override
+                            public DNSSDService getService(Subscriber<? super BonjourService> subscriber) throws DNSSDException {
+                                return DNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 1 /* ns_t_a */, 1 /* ns_c_in */, new QueryListener(subscriber, new BonjourService.Builder(bs)));
+                            }
+                        });
+                    }
+                });
+            }
+        };
+    }
+
+    public static Observable.Transformer<BonjourService, BonjourService> queryIPV6Records() {
+        return new Observable.Transformer<BonjourService, BonjourService>() {
+            @Override
+            public Observable<BonjourService> call(Observable<BonjourService> observable) {
+                return observable.flatMap(new Func1<BonjourService, Observable<? extends BonjourService>>() {
+                    @Override
+                    public Observable<? extends BonjourService> call(final BonjourService bs) {
+                        if ((bs.getFlags() & BonjourService.DELETED) == BonjourService.DELETED) {
+                            return Observable.just(bs);
+                        }
+                        return INSTANCE.createObservable(new DNSSDServiceCreator<BonjourService>() {
+                            @Override
+                            public DNSSDService getService(Subscriber<? super BonjourService> subscriber) throws DNSSDException {
+                                return DNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 28 /* ns_t_aaaa */, 1 /* ns_c_in */, new QueryListener(subscriber, new BonjourService.Builder(bs)));
                             }
                         });
                     }
@@ -203,9 +256,9 @@ public class RxDnssd {
         private final Subscriber<? super BonjourService> subscriber;
         private final BonjourService.Builder builder;
 
-        private QueryListener(Subscriber<? super BonjourService> subscriber, BonjourService bonjourService){
+        private QueryListener(Subscriber<? super BonjourService> subscriber, BonjourService.Builder builder){
             this.subscriber = subscriber;
-            builder = new BonjourService.Builder(bonjourService);
+            this.builder = builder;
         }
 
         @Override
@@ -215,7 +268,12 @@ public class RxDnssd {
             }
             try {
                 InetAddress address = InetAddress.getByAddress(rdata);
-                builder.addresses(address);
+                if (address instanceof Inet4Address) {
+                    builder.inet4Address((Inet4Address) address);
+                }
+                else if (address instanceof Inet6Address){
+                    builder.inet6Address((Inet6Address) address);
+                }
                 subscriber.onNext(builder.build());
                 subscriber.onCompleted();
             } catch (Exception e) {
