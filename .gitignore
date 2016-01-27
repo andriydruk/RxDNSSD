@@ -42,3 +42,5 @@ keys/
 # Test reports
 /*.html
 
+# Native libaries
+*.so
