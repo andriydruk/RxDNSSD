@@ -1,7 +1,41 @@
 # RxDNSSD
 
+Android library which is Rx wrapper for Apple DNSSD Java API. It contains native client for mDnsResponder for all architectures.
+
+## Why RxDNSSD?
+My [explanation](http://andriydruk.com/post/mdnsresponder/) about why jmDNS, Android NSD Services and Google Nearby API are not good enough, and why I maintain this library.
+
+## Download:
+```groovy
+//compile 'com.github.andriydruk:rxdnssd:0.4.0'
+```
+
+##Some examples
+
+#####Browse services
+```java
+mSubscription = RxDnssd.browse("_ftp._tcp" /*reqType*/, "." /*domain*/)
+	.compose(RxDnssd.resolve())
+    .compose(RxDnssd.queryRecords())
+    .observeOn(AndroidSchedulers.mainThread())
+    .subscribe(bonjourService -> {
+		if ((bonjourService.getFlags() & BonjourService.DELETED) != BonjourService.DELETED){
+        	mAdapter.add(bonjourService);
+        } else {
+            mAdapter.remove(bonjourService);
+        }
+        mAdapter.notifyDataSetChanged();
+     }, throwable -> {
+        Log.e("DNSSD", "Error: ", throwable);
+     });
+
+```
+
+
+
 License
 -------
+	Copyright (C) 2016 Andriy Druk
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.

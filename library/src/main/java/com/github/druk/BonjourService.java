@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Andriy Druk
+ * Copyright (C) 2016 Andriy Druk
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,10 @@ package com.github.druk;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.io.Serializable;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -194,30 +189,6 @@ public class BonjourService implements Parcelable {
         return Collections.unmodifiableMap(result);
     }
 
-    public static void writeInetAddressList(Parcel dest, List<InetAddress> val) {
-        if (val == null) {
-            dest.writeInt(-1);
-            return;
-        }
-        int N = val.size();
-        dest.writeInt(N);
-        for (Serializable serializable : val) {
-            dest.writeSerializable(serializable);
-        }
-    }
-
-    public static List<InetAddress> readInetAddressList(Parcel in) {
-        int N = in.readInt();
-        if (N < 0) {
-            return null;
-        }
-        List<InetAddress> result = new ArrayList<>(N);
-        for (int i = 0; i < N; i++) {
-            result.add((InetAddress) in.readSerializable());
-        }
-        return Collections.unmodifiableList(result);
-    }
-
     @Override
     public String toString() {
         return "BonjourService{" +
@@ -235,7 +206,7 @@ public class BonjourService implements Parcelable {
         private final int ifIndex;
         private Inet4Address inet4Address;
         private Inet6Address inet6Address;
-        //modified version
+        //mutable version
         private Map<String, String> dnsRecords = new HashMap<>();
         private String hostname;
         private int port;

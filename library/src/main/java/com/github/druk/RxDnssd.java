@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Andriy Druk
+ * Copyright (C) 2016 Andriy Druk
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import com.apple.dnssd.TXTRecord;
 
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
