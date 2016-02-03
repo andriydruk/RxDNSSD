@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.druk;
+package com.github.druk.rxdnssd;
 
 import com.apple.dnssd.DNSSD;
 import com.apple.dnssd.DNSSDException;
@@ -37,6 +37,11 @@ import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.functions.Func1;
 
+/**
+ * RxDnssd is reactive wrapper for DNSSD
+ *
+ * {@see com.apple.dnssd.DNSSD}
+ */
 public class RxDnssd {
 
     private final static RxDnssd INSTANCE = new RxDnssd();
@@ -44,10 +49,28 @@ public class RxDnssd {
 
     private RxDnssd(){}
 
+    /**
+     * Initialize wrapper with context
+     *
+     * @param ctx Context of application or any other android component
+     */
     public static void init(Context ctx) {
         INSTANCE.context = ctx.getApplicationContext();
     }
 
+    /** Browse for instances of a service.<P>
+
+     @param	regType
+     The registration type being browsed for followed by the protocol, separated by a
+     dot (e.g. "_ftp._tcp"). The transport protocol must be "_tcp" or "_udp".
+     <P>
+     @param	domain
+     If non-null, specifies the domain on which to browse for services.
+     Most applications will not specify a domain, instead browsing on the
+     default domain(s).
+     <P>
+     @return A {@link Observable<BonjourService>} that represents the active browse operation.
+     */
     public static Observable<BonjourService> browse(final String regType, final String domain) {
         return INSTANCE.createObservable(new DNSSDServiceCreator<BonjourService>() {
             @Override
@@ -57,6 +80,18 @@ public class RxDnssd {
         });
     }
 
+    /** Resolve a {@link Observable<BonjourService>} to a target host name, port number, and txt record.<P>
+
+     Note: Applications should NOT use resolve() solely for txt record monitoring - use
+     queryRecord() instead, as it is more efficient for this task.<P>
+
+     Note: resolve() behaves correctly for typical services that have a single SRV record and
+     a single TXT record (the TXT record may be empty.)  To resolve non-standard services with
+     multiple SRV or TXT records, use queryRecord().<P>
+
+     @return A {@link Observable.Transformer<BonjourService, BonjourService>} that transform not resolved object to resolved.
+
+     */
     public static Observable.Transformer<BonjourService, BonjourService> resolve() {
         return new Observable.Transformer<BonjourService, BonjourService>() {
             @Override
@@ -64,7 +99,7 @@ public class RxDnssd {
                 return observable.flatMap(new Func1<BonjourService, Observable<? extends BonjourService>>() {
                     @Override
                     public Observable<? extends BonjourService> call(final BonjourService bs) {
-                        if ((bs.getFlags() & BonjourService.DELETED) == BonjourService.DELETED) {
+                        if ((bs.getFlags() & BonjourService.LOST) == BonjourService.LOST) {
                             return Observable.just(bs);
                         }
                         return INSTANCE.createObservable(new DNSSDServiceCreator<BonjourService>() {
@@ -79,6 +114,10 @@ public class RxDnssd {
         };
     }
 
+    /** Query ipv4 and ipv6 addresses
+
+     @return A {@link Observable.Transformer<BonjourService, BonjourService>} that transform object without addresses to object with addresses.
+     */
     public static Observable.Transformer<BonjourService, BonjourService> queryRecords() {
         return new Observable.Transformer<BonjourService, BonjourService>() {
             @Override
@@ -86,7 +125,7 @@ public class RxDnssd {
                 return observable.flatMap(new Func1<BonjourService, Observable<? extends BonjourService>>() {
                     @Override
                     public Observable<? extends BonjourService> call(final BonjourService bs) {
-                        if ((bs.getFlags() & BonjourService.DELETED) == BonjourService.DELETED) {
+                        if ((bs.getFlags() & BonjourService.LOST) == BonjourService.LOST) {
                             return Observable.just(bs);
                         }
                         final BonjourService.Builder builder = new BonjourService.Builder(bs);
@@ -107,6 +146,10 @@ public class RxDnssd {
         };
     }
 
+    /** Query ipv4 address
+
+     @return A {@link Observable.Transformer<BonjourService, BonjourService>} that transform object without address to object with address.
+     */
     public static Observable.Transformer<BonjourService, BonjourService> queryIPV4Records() {
         return new Observable.Transformer<BonjourService, BonjourService>() {
             @Override
@@ -114,7 +157,7 @@ public class RxDnssd {
                 return observable.flatMap(new Func1<BonjourService, Observable<? extends BonjourService>>() {
                     @Override
                     public Observable<? extends BonjourService> call(final BonjourService bs) {
-                        if ((bs.getFlags() & BonjourService.DELETED) == BonjourService.DELETED) {
+                        if ((bs.getFlags() & BonjourService.LOST) == BonjourService.LOST) {
                             return Observable.just(bs);
                         }
                         return INSTANCE.createObservable(new DNSSDServiceCreator<BonjourService>() {
@@ -129,6 +172,10 @@ public class RxDnssd {
         };
     }
 
+    /** Query ipv6 address
+
+     @return A {@link Observable.Transformer<BonjourService, BonjourService>} that transform object without address to object with address.
+     */
     public static Observable.Transformer<BonjourService, BonjourService> queryIPV6Records() {
         return new Observable.Transformer<BonjourService, BonjourService>() {
             @Override
@@ -136,7 +183,7 @@ public class RxDnssd {
                 return observable.flatMap(new Func1<BonjourService, Observable<? extends BonjourService>>() {
                     @Override
                     public Observable<? extends BonjourService> call(final BonjourService bs) {
-                        if ((bs.getFlags() & BonjourService.DELETED) == BonjourService.DELETED) {
+                        if ((bs.getFlags() & BonjourService.LOST) == BonjourService.LOST) {
                             return Observable.just(bs);
                         }
                         return INSTANCE.createObservable(new DNSSDServiceCreator<BonjourService>() {
@@ -209,7 +256,7 @@ public class RxDnssd {
             if (subscriber.isUnsubscribed()){
                 return;
             }
-            BonjourService service = new BonjourService.Builder(flags | BonjourService.DELETED, ifIndex, serviceName, regType, domain).build();
+            BonjourService service = new BonjourService.Builder(flags | BonjourService.LOST, ifIndex, serviceName, regType, domain).build();
             subscriber.onNext(service);
         }
 

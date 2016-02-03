@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.druk;
+package com.github.druk.rxdnssd;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -23,12 +23,16 @@ import java.net.Inet6Address;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
+/**
+ * A class representing bonjour service
+ */
 public class BonjourService implements Parcelable {
 
-    public static final int DELETED = ( 1 << 8 );
-    private static final String REG_TYPE_SEPARATOR = Pattern.quote(".");
+    /**
+     * Flag that indicate that Bonjour service was lost
+     */
+    public static final int LOST = ( 1 << 8 );
 
     private final int flags;
     private final String serviceName;
@@ -40,7 +44,6 @@ public class BonjourService implements Parcelable {
     private final int ifIndex;
     private final String hostname;
     private final int port;
-    private final long timestamp;
 
     protected BonjourService(Builder builder) {
         this.flags = builder.flags;
@@ -53,55 +56,64 @@ public class BonjourService implements Parcelable {
         this.dnsRecords = Collections.unmodifiableMap(builder.dnsRecords);
         this.hostname = builder.hostname;
         this.port = builder.port;
-        this.timestamp = System.currentTimeMillis();
     }
 
-    public String[] getRegTypeParts() {
-        return regType.split(REG_TYPE_SEPARATOR);
-    }
-
+    /** Get flags */
     public int getFlags() {
         return flags;
     }
 
+    /** Get the service name */
     public String getServiceName() {
         return serviceName;
     }
 
+    /** Get reg type */
     public String getRegType() {
         return regType;
     }
 
+    /** Get domain */
     public String getDomain() {
         return domain;
     }
 
+    /** Get if index */
     public int getIfIndex() {
         return ifIndex;
     }
 
+    /** Get hostname */
     public String getHostname() {
         return hostname;
     }
 
+    /** Get port */
     public int getPort() {
         return port;
     }
 
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public Map<String, String> getDnsRecords() {
+    /** Get TXT records */
+    public Map<String, String> getTxtRecords() {
         return dnsRecords;
     }
 
+    /** Get ipv4 address */
     public Inet4Address getInet4Address() {
         return inet4Address;
     }
 
+    /** Get ipv6 address */
     public Inet6Address getInet6Address() {
         return inet6Address;
+    }
+
+    /** Get status of bonjour service
+     *
+     * @return true if service was lost
+     */
+    public boolean isLost() {
+        return (flags & LOST) != LOST;
     }
 
     @Override
@@ -137,7 +149,6 @@ public class BonjourService implements Parcelable {
         dest.writeInt(this.ifIndex);
         dest.writeString(this.hostname);
         dest.writeInt(this.port);
-        dest.writeLong(this.timestamp);
     }
 
     protected BonjourService(Parcel in) {
@@ -151,7 +162,6 @@ public class BonjourService implements Parcelable {
         this.ifIndex = in.readInt();
         this.hostname = in.readString();
         this.port = in.readInt();
-        this.timestamp = in.readLong();
     }
 
     public static final Parcelable.Creator<BonjourService> CREATOR = new Parcelable.Creator<BonjourService>() {
@@ -164,7 +174,7 @@ public class BonjourService implements Parcelable {
         }
     };
 
-    public static void writeMap(Parcel dest, Map<String, String> val) {
+    private static void writeMap(Parcel dest, Map<String, String> val) {
         if (val == null) {
             dest.writeInt(-1);
             return;
@@ -177,7 +187,7 @@ public class BonjourService implements Parcelable {
         }
     }
 
-    public static Map<String, String> readMap(Parcel in) {
+    private static Map<String, String> readMap(Parcel in) {
         int N = in.readInt();
         if (N < 0) {
             return null;
@@ -211,6 +221,16 @@ public class BonjourService implements Parcelable {
         private String hostname;
         private int port;
 
+        /**
+         * Constructs a builder initialized to input parameters
+         *
+         * @param flags         flags of BonjourService.
+         * @param ifIndex       ifIndex of BonjourService.
+         * @param serviceName   serviceName of BonjourService.
+         * @param regType       regType of BonjourService.
+         * @param domain        domain of BonjourService.
+         *
+         */
         public Builder(int flags, int ifIndex, String serviceName, String regType, String domain) {
             this.flags = flags;
             this.serviceName = serviceName;
@@ -219,6 +239,11 @@ public class BonjourService implements Parcelable {
             this.ifIndex = ifIndex;
         }
 
+        /**
+         * Constructs a builder initialized to the contents of existed BonjourService object
+         *
+         * @param service the initial contents of the object.
+         */
         public Builder(BonjourService service) {
             this.flags = service.flags;
             this.serviceName = service.serviceName;
@@ -232,31 +257,66 @@ public class BonjourService implements Parcelable {
             this.port = service.port;
         }
 
+        /**
+         * Appends hostname of service
+         *
+         * @param hostname the hostname of service.
+         * @return this builder.
+         */
         public Builder hostname(String hostname) {
             this.hostname = hostname;
             return this;
         }
 
+        /**
+         * Appends port
+         *
+         * @param port the port of service.
+         * @return this builder.
+         */
         public Builder port(int port) {
             this.port = port;
             return this;
         }
 
+        /**
+         * Appends TXT records of service
+         *
+         * @param dnsRecords map of TXT records.
+         * @return this builder.
+         */
         public Builder dnsRecords(Map<String, String> dnsRecords) {
             this.dnsRecords = dnsRecords;
             return this;
         }
 
+        /**
+         * Appends ipv4 address
+         *
+         * @param inet4Address ipv4 address of service.
+         * @return this builder.
+         */
         public Builder inet4Address(Inet4Address inet4Address) {
             this.inet4Address = inet4Address;
             return this;
         }
 
+        /**
+         * Appends ipv6 address
+         *
+         * @param inet6Address ipv6 address of service.
+         * @return this builder.
+         */
         public Builder inet6Address(Inet6Address inet6Address) {
             this.inet6Address = inet6Address;
             return this;
         }
 
+        /**
+         * Constructs a BonjourService object
+         *
+         * @return new BonjourService object.
+         */
         public BonjourService build() {
             return new BonjourService(this);
         }
