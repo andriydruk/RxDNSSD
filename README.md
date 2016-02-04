@@ -1,14 +1,10 @@
 #RxDNSSD
 
-Android library which is Rx wrapper for Apple DNSSD Java API. It contains native client for mDnsResponder for all architectures.
+Android library which is Rx wrapper for Apple DNSSD Java API.
 
 #####Why RxDNSSD?
 My [explanation](http://andriydruk.com/post/mdnsresponder/) about why jmDNS, Android NSD Services and Google Nearby API are not good enough, and why I maintain this library.
 
-####Download:
-```groovy
-//compile 'com.github.andriydruk:rxdnssd:0.5.0'
-```
 
 ####Some examples
 
@@ -19,7 +15,7 @@ mSubscription = RxDnssd.browse("_ftp._tcp" /*reqType*/, "." /*domain*/)
     .compose(RxDnssd.queryRecords())
     .observeOn(AndroidSchedulers.mainThread())
     .subscribe(bonjourService -> {
-		if ((bonjourService.getFlags() & BonjourService.DELETED) != BonjourService.DELETED){
+		if (bonjourService.isLost()){
         	mAdapter.add(bonjourService);
         } else {
             mAdapter.remove(bonjourService);
@@ -31,16 +27,14 @@ mSubscription = RxDnssd.browse("_ftp._tcp" /*reqType*/, "." /*domain*/)
 
 ```
 
-
-
 Android library which is Rx wrapper for Apple DNSSD Java API. It contains native client for mDnsResponder for all architectures.
 
 ## Why RxDNSSD?
 My [explanation](http://andriydruk.com/post/mdnsresponder/) about why jmDNS, Android NSD Services and Google Nearby API are not good enough, and why I maintain this library.
 
-## Download:
+## Download
 ```groovy
-//compile 'com.github.andriydruk:rxdnssd:0.4.0'
+compile 'com.github.andriydruk:rxdnssd:0.5.0'
 ```
 
 ##Some examples
@@ -52,7 +46,7 @@ mSubscription = RxDnssd.browse("_ftp._tcp" /*reqType*/, "." /*domain*/)
     .compose(RxDnssd.queryRecords())
     .observeOn(AndroidSchedulers.mainThread())
     .subscribe(bonjourService -> {
-		if ((bonjourService.getFlags() & BonjourService.DELETED) != BonjourService.DELETED){
+		if (bonjourService.isLost(){
         	mAdapter.add(bonjourService);
         } else {
             mAdapter.remove(bonjourService);
@@ -63,8 +57,6 @@ mSubscription = RxDnssd.browse("_ftp._tcp" /*reqType*/, "." /*domain*/)
      });
 
 ```
-
-
 
 License
 -------
