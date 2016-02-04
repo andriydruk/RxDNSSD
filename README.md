@@ -19,7 +19,7 @@ mSubscription = RxDnssd.browse("_ftp._tcp" /*reqType*/, "." /*domain*/)
     .compose(RxDnssd.queryRecords())
     .observeOn(AndroidSchedulers.mainThread())
     .subscribe(bonjourService -> {
-		if (bonjourService.isLost()){
+		if (!bonjourService.isLost()){
         	mAdapter.add(bonjourService);
         } else {
             mAdapter.remove(bonjourService);
