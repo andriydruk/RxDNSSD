@@ -21,6 +21,7 @@ import com.apple.dnssd.DNSSDService;
 import com.apple.dnssd.TXTRecord;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import java.net.Inet4Address;
@@ -71,7 +72,7 @@ public class RxDnssd {
      <P>
      @return A {@link Observable<BonjourService>} that represents the active browse operation.
      */
-    public static Observable<BonjourService> browse(final String regType, final String domain) {
+    public static Observable<BonjourService> browse(@NonNull final String regType, @NonNull final String domain) {
         return INSTANCE.createObservable(new DNSSDServiceCreator<BonjourService>() {
             @Override
             public DNSSDService getService(Subscriber<? super BonjourService> subscriber) throws DNSSDException {
@@ -92,6 +93,7 @@ public class RxDnssd {
      @return A {@link Observable.Transformer<BonjourService, BonjourService>} that transform not resolved object to resolved.
 
      */
+    @NonNull
     public static Observable.Transformer<BonjourService, BonjourService> resolve() {
         return new Observable.Transformer<BonjourService, BonjourService>() {
             @Override
@@ -118,6 +120,7 @@ public class RxDnssd {
 
      @return A {@link Observable.Transformer<BonjourService, BonjourService>} that transform object without addresses to object with addresses.
      */
+    @NonNull
     public static Observable.Transformer<BonjourService, BonjourService> queryRecords() {
         return new Observable.Transformer<BonjourService, BonjourService>() {
             @Override
@@ -150,6 +153,7 @@ public class RxDnssd {
 
      @return A {@link Observable.Transformer<BonjourService, BonjourService>} that transform object without address to object with address.
      */
+    @NonNull
     public static Observable.Transformer<BonjourService, BonjourService> queryIPV4Records() {
         return new Observable.Transformer<BonjourService, BonjourService>() {
             @Override
@@ -176,6 +180,7 @@ public class RxDnssd {
 
      @return A {@link Observable.Transformer<BonjourService, BonjourService>} that transform object without address to object with address.
      */
+    @NonNull
     public static Observable.Transformer<BonjourService, BonjourService> queryIPV6Records() {
         return new Observable.Transformer<BonjourService, BonjourService>() {
             @Override

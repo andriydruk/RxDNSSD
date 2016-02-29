@@ -17,6 +17,8 @@ package com.github.druk.rxdnssd;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -45,7 +47,7 @@ public class BonjourService implements Parcelable {
     private final String hostname;
     private final int port;
 
-    protected BonjourService(Builder builder) {
+    protected BonjourService(@NonNull Builder builder) {
         this.flags = builder.flags;
         this.serviceName = builder.serviceName;
         this.regType = builder.regType;
@@ -64,16 +66,19 @@ public class BonjourService implements Parcelable {
     }
 
     /** Get the service name */
+    @NonNull
     public String getServiceName() {
         return serviceName;
     }
 
     /** Get reg type */
+    @NonNull
     public String getRegType() {
         return regType;
     }
 
     /** Get domain */
+    @NonNull
     public String getDomain() {
         return domain;
     }
@@ -84,6 +89,7 @@ public class BonjourService implements Parcelable {
     }
 
     /** Get hostname */
+    @Nullable
     public String getHostname() {
         return hostname;
     }
@@ -94,16 +100,19 @@ public class BonjourService implements Parcelable {
     }
 
     /** Get TXT records */
+    @Nullable
     public Map<String, String> getTxtRecords() {
         return dnsRecords;
     }
 
     /** Get ipv4 address */
+    @Nullable
     public Inet4Address getInet4Address() {
         return inet4Address;
     }
 
     /** Get ipv6 address */
+    @Nullable
     public Inet6Address getInet6Address() {
         return inet6Address;
     }
@@ -117,7 +126,7 @@ public class BonjourService implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BonjourService that = (BonjourService) o;
@@ -138,7 +147,7 @@ public class BonjourService implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(this.flags);
         dest.writeString(this.serviceName);
         dest.writeString(this.regType);
@@ -151,7 +160,7 @@ public class BonjourService implements Parcelable {
         dest.writeInt(this.port);
     }
 
-    protected BonjourService(Parcel in) {
+    protected BonjourService(@NonNull Parcel in) {
         this.flags = in.readInt();
         this.serviceName = in.readString();
         this.regType = in.readString();
@@ -165,10 +174,12 @@ public class BonjourService implements Parcelable {
     }
 
     public static final Parcelable.Creator<BonjourService> CREATOR = new Parcelable.Creator<BonjourService>() {
-        public BonjourService createFromParcel(Parcel source) {
+        @NonNull
+        public BonjourService createFromParcel(@NonNull Parcel source) {
             return new BonjourService(source);
         }
 
+        @NonNull
         public BonjourService[] newArray(int size) {
             return new BonjourService[size];
         }
@@ -199,6 +210,7 @@ public class BonjourService implements Parcelable {
         return Collections.unmodifiableMap(result);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "BonjourService{" +
@@ -231,7 +243,7 @@ public class BonjourService implements Parcelable {
          * @param domain        domain of BonjourService.
          *
          */
-        public Builder(int flags, int ifIndex, String serviceName, String regType, String domain) {
+        public Builder(int flags, int ifIndex, @NonNull String serviceName, @NonNull String regType, @NonNull String domain) {
             this.flags = flags;
             this.serviceName = serviceName;
             this.regType = regType;
@@ -244,7 +256,7 @@ public class BonjourService implements Parcelable {
          *
          * @param service the initial contents of the object.
          */
-        public Builder(BonjourService service) {
+        public Builder(@NonNull BonjourService service) {
             this.flags = service.flags;
             this.serviceName = service.serviceName;
             this.regType = service.regType;
@@ -263,6 +275,7 @@ public class BonjourService implements Parcelable {
          * @param hostname the hostname of service.
          * @return this builder.
          */
+        @NonNull
         public Builder hostname(String hostname) {
             this.hostname = hostname;
             return this;
@@ -274,6 +287,7 @@ public class BonjourService implements Parcelable {
          * @param port the port of service.
          * @return this builder.
          */
+        @NonNull
         public Builder port(int port) {
             this.port = port;
             return this;
@@ -285,6 +299,7 @@ public class BonjourService implements Parcelable {
          * @param dnsRecords map of TXT records.
          * @return this builder.
          */
+        @NonNull
         public Builder dnsRecords(Map<String, String> dnsRecords) {
             this.dnsRecords = dnsRecords;
             return this;
@@ -296,6 +311,7 @@ public class BonjourService implements Parcelable {
          * @param inet4Address ipv4 address of service.
          * @return this builder.
          */
+        @NonNull
         public Builder inet4Address(Inet4Address inet4Address) {
             this.inet4Address = inet4Address;
             return this;
@@ -307,6 +323,7 @@ public class BonjourService implements Parcelable {
          * @param inet6Address ipv6 address of service.
          * @return this builder.
          */
+        @NonNull
         public Builder inet6Address(Inet6Address inet6Address) {
             this.inet6Address = inet6Address;
             return this;
@@ -317,6 +334,7 @@ public class BonjourService implements Parcelable {
          *
          * @return new BonjourService object.
          */
+        @NonNull
         public BonjourService build() {
             return new BonjourService(this);
         }
