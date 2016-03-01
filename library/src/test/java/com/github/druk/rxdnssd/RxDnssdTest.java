@@ -59,7 +59,7 @@ import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({DNSSD.class, RxDnssd.class, Inet4Address.class, Inet6Address.class})
+@PrepareForTest({DNSSD.class, RxQueryListener.class, Inet4Address.class, Inet6Address.class})
 @SuppressStaticInitializationFor("com.apple.dnssd.DNSSD")
 public class RxDnssdTest {
 

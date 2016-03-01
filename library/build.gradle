@@ -62,7 +62,7 @@ pmd {
     toolVersion = '5.4.0'
 }
 task pmd(type: Pmd) {
-    ignoreFailures = true // Fail early.
+    ignoreFailures = false // Fail early.
     ruleSetFiles = files("${buildscript.sourceFile.parent}/pmd.xml")
     ruleSets = []
     source = fileTree('src/main/java/com/github')
@@ -71,7 +71,7 @@ task pmd(type: Pmd) {
 //Add findbugs
 plugins.apply('findbugs')
 task findbugs(type: FindBugs) {
-    ignoreFailures = true // Fail early.
+    ignoreFailures = false // Fail early.
     effort = 'max'
     reportLevel = 'low' // Report even low priority problems.
     reports {
@@ -82,7 +82,7 @@ task findbugs(type: FindBugs) {
             enabled = true
         }
     }
-    classes = files("${project.projectDir}/build/intermediates/classes")
+    classes = files("${project.projectDir}/build/intermediates/classes/debug/com/github")
     source = fileTree('src/main/java/com/github')
     classpath = files()
     excludeFilter = file("${buildscript.sourceFile.parent}/findbugs-filter.xml")
@@ -95,7 +95,7 @@ checkstyle {
 }
 task checkstyle(type: Checkstyle) {
     configFile file("${buildscript.sourceFile.parent}/checkstyle.xml")
-    ignoreFailures = true // Fail early.
+    ignoreFailures = false // Fail early.
     showViolations false
     source 'src/main/java/com/github'
     include '**/*.java'

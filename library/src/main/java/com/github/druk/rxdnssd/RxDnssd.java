@@ -18,17 +18,9 @@ package com.github.druk.rxdnssd;
 import com.apple.dnssd.DNSSD;
 import com.apple.dnssd.DNSSDException;
 import com.apple.dnssd.DNSSDService;
-import com.apple.dnssd.TXTRecord;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.text.TextUtils;
-
-import java.net.Inet4Address;
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.util.HashMap;
-import java.util.Map;
 
 import rx.Observable;
 import rx.Observable.OnSubscribe;
@@ -48,7 +40,8 @@ public class RxDnssd {
     private final static RxDnssd INSTANCE = new RxDnssd();
     private Context context;
 
-    private RxDnssd(){}
+    private RxDnssd() {
+    }
 
     /**
      * Initialize wrapper with context
@@ -59,39 +52,38 @@ public class RxDnssd {
         INSTANCE.context = ctx.getApplicationContext();
     }
 
-    /** Browse for instances of a service.<P>
-
-     @param	regType
-     The registration type being browsed for followed by the protocol, separated by a
-     dot (e.g. "_ftp._tcp"). The transport protocol must be "_tcp" or "_udp".
-     <P>
-     @param	domain
-     If non-null, specifies the domain on which to browse for services.
-     Most applications will not specify a domain, instead browsing on the
-     default domain(s).
-     <P>
-     @return A {@link Observable<BonjourService>} that represents the active browse operation.
+    /**
+     * Browse for instances of a service.<P>
+     *
+     * @param regType The registration type being browsed for followed by the protocol, separated by a
+     *                dot (e.g. "_ftp._tcp"). The transport protocol must be "_tcp" or "_udp".
+     *                <P>
+     * @param domain  If non-null, specifies the domain on which to browse for services.
+     *                Most applications will not specify a domain, instead browsing on the
+     *                default domain(s).
+     *                <P>
+     * @return A {@link Observable<BonjourService>} that represents the active browse operation.
      */
     public static Observable<BonjourService> browse(@NonNull final String regType, @NonNull final String domain) {
         return INSTANCE.createObservable(new DNSSDServiceCreator<BonjourService>() {
             @Override
             public DNSSDService getService(Subscriber<? super BonjourService> subscriber) throws DNSSDException {
-                return DNSSD.browse(0, DNSSD.ALL_INTERFACES, regType, domain, new BrowseListener(subscriber));
+                return DNSSD.browse(0, DNSSD.ALL_INTERFACES, regType, domain, new RxBrowseListener(subscriber));
             }
         });
     }
 
-    /** Resolve a {@link Observable<BonjourService>} to a target host name, port number, and txt record.<P>
-
-     Note: Applications should NOT use resolve() solely for txt record monitoring - use
-     queryRecord() instead, as it is more efficient for this task.<P>
-
-     Note: resolve() behaves correctly for typical services that have a single SRV record and
-     a single TXT record (the TXT record may be empty.)  To resolve non-standard services with
-     multiple SRV or TXT records, use queryRecord().<P>
-
-     @return A {@link Observable.Transformer<BonjourService, BonjourService>} that transform not resolved object to resolved.
-
+    /**
+     * Resolve a {@link Observable<BonjourService>} to a target host name, port number, and txt record.<P>
+     *
+     * Note: Applications should NOT use resolve() solely for txt record monitoring - use
+     * queryRecord() instead, as it is more efficient for this task.<P>
+     *
+     * Note: resolve() behaves correctly for typical services that have a single SRV record and
+     * a single TXT record (the TXT record may be empty.)  To resolve non-standard services with
+     * multiple SRV or TXT records, use queryRecord().<P>
+     *
+     * @return A {@link Observable.Transformer<BonjourService, BonjourService>} that transform not resolved object to resolved.
      */
     @NonNull
     public static Observable.Transformer<BonjourService, BonjourService> resolve() {
@@ -107,7 +99,8 @@ public class RxDnssd {
                         return INSTANCE.createObservable(new DNSSDServiceCreator<BonjourService>() {
                             @Override
                             public DNSSDService getService(Subscriber<? super BonjourService> subscriber) throws DNSSDException {
-                                return DNSSD.resolve(bs.getFlags(), bs.getIfIndex(), bs.getServiceName(), bs.getRegType(), bs.getDomain(), new ResolveListener(subscriber, bs));
+                                return DNSSD.resolve(bs.getFlags(), bs.getIfIndex(), bs.getServiceName(), bs.getRegType(), bs.getDomain(),
+                                        new RxResolveListener(subscriber, bs));
                             }
                         });
                     }
@@ -116,9 +109,10 @@ public class RxDnssd {
         };
     }
 
-    /** Query ipv4 and ipv6 addresses
-
-     @return A {@link Observable.Transformer<BonjourService, BonjourService>} that transform object without addresses to object with addresses.
+    /**
+     * Query ipv4 and ipv6 addresses
+     *
+     * @return A {@link Observable.Transformer<BonjourService, BonjourService>} that transform object without addresses to object with addresses.
      */
     @NonNull
     public static Observable.Transformer<BonjourService, BonjourService> queryRecords() {
@@ -135,12 +129,14 @@ public class RxDnssd {
                         return INSTANCE.createObservable(new DNSSDServiceCreator<BonjourService>() {
                             @Override
                             public DNSSDService getService(Subscriber<? super BonjourService> subscriber) throws DNSSDException {
-                                return DNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 1 /* ns_t_a */, 1 /* ns_c_in */, new QueryListener(subscriber, builder));
+                                return DNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 1 /* ns_t_a */, 1 /* ns_c_in */,
+                                        new RxQueryListener(subscriber, builder));
                             }
                         }).mergeWith(INSTANCE.createObservable(new DNSSDServiceCreator<BonjourService>() {
                             @Override
                             public DNSSDService getService(Subscriber<? super BonjourService> subscriber) throws DNSSDException {
-                                return DNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 28 /* ns_t_aaaa */, 1 /* ns_c_in */, new QueryListener(subscriber, builder));
+                                return DNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 28 /* ns_t_aaaa */, 1 /* ns_c_in */,
+                                        new RxQueryListener(subscriber, builder));
                             }
                         }));
                     }
@@ -149,9 +145,10 @@ public class RxDnssd {
         };
     }
 
-    /** Query ipv4 address
-
-     @return A {@link Observable.Transformer<BonjourService, BonjourService>} that transform object without address to object with address.
+    /**
+     * Query ipv4 address
+     *
+     * @return A {@link Observable.Transformer<BonjourService, BonjourService>} that transform object without address to object with address.
      */
     @NonNull
     public static Observable.Transformer<BonjourService, BonjourService> queryIPV4Records() {
@@ -167,7 +164,8 @@ public class RxDnssd {
                         return INSTANCE.createObservable(new DNSSDServiceCreator<BonjourService>() {
                             @Override
                             public DNSSDService getService(Subscriber<? super BonjourService> subscriber) throws DNSSDException {
-                                return DNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 1 /* ns_t_a */, 1 /* ns_c_in */, new QueryListener(subscriber, new BonjourService.Builder(bs)));
+                                return DNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 1 /* ns_t_a */, 1 /* ns_c_in */,
+                                        new RxQueryListener(subscriber, new BonjourService.Builder(bs)));
                             }
                         });
                     }
@@ -176,9 +174,10 @@ public class RxDnssd {
         };
     }
 
-    /** Query ipv6 address
-
-     @return A {@link Observable.Transformer<BonjourService, BonjourService>} that transform object without address to object with address.
+    /**
+     * Query ipv6 address
+     *
+     * @return A {@link Observable.Transformer<BonjourService, BonjourService>} that transform object without address to object with address.
      */
     @NonNull
     public static Observable.Transformer<BonjourService, BonjourService> queryIPV6Records() {
@@ -194,7 +193,8 @@ public class RxDnssd {
                         return INSTANCE.createObservable(new DNSSDServiceCreator<BonjourService>() {
                             @Override
                             public DNSSDService getService(Subscriber<? super BonjourService> subscriber) throws DNSSDException {
-                                return DNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 28 /* ns_t_aaaa */, 1 /* ns_c_in */, new QueryListener(subscriber, new BonjourService.Builder(bs)));
+                                return DNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 28 /* ns_t_aaaa */, 1 /* ns_c_in */,
+                                        new RxQueryListener(subscriber, new BonjourService.Builder(bs)));
                             }
                         });
                     }
@@ -203,150 +203,49 @@ public class RxDnssd {
         };
     }
 
-    private interface DNSSDServiceCreator<T>{
+    private <T> Observable<T> createObservable(DNSSDServiceCreator<T> creator) {
+        DNSSDServiceAction<T> action = new DNSSDServiceAction<>(creator);
+        return Observable.create(action).doOnUnsubscribe(action);
+    }
+
+    private interface DNSSDServiceCreator<T> {
         DNSSDService getService(Subscriber<? super T> subscriber) throws DNSSDException;
     }
 
-    private <T> Observable<T> createObservable(final DNSSDServiceCreator<T> creator){
-        final DNSSDService[] service = new DNSSDService[1];
-        return Observable.create(new OnSubscribe<T>() {
-            @Override
-            public void call(Subscriber<? super T> subscriber) {
-                if (!subscriber.isUnsubscribed()) {
-                    context.getSystemService(Context.NSD_SERVICE);
-                    try {
-                        service[0] = creator.getService(subscriber);
-                    } catch (DNSSDException e) {
-                        e.printStackTrace();
-                        subscriber.onError(e);
-                    }
+    private class DNSSDServiceAction<T> implements OnSubscribe<T>, Action0 {
+
+        private final DNSSDServiceCreator<T> creator;
+        private DNSSDService service;
+
+        DNSSDServiceAction(DNSSDServiceCreator<T> creator) {
+            this.creator = creator;
+        }
+
+        @Override
+        public void call(Subscriber<? super T> subscriber) {
+            if (!subscriber.isUnsubscribed() && creator != null) {
+                context.getSystemService(Context.NSD_SERVICE);
+                try {
+                    service = creator.getService(subscriber);
+                } catch (DNSSDException e) {
+                    subscriber.onError(e);
                 }
             }
-        }).doOnUnsubscribe(new Action0() {
-            @Override
-            public void call() {
-                if (service[0] != null) {
-                    Observable.just(service[0])
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(new Action1<DNSSDService>() {
-                                @Override
-                                public void call(DNSSDService dnssdService) {
-                                    dnssdService.stop();
-                                }
-                            });
-                    service[0] = null;
-                }
-            }
-        });
-    }
-
-    private static class BrowseListener implements com.apple.dnssd.BrowseListener{
-        private Subscriber<? super BonjourService> subscriber;
-
-        private BrowseListener(Subscriber<? super BonjourService> subscriber){
-            this.subscriber = subscriber;
         }
 
         @Override
-        public void serviceFound(DNSSDService browser, int flags, int ifIndex, String serviceName, String regType, String domain) {
-            if (subscriber.isUnsubscribed()){
-                return;
-            }
-            BonjourService service = new BonjourService.Builder(flags, ifIndex, serviceName, regType, domain).build();
-            subscriber.onNext(service);
-        }
-
-        @Override
-        public void serviceLost(DNSSDService browser, int flags, int ifIndex, String serviceName, String regType, String domain) {
-            if (subscriber.isUnsubscribed()){
-                return;
-            }
-            BonjourService service = new BonjourService.Builder(flags | BonjourService.LOST, ifIndex, serviceName, regType, domain).build();
-            subscriber.onNext(service);
-        }
-
-        @Override
-        public void operationFailed(DNSSDService service, int errorCode) {
-            if (subscriber.isUnsubscribed()){
-                return;
-            }
-            subscriber.onError(new RuntimeException("DNSSD browse error: " + errorCode));
-        }
-    }
-
-    private static class ResolveListener implements com.apple.dnssd.ResolveListener{
-        private Subscriber<? super BonjourService> subscriber;
-        private BonjourService.Builder builder;
-
-        private ResolveListener(Subscriber<? super BonjourService> subscriber, BonjourService service){
-            this.subscriber = subscriber;
-            builder = new BonjourService.Builder(service);
-        }
-
-        @Override
-        public void serviceResolved(DNSSDService resolver, int flags, int ifIndex, String fullName, String hostName, int port, TXTRecord txtRecord) {
-            if (subscriber.isUnsubscribed()){
-                return;
-            }
-            BonjourService bonjourService = builder.port(port).hostname(hostName).dnsRecords(parseTXTRecords(txtRecord)).build();
-            subscriber.onNext(bonjourService);
-            subscriber.onCompleted();
-        }
-
-        @Override
-        public void operationFailed(DNSSDService service, int errorCode) {
-            if (subscriber.isUnsubscribed()){
-                return;
-            }
-            subscriber.onError(new RuntimeException("DNSSD resolve error: " + errorCode));
-        }
-    }
-
-    private static class QueryListener implements com.apple.dnssd.QueryListener{
-
-        private final Subscriber<? super BonjourService> subscriber;
-        private final BonjourService.Builder builder;
-
-        private QueryListener(Subscriber<? super BonjourService> subscriber, BonjourService.Builder builder){
-            this.subscriber = subscriber;
-            this.builder = builder;
-        }
-
-        @Override
-        public void queryAnswered(DNSSDService query, int flags, int ifIndex, String fullName, int rrtype, int rrclass, byte[] rdata, int ttl) {
-            if (subscriber.isUnsubscribed()){
-                return;
-            }
-            try {
-                InetAddress address = InetAddress.getByAddress(rdata);
-                if (address instanceof Inet4Address) {
-                    builder.inet4Address((Inet4Address) address);
-                }
-                else if (address instanceof Inet6Address){
-                    builder.inet6Address((Inet6Address) address);
-                }
-                subscriber.onNext(builder.build());
-                subscriber.onCompleted();
-            } catch (Exception e) {
-                subscriber.onError(e);
+        public void call() {
+            if (service != null) {
+                Observable.just(service)
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Action1<DNSSDService>() {
+                            @Override
+                            public void call(DNSSDService service) {
+                                service.stop();
+                            }
+                        });
+                service = null;
             }
         }
-
-        @Override
-        public void operationFailed(DNSSDService service, int errorCode) {
-            if (subscriber.isUnsubscribed()){
-                return;
-            }
-            subscriber.onError(new RuntimeException("DNSSD queryRecord error: " + errorCode));
-        }
-    }
-
-    private static Map<String, String> parseTXTRecords(TXTRecord record) {
-        Map<String, String> result = new HashMap<>(record.size());
-        for (int i = 0; i < record.size(); i++) {
-            if (!TextUtils.isEmpty(record.getKey(i)) && !TextUtils.isEmpty(record.getValueAsString(i)))
-                result.put(record.getKey(i), record.getValueAsString(i));
-        }
-        return result;
     }
 }
