@@ -1,0 +1,37 @@
+#
+# Build configuration for Circle CI
+#
+
+general:
+    artifacts:
+        - /home/ubuntu/RxDNSSD/app/build/outputs/apk/
+
+machine:
+    environment:
+        ANDROID_HOME: /usr/local/android-sdk-linux
+    java:
+        version: oraclejdk8
+
+dependencies:
+    override:
+        - echo y | android update sdk --no-ui --all --filter "tools"
+        - echo y | android update sdk --no-ui --all --filter "platform-tools"
+        - echo y | android update sdk --no-ui --all --filter "build-tools-23.0.2"
+        - echo y | android update sdk --no-ui --all --filter "android-23"
+        - echo y | android update sdk --no-ui --all --filter "extra-android-m2repository"
+        - ANDROID_HOME=/usr/local/android-sdk-linux ./gradlew dependencies
+
+test:
+    override:
+        # start the emulator
+        # - emulator -avd circleci-android22 -no-audio -no-window:
+        #    background: true
+        #    parallel: true
+        # wait for it to have booted
+        # - circle-android wait-for-boot
+        # run tests  against the emulator.
+        - ./gradlew check
+        # copy the build outputs to artifacts
+        - cp -r app/build/outputs $CIRCLE_ARTIFACTS
+        # copy the test results to the test results directory.
+        - cp -r app/build/reports/* $CIRCLE_TEST_REPORTS

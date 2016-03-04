@@ -192,8 +192,10 @@ public class BonjourService implements Parcelable {
         if (serviceName != null ? !serviceName.equals(that.serviceName) : that.serviceName != null) return false;
         if (regType != null ? !regType.equals(that.regType) : that.regType != null) return false;
         if (domain != null ? !domain.equals(that.domain) : that.domain != null) return false;
-        if (inet4Address != null ? !inet4Address.equals(that.inet4Address) : that.inet4Address != null) return false;
-        if (inet6Address != null ? !inet6Address.equals(that.inet6Address) : that.inet6Address != null) return false;
+        if (inet4Address != null ? inet4Address != that.inet4Address && !inet4Address.equals(that.inet4Address)
+                : that.inet4Address != null) return false;
+        if (inet6Address != null ? inet6Address != that.inet6Address && !inet6Address.equals(that.inet6Address)
+                : that.inet6Address != null) return false;
         if (dnsRecords != null ? !dnsRecords.equals(that.dnsRecords) : that.dnsRecords != null) return false;
         if (hostname != null ? !hostname.equals(that.hostname) : that.hostname != null) return false;
 
