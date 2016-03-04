@@ -4,7 +4,7 @@
 
 general:
     artifacts:
-        - /home/ubuntu/RxDNSSD/app/build/outputs/apk/
+        - /home/ubuntu/RxDNSSD/library/build/outputs/aar/
 
 machine:
     environment:
@@ -32,6 +32,6 @@ test:
         # run tests  against the emulator.
         - ./gradlew check
         # copy the build outputs to artifacts
-        - cp -r app/build/outputs $CIRCLE_ARTIFACTS
+        - cp -r library/build/outputs/aar/* $CIRCLE_ARTIFACTS
         # copy the test results to the test results directory.
-        - cp -r app/build/reports/* $CIRCLE_TEST_REPORTS
+        - cp -r library/build/reports/* $CIRCLE_TEST_REPORTS

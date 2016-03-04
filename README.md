@@ -1,4 +1,4 @@
-#RxDNSSD
+#RxDNSSD [![Circle CI](https://circleci.com/gh/andriydruk/RxDNSSD.svg?style=shield&circle-token=5f0cb1ee907a20bdb08aa4b073b5690afbaaabe1)](https://circleci.com/gh/andriydruk/RxDNSSD)
 
 Android library which is Rx wrapper for Apple DNSSD Java API.
 
