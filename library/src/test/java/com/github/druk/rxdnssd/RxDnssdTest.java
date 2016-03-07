@@ -40,6 +40,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashMap;
+import java.util.List;
 
 import rx.Observable;
 import rx.Scheduler;
@@ -48,6 +49,7 @@ import rx.android.plugins.RxAndroidSchedulersHook;
 import rx.observers.TestSubscriber;
 import rx.schedulers.Schedulers;
 
+import static junit.framework.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -128,7 +130,7 @@ public class RxDnssdTest {
         PowerMockito.verifyStatic();
         DNSSD.browse(anyInt(), anyInt(), anyString(), anyString(), propertiesCaptor.capture());
         propertiesCaptor.getValue().serviceFound(mockService, FLAGS, IF_INDEX, SERVICE_NAME, REG_TYPE, DOMAIN);
-        testSubscriber.assertValue(bonjourService);
+        assertServices(testSubscriber.getOnNextEvents(), bonjourService);
     }
 
     @Test
@@ -154,7 +156,7 @@ public class RxDnssdTest {
         PowerMockito.verifyStatic();
         DNSSD.browse(anyInt(), anyInt(), anyString(), anyString(), propertiesCaptor.capture());
         propertiesCaptor.getValue().serviceLost(mockService, FLAGS, IF_INDEX, SERVICE_NAME, REG_TYPE, DOMAIN);
-        testSubscriber.assertValue(lostBonjourService);
+        assertServices(testSubscriber.getOnNextEvents(), lostBonjourService);
     }
 
     @Test
@@ -216,7 +218,7 @@ public class RxDnssdTest {
     public void test_resolve_ignore_lost() throws DNSSDException {
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
         Observable.just(lostBonjourService).compose(RxDnssd.resolve()).subscribe(testSubscriber);
-        testSubscriber.assertValue(lostBonjourService);
+        assertServices(testSubscriber.getOnNextEvents(), lostBonjourService);
         testSubscriber.assertCompleted();
     }
 
@@ -230,7 +232,7 @@ public class RxDnssdTest {
         PowerMockito.verifyStatic();
         DNSSD.resolve(anyInt(), anyInt(), anyString(), anyString(), anyString(), propertiesCaptor.capture());
         propertiesCaptor.getValue().serviceResolved(mockService, FLAGS, IF_INDEX, SERVICE_NAME, HOSTNAME, PORT, new TXTRecord());
-        testSubscriber.assertValue(resolvedBonjourService);
+        assertServices(testSubscriber.getOnNextEvents(), resolvedBonjourService);
         testSubscriber.assertCompleted();
     }
 
@@ -322,7 +324,7 @@ public class RxDnssdTest {
     public void test_query_ipv4_records_ignore_lost() throws DNSSDException {
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
         Observable.just(lostBonjourService).compose(RxDnssd.queryIPV4Records()).subscribe(testSubscriber);
-        testSubscriber.assertValue(lostBonjourService);
+        assertServices(testSubscriber.getOnNextEvents(), lostBonjourService);
         testSubscriber.assertCompleted();
     }
 
@@ -330,7 +332,7 @@ public class RxDnssdTest {
     public void test_query_ipv6_records_ignore_lost() throws DNSSDException {
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
         Observable.just(lostBonjourService).compose(RxDnssd.queryIPV6Records()).subscribe(testSubscriber);
-        testSubscriber.assertValue(lostBonjourService);
+        assertServices(testSubscriber.getOnNextEvents(), lostBonjourService);
         testSubscriber.assertCompleted();
     }
 
@@ -338,7 +340,7 @@ public class RxDnssdTest {
     public void test_query_records_ignore_lost() throws DNSSDException {
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
         Observable.just(lostBonjourService).compose(RxDnssd.queryRecords()).subscribe(testSubscriber);
-        testSubscriber.assertValue(lostBonjourService);
+        assertServices(testSubscriber.getOnNextEvents(), lostBonjourService);
         testSubscriber.assertCompleted();
     }
 
@@ -353,7 +355,7 @@ public class RxDnssdTest {
         PowerMockito.verifyStatic();
         DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());
         propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, new byte[0], 0);
-        testSubscriber.assertValue(resolvedBonjourServiceWithIpv4);
+        assertServices(testSubscriber.getOnNextEvents(), resolvedBonjourServiceWithIpv4);
         testSubscriber.assertCompleted();
     }
 
@@ -368,7 +370,7 @@ public class RxDnssdTest {
         PowerMockito.verifyStatic();
         DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), propertiesCaptor.capture());
         propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, null, 0);
-        testSubscriber.assertValue(resolvedBonjourServiceWithIpv6);
+        assertServices(testSubscriber.getOnNextEvents(), resolvedBonjourServiceWithIpv6);
         testSubscriber.assertCompleted();
     }
 
@@ -390,7 +392,7 @@ public class RxDnssdTest {
         PowerMockito.verifyStatic();
         DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), propertiesCaptor.capture());
         propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, ipv6, 0);
-        testSubscriber.assertValues(resolvedBonjourServiceWithIpv4, resolvedBonjourServiceWithBothIp);
+        assertServices(testSubscriber.getOnNextEvents(), resolvedBonjourServiceWithIpv4, resolvedBonjourServiceWithBothIp);
         testSubscriber.assertCompleted();
     }
 
@@ -412,7 +414,7 @@ public class RxDnssdTest {
         PowerMockito.verifyStatic();
         DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());
         propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, ipv4, 0);
-        testSubscriber.assertValues(resolvedBonjourServiceWithIpv6, resolvedBonjourServiceWithBothIp);
+        assertServices(testSubscriber.getOnNextEvents(), resolvedBonjourServiceWithIpv6, resolvedBonjourServiceWithBothIp);
         testSubscriber.assertCompleted();
     }
 
@@ -490,7 +492,7 @@ public class RxDnssdTest {
         PowerMockito.verifyStatic();
         DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());
         propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, ipv4, 0);
-        testSubscriber.assertValue(resolvedBonjourServiceWithIpv6);
+        assertServices(testSubscriber.getOnNextEvents(), resolvedBonjourServiceWithIpv6);
         testSubscriber.assertError(UnknownHostException.class);
     }
 
@@ -534,7 +536,7 @@ public class RxDnssdTest {
         PowerMockito.verifyStatic();
         DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), propertiesCaptor.capture());
         propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, ipv6, 0);
-        testSubscriber.assertValue(resolvedBonjourServiceWithIpv4);
+        assertServices(testSubscriber.getOnNextEvents(), resolvedBonjourServiceWithIpv4);
         testSubscriber.assertError(UnknownHostException.class);
     }
 
@@ -706,6 +708,25 @@ public class RxDnssdTest {
     @After
     public void tearDown() {
         RxAndroidPlugins.getInstance().reset();
+    }
+
+    public static void assertServices(List<BonjourService> serviceList, BonjourService... services){
+        int serviceIndex = 0;
+        for (BonjourService service : services) {
+            BonjourService origin = serviceList.get(serviceIndex++);
+            if (origin == service) continue;
+            if (origin.getFlags() != service.getFlags()) fail();
+            if (origin.getIfIndex() != service.getIfIndex()) fail();
+            if (origin.getPort() != service.getPort()) fail();
+            if (!origin.getServiceName().equals(service.getServiceName())) fail();
+            if (!origin.getRegType().equals(service.getRegType())) fail();
+            if (!origin.getDomain().equals(service.getDomain())) fail();
+            if (origin.getInet4Address() != service.getInet4Address()) fail();
+            if (origin.getInet6Address() != service.getInet6Address()) fail();
+            if (!origin.getTxtRecords().equals(service.getTxtRecords())) fail();
+            if (origin.getHostname() != null ? !origin.getHostname().equals(service.getHostname()) : service.getHostname() != null) fail();
+        }
+        if (serviceList.size() != serviceIndex) fail();
     }
 
 }

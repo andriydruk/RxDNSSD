@@ -151,7 +151,7 @@ public class BonjourService implements Parcelable {
     }
 
     /** Get TXT records */
-    @Nullable
+    @NonNull
     public Map<String, String> getTxtRecords() {
         return dnsRecords;
     }
@@ -186,34 +186,19 @@ public class BonjourService implements Parcelable {
 
         BonjourService that = (BonjourService) o;
 
-        if (flags != that.flags) return false;
         if (ifIndex != that.ifIndex) return false;
-        if (port != that.port) return false;
         if (serviceName != null ? !serviceName.equals(that.serviceName) : that.serviceName != null) return false;
         if (regType != null ? !regType.equals(that.regType) : that.regType != null) return false;
-        if (domain != null ? !domain.equals(that.domain) : that.domain != null) return false;
-        if (inet4Address != null ? inet4Address != that.inet4Address && !inet4Address.equals(that.inet4Address)
-                : that.inet4Address != null) return false;
-        if (inet6Address != null ? inet6Address != that.inet6Address && !inet6Address.equals(that.inet6Address)
-                : that.inet6Address != null) return false;
-        if (dnsRecords != null ? !dnsRecords.equals(that.dnsRecords) : that.dnsRecords != null) return false;
-        if (hostname != null ? !hostname.equals(that.hostname) : that.hostname != null) return false;
+        return !(domain != null ? !domain.equals(that.domain) : that.domain != null);
 
-        return true;
     }
 
     @Override
     public int hashCode() {
-        int result = flags;
-        result = 31 * result + (serviceName != null ? serviceName.hashCode() : 0);
+        int result = serviceName != null ? serviceName.hashCode() : 0;
         result = 31 * result + (regType != null ? regType.hashCode() : 0);
         result = 31 * result + (domain != null ? domain.hashCode() : 0);
-        result = 31 * result + (inet4Address != null ? inet4Address.hashCode() : 0);
-        result = 31 * result + (inet6Address != null ? inet6Address.hashCode() : 0);
-        result = 31 * result + (dnsRecords != null ? dnsRecords.hashCode() : 0);
         result = 31 * result + ifIndex;
-        result = 31 * result + (hostname != null ? hostname.hashCode() : 0);
-        result = 31 * result + port;
         return result;
     }
 
