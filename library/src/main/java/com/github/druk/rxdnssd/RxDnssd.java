@@ -64,6 +64,7 @@ public class RxDnssd {
      *                <P>
      * @return A {@link Observable<BonjourService>} that represents the active browse operation.
      */
+    @NonNull
     public static Observable<BonjourService> browse(@NonNull final String regType, @NonNull final String domain) {
         return INSTANCE.createObservable(new DNSSDServiceCreator<BonjourService>() {
             @Override
