@@ -71,6 +71,20 @@ static DWORD	if_nametoindex( const char * nameStr );
 #define	_UNUSED
 #endif
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <errno.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <signal.h>
+
+#include "mDNSEmbeddedAPI.h"
+#include "mDNSPosix.h"
+#include <android/log.h>
+
 enum {
 	kInterfaceVersionOne = 1,
 	kInterfaceVersionCurrent		// Must match version in .jar file
@@ -88,15 +102,19 @@ struct	OpContext
 	jmethodID		Callback2;
 };
 
+mDNS mDNSStorage;
+static mDNS_PlatformSupport PlatformStorage;
+#define RR_CACHE_SIZE 500
+static CacheEntity gRRCache[RR_CACHE_SIZE];
+
 // For AUTO_CALLBACKS, we must attach the callback thread to the Java VM prior to upcall.
 #if AUTO_CALLBACKS
 JavaVM		*gJavaVM = NULL;
 #endif
 
-
 JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleDNSSD_InitLibrary( JNIEnv *pEnv, jclass cls,
 						jint callerVersion)
-{
+{    
 	/* Ensure that caller & interface versions match. */
 	if ( callerVersion != kInterfaceVersionCurrent)
 		return kDNSServiceErr_Incompatible;
@@ -121,7 +139,13 @@ JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleDNSSD_InitLibrary( JNIEnv *pEnv
 		(*pEnv)->SetStaticBooleanField( pEnv, cls, hasAutoCField, hasAutoC);
 	}
 
-	return kDNSServiceErr_NoError;
+	mStatus status = mDNS_Init(&mDNSStorage, &PlatformStorage, gRRCache, RR_CACHE_SIZE,
+              mDNS_Init_AdvertiseLocalAddresses,
+              mDNS_Init_NoInitCallback, mDNS_Init_NoInitCallbackContext);
+
+    __android_log_print(ANDROID_LOG_VERBOSE, "TAG", "mDNS_Init status: %ld", status);
+
+	return status;
 }
 
 
