@@ -184,8 +184,8 @@ int main(int argc, char **argv)
 	err = mDNS_Init(&mDNSStorage, &PlatformStorage, gRRCache, RR_CACHE_SIZE, mDNS_Init_AdvertiseLocalAddresses, 
 					mDNS_StatusCallback, mDNS_Init_NoInitCallbackContext); 
 
-	if (mStatus_NoError == err)
-		err = udsserver_init(mDNSNULL, 0);
+	// if (mStatus_NoError == err)
+	// 	err = udsserver_init(mDNSNULL, 0);
 		
 	Reconfigure(&mDNSStorage);
 

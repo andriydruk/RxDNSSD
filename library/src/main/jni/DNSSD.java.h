@@ -259,6 +259,22 @@ JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleRecordRegistrar_CreateConnectio
 JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleRecordRegistrar_RegisterRecord
   (JNIEnv *, jobject, jint, jint, jstring, jint, jint, jbyteArray, jint, jobject);
 
+  /*
+ * Class:     com_apple_dnssd_DNSSDEmbedded
+ * Method:    Init
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_com_apple_dnssd_DNSSDEmbedded_Init
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     com_apple_dnssd_DNSSDEmbedded
+ * Method:    Exit
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_com_apple_dnssd_DNSSDEmbedded_Exit
+  (JNIEnv *, jclass);
+
 #ifdef __cplusplus
 }
 #endif

@@ -16,11 +16,13 @@
 package com.github.druk.rxdnssd;
 
 import com.apple.dnssd.DNSSD;
+import com.apple.dnssd.DNSSDEmbedded;
 import com.apple.dnssd.DNSSDException;
 import com.apple.dnssd.DNSSDService;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import rx.Observable;
 import rx.Observable.OnSubscribe;
@@ -37,8 +39,10 @@ import rx.functions.Func1;
  */
 public class RxDnssd {
 
+    static final String TAG = "RX";
+
     private final static RxDnssd INSTANCE = new RxDnssd();
-    private Context context;
+    //private Context context;
 
     private RxDnssd() {
     }
@@ -49,7 +53,8 @@ public class RxDnssd {
      * @param ctx Context of application or any other android component
      */
     public static void init(Context ctx) {
-        INSTANCE.context = ctx.getApplicationContext();
+        //INSTANCE.context = ctx.getApplicationContext();
+        DNSSDEmbedded.init();
     }
 
     /**
@@ -69,6 +74,7 @@ public class RxDnssd {
         return INSTANCE.createObservable(new DNSSDServiceCreator<BonjourService>() {
             @Override
             public DNSSDService getService(Subscriber<? super BonjourService> subscriber) throws DNSSDException {
+                Log.d(TAG, "start browsing: " + regType + "." + domain);
                 return DNSSD.browse(0, DNSSD.ALL_INTERFACES, regType, domain, new RxBrowseListener(subscriber));
             }
         });
@@ -225,7 +231,7 @@ public class RxDnssd {
         @Override
         public void call(Subscriber<? super T> subscriber) {
             if (!subscriber.isUnsubscribed() && creator != null) {
-                context.getSystemService(Context.NSD_SERVICE);
+                //context.getSystemService(Context.NSD_SERVICE);
                 try {
                     service = creator.getService(subscriber);
                 } catch (DNSSDException e) {
@@ -249,4 +255,19 @@ public class RxDnssd {
             }
         }
     }
+
+    public void initEmbedded() {
+        //DNSSD.getInstance();
+        Thread thread = new Thread() {
+            public void run() {
+                int ret = InitEmbedded();
+                Log.v("TAG", "ret from main: " + ret);
+            }
+        };
+        thread.setPriority(Thread.MAX_PRIORITY);
+        thread.setName("DNS-SD");
+        thread.start();
+    }
+
+    protected static native int InitEmbedded();
 }

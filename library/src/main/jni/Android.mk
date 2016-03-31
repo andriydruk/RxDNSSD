@@ -38,7 +38,6 @@ LOCAL_MODULE    := jdns_sd
 LOCAL_SRC_FILES :=  mdnsresponder/mDNSCore/mDNS.c \
                     mdnsresponder/mDNSCore/DNSDigest.c \
                     mdnsresponder/mDNSCore/uDNS.c \
-                    mdnsresponder/mDNSCore/DNSCommon.c \
                     mdnsresponder/mDNSPosix/mDNSPosix.c \
                     mdnsresponder/mDNSPosix/mDNSUNP.c \
                     mdnsresponder/mDNSShared/mDNSDebug.c \
@@ -47,6 +46,7 @@ LOCAL_SRC_FILES :=  mdnsresponder/mDNSCore/mDNS.c \
                     mdnsresponder/mDNSShared/dnssd_ipc.c \
                     mdnsresponder/mDNSShared/GenLinkedList.c \
                     mdnsresponder/mDNSShared/PlatformCommon.c \
+                    DNSCommon.c \
                     PosixDaemon.c \
                     uds_daemon.c \
                     JNISupport.c
@@ -62,7 +62,8 @@ LOCAL_CFLAGS += $(commonFlags) \
                 -DMDNS_DEBUGMSGS=0 \
                 -DSO_REUSEADDR \
                 -DUNICAST_DISABLED \
-                -DMDNS_VERSIONSTR_NODTS=1
+                -DMDNS_VERSIONSTR_NODTS=1 \
+                -AUTO_CALLBACKS=1
 
 LOCAL_MODULE_TAGS := optional
 LOCAL_SYSTEM_SHARED_LIBRARIES := libc libcutils

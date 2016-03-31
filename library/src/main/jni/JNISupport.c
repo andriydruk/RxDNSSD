@@ -24,7 +24,8 @@
 // invoke response callbacks (as is true on Mac OS X, Posix, Windows, etc.).
 // (Invoking callbacks automatically on a different thread sounds attractive, but while
 // the client gains by not needing to add an event source to its main event loop, it loses
-// by being forced to deal with concurrency and locking, which can be a bigger burden.)
+// by being forced to deal with concurrency and locking, which can be a bigger burden.)	
+#define AUTO_CALLBACKS 1
 #ifndef	AUTO_CALLBACKS
 #define	AUTO_CALLBACKS	0
 #endif
@@ -102,30 +103,46 @@ struct	OpContext
 	jmethodID		Callback2;
 };
 
-mDNS mDNSStorage;
-static mDNS_PlatformSupport PlatformStorage;
-#define RR_CACHE_SIZE 500
-static CacheEntity gRRCache[RR_CACHE_SIZE];
 
 // For AUTO_CALLBACKS, we must attach the callback thread to the Java VM prior to upcall.
-#if AUTO_CALLBACKS
-JavaVM		*gJavaVM = NULL;
-#endif
+// #if AUTO_CALLBACKS
+// JavaVM		*gJavaVM = NULL;
+// #endif
+JNIEnv *pLoopEnv = NULL;
 
-JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleDNSSD_InitLibrary( JNIEnv *pEnv, jclass cls,
+int main(int argc, char **argv);
+
+JNIEXPORT jint JNICALL Java_com_apple_dnssd_DNSSDEmbedded_Init( JNIEnv *pEnv, jclass cls)
+{
+	pLoopEnv = pEnv;
+  return main(0, NULL);
+}
+
+JNIEXPORT void JNICALL Java_com_apple_dnssd_DNSSDEmbedded_Loop( JNIEnv *pEnv, jclass cls)
+{
+	//__android_log_print(ANDROID_LOG_VERBOSE, "TAG", "LOOP");
+  //embedded_mDNSLoop();
+}
+
+JNIEXPORT void JNICALL Java_com_apple_dnssd_DNSSDEmbedded_Exit( JNIEnv *pEnv, jclass cls)
+{
+  //embedded_mDNSExit();
+}
+
+JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleDNSSD_InitLibrary( JNIEnv *pEnv, jclass cls, 
 						jint callerVersion)
-{    
+{
 	/* Ensure that caller & interface versions match. */
 	if ( callerVersion != kInterfaceVersionCurrent)
 		return kDNSServiceErr_Incompatible;
 
 #if AUTO_CALLBACKS
-	{
-		jsize	numVMs;
+	// {
+	// 	jsize	numVMs;
 	
-		if ( 0 != JNI_GetCreatedJavaVMs( &gJavaVM, 1, &numVMs))
-			return kDNSServiceErr_BadState;
-	}
+	// 	if ( 0 != JNI_GetCreatedJavaVMs( &gJavaVM, 1, &numVMs))
+	// 		return kDNSServiceErr_BadState;
+	// }
 #endif
 
 	// Set AppleDNSSD.hasAutoCallbacks
@@ -139,13 +156,7 @@ JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleDNSSD_InitLibrary( JNIEnv *pEnv
 		(*pEnv)->SetStaticBooleanField( pEnv, cls, hasAutoCField, hasAutoC);
 	}
 
-	mStatus status = mDNS_Init(&mDNSStorage, &PlatformStorage, gRRCache, RR_CACHE_SIZE,
-              mDNS_Init_AdvertiseLocalAddresses,
-              mDNS_Init_NoInitCallback, mDNS_Init_NoInitCallbackContext);
-
-    __android_log_print(ANDROID_LOG_VERBOSE, "TAG", "mDNS_Init status: %ld", status);
-
-	return status;
+	return kDNSServiceErr_NoError;
 }
 
 
@@ -166,12 +177,13 @@ static void			SafeReleaseUTFChars( JNIEnv *pEnv, jstring str, const char *buff)
 #if AUTO_CALLBACKS
 static void	SetupCallbackState( JNIEnv **ppEnv)
 {
-	(*gJavaVM)->AttachCurrentThread( gJavaVM, (void**) ppEnv, NULL);
+	(*ppEnv) = pLoopEnv;
+	//(*gJavaVM)->AttachCurrentThread( gJavaVM, (void**) ppEnv, NULL);
 }
 
 static void	TeardownCallbackState( void )
 {
-	(*gJavaVM)->DetachCurrentThread( gJavaVM);
+	//(*gJavaVM)->DetachCurrentThread( gJavaVM);
 }
 
 #else	// AUTO_CALLBACKS
