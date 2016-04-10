@@ -38,9 +38,11 @@
 #include <pwd.h>
 #include <sys/types.h>
 
+#ifndef EMBEDDED
 #ifdef __ANDROID__
 #include "cutils/sockets.h"
 #endif
+#endif	
 
 #if __APPLE__
 #undef daemon
@@ -189,6 +191,7 @@ int main(int argc, char **argv)
 					mDNS_StatusCallback, mDNS_Init_NoInitCallbackContext); 
 
 	if (mStatus_NoError == err)
+#ifndef EMBEDDED		
 #ifdef __ANDROID__
 		{
 		dnssd_sock_t s[1];
@@ -205,6 +208,7 @@ int main(int argc, char **argv)
 #else
 		err = udsserver_init(mDNSNULL, 0);
 #endif // __ANDROID__
+#endif		
 		
 	Reconfigure(&mDNSStorage);
 

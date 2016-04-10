@@ -825,7 +825,11 @@ mDNSexport mDNSBool DeconstructServiceName(const domainname *const fqdn,
 	len = *src;
 	if (!len)         { debugf("DeconstructServiceName: FQDN contains only two labels!");          return(mDNSfalse); }
 	if (!ValidTransportProtocol(src))
-	                  { debugf("DeconstructServiceName: Transport protocol must be _udp or _tcp"); return(mDNSfalse); }
+	                  { debugf("DeconstructServiceName: Transport protocol must be _udp or _tcp");
+	              #ifndef EMBEDDED
+	                   return(mDNSfalse); 
+	              #endif     
+	               }
 	for (i=0; i<=len; i++) *dst++ = *src++;
 	*dst++ = 0;											// Put terminator on the end of service type
 

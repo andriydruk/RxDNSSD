@@ -25,7 +25,6 @@
 // (Invoking callbacks automatically on a different thread sounds attractive, but while
 // the client gains by not needing to add an event source to its main event loop, it loses
 // by being forced to deal with concurrency and locking, which can be a bigger burden.)	
-#define AUTO_CALLBACKS 1
 #ifndef	AUTO_CALLBACKS
 #define	AUTO_CALLBACKS	0
 #endif
