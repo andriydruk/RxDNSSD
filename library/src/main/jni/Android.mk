@@ -30,11 +30,11 @@ commonFlags := \
     -Wno-unused-parameter \
     -Werror=implicit-function-declaration \
 
-### STATIC LIB ###
+### EMBEDDED LIB ###
 include $(CLEAR_VARS)
 
 LOCAL_SDK_VERSION := 8
-LOCAL_MODULE    := jdns_sd
+LOCAL_MODULE    := jdns_sd_embedded
 LOCAL_SRC_FILES :=  mdnsresponder/mDNSCore/mDNS.c \
                     mdnsresponder/mDNSCore/DNSDigest.c \
                     mdnsresponder/mDNSCore/uDNS.c \
@@ -76,23 +76,20 @@ ifeq ($(TARGET_BUILD_TYPE),debug)
 endif
 
 LOCAL_LDLIBS := -llog
-
 include $(BUILD_SHARED_LIBRARY)
 
-#------------------------------------------------------------
-
-
-#include $(CLEAR_VARS)
-#LOCAL_C_INCLUDES := $(LOCAL_PATH)/mdnsresponder/mDNSPosix \
-#                    $(LOCAL_PATH)/mdnsresponder/mDNSCore  \
-#                    $(LOCAL_PATH)/mdnsresponder/mDNSShared \
-#                    $(LOCAL_PATH)
-#LOCAL_SRC_FILES := $(commonSources) \
-#                    JNISupport.c
-#LOCAL_MODULE := jdns_sd
-#LOCAL_MODULE_TAGS := optional
-#LOCAL_CFLAGS := $(commonFlags)
-#LOCAL_SYSTEM_SHARED_LIBRARIES := libc
-#LOCAL_SHARED_LIBRARIES := $(commonLibs)
-#LOCAL_EXPORT_C_INCLUDE_DIRS := external/mdnsresponder/mDNSShared
-#include $(BUILD_SHARED_LIBRARY)
+### DEAMONIC LIB ###
+include $(CLEAR_VARS)
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/mdnsresponder/mDNSPosix \
+                    $(LOCAL_PATH)/mdnsresponder/mDNSCore  \
+                    $(LOCAL_PATH)/mdnsresponder/mDNSShared \
+                    $(LOCAL_PATH)
+LOCAL_SRC_FILES := $(commonSources) \
+                    JNISupport.c
+LOCAL_MODULE := jdns_sd
+LOCAL_MODULE_TAGS := optional
+LOCAL_CFLAGS := $(commonFlags)
+LOCAL_SYSTEM_SHARED_LIBRARIES := libc
+LOCAL_SHARED_LIBRARIES := $(commonLibs)
+LOCAL_EXPORT_C_INCLUDE_DIRS := external/mdnsresponder/mDNSShared
+include $(BUILD_SHARED_LIBRARY)

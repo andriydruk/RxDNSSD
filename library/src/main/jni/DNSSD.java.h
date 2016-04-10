@@ -267,6 +267,15 @@ JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleRecordRegistrar_RegisterRecord
 JNIEXPORT jint JNICALL Java_com_apple_dnssd_DNSSDEmbedded_Init
   (JNIEnv *, jclass);
 
+
+  /*
+ * Class:     com_apple_dnssd_DNSSDEmbedded
+ * Method:    Init
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_com_apple_dnssd_DNSSDEmbedded_Loop
+  (JNIEnv *, jclass);  
+
 /*
  * Class:     com_apple_dnssd_DNSSDEmbedded
  * Method:    Exit

@@ -67,6 +67,8 @@ static domainname DynDNSHostname;
 static CacheEntity gRRCache[RR_CACHE_SIZE];
 static mDNS_PlatformSupport PlatformStorage;
 
+int stopNow = 0;
+
 mDNSlocal void mDNS_StatusCallback(mDNS *const m, mStatus result)
 	{
 	(void)m; // Unused
@@ -148,7 +150,12 @@ mDNSlocal mStatus MainLoop(mDNS *m) // Loop until we quit.
 	mDNSPosixListenForSignalInEventLoop(SIGPIPE);
 	mDNSPosixListenForSignalInEventLoop(SIGHUP) ;
 
+	stopNow = 0;
+	#ifdef EMBEDDED
+	while (!stopNow)
+	#else
 	for (; ;)
+	#endif			
 		{
 		// Work out how long we expect to sleep before the next scheduled task
 		struct timeval	timeout;
@@ -177,7 +184,7 @@ mDNSlocal mStatus MainLoop(mDNS *m) // Loop until we quit.
 		if (sigismember(&signals, SIGINT) || sigismember(&signals, SIGTERM)) break;
 		}
 	return EINTR;
-	}
+	}	
 
 int main(int argc, char **argv)
 	{
@@ -190,8 +197,8 @@ int main(int argc, char **argv)
 	err = mDNS_Init(&mDNSStorage, &PlatformStorage, gRRCache, RR_CACHE_SIZE, mDNS_Init_AdvertiseLocalAddresses, 
 					mDNS_StatusCallback, mDNS_Init_NoInitCallbackContext); 
 
-	if (mStatus_NoError == err)
-#ifndef EMBEDDED		
+#ifndef EMBEDDED
+	if (mStatus_NoError == err)		
 #ifdef __ANDROID__
 		{
 		dnssd_sock_t s[1];
@@ -238,6 +245,42 @@ int main(int argc, char **argv)
  
 	return err;
 	}
+
+#ifdef EMBEDDED	
+int init()
+	{
+	mStatus					err;
+
+	LogMsg("%s starting", mDNSResponderVersionString);
+
+	err = mDNS_Init(&mDNSStorage, &PlatformStorage, gRRCache, RR_CACHE_SIZE, mDNS_Init_AdvertiseLocalAddresses, 
+					mDNS_StatusCallback, mDNS_Init_NoInitCallbackContext); 
+ 
+	return err;
+	}
+
+int loop(){
+	mStatus					err;
+	Reconfigure(&mDNSStorage);
+
+	err = MainLoop(&mDNSStorage);
+ 
+	LogMsg("%s stopping", mDNSResponderVersionString);
+
+	mDNS_Close(&mDNSStorage);
+ 
+ #if MDNS_DEBUGMSGS > 0
+	printf("mDNSResponder exiting normally with %ld\n", err);
+ #endif
+ 
+	return err;
+}	
+
+void stopLoop()
+{
+	stopNow = 1;
+}
+#endif
 
 //		uds_daemon support		////////////////////////////////////////////////////////////
 

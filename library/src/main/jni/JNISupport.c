@@ -103,30 +103,32 @@ struct	OpContext
 };
 
 
-// For AUTO_CALLBACKS, we must attach the callback thread to the Java VM prior to upcall.
-// #if AUTO_CALLBACKS
-// JavaVM		*gJavaVM = NULL;
-// #endif
-JNIEnv *pLoopEnv = NULL;
+//For AUTO_CALLBACKS, we must attach the callback thread to the Java VM prior to upcall.
+#if AUTO_CALLBACKS
+	JNIEnv *pLoopEnv = NULL;
+#endif
 
-int main(int argc, char **argv);
+#ifdef EMBEDDED
+int init();
+int loop();
+void stopLoop();
 
 JNIEXPORT jint JNICALL Java_com_apple_dnssd_DNSSDEmbedded_Init( JNIEnv *pEnv, jclass cls)
 {
 	pLoopEnv = pEnv;
-  return main(0, NULL);
+  	return init();
 }
 
-JNIEXPORT void JNICALL Java_com_apple_dnssd_DNSSDEmbedded_Loop( JNIEnv *pEnv, jclass cls)
+JNIEXPORT jint JNICALL Java_com_apple_dnssd_DNSSDEmbedded_Loop( JNIEnv *pEnv, jclass cls)
 {
-	//__android_log_print(ANDROID_LOG_VERBOSE, "TAG", "LOOP");
-  //embedded_mDNSLoop();
+	return loop();
 }
 
 JNIEXPORT void JNICALL Java_com_apple_dnssd_DNSSDEmbedded_Exit( JNIEnv *pEnv, jclass cls)
 {
-  //embedded_mDNSExit();
+	stopLoop();
 }
+#endif
 
 JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleDNSSD_InitLibrary( JNIEnv *pEnv, jclass cls, 
 						jint callerVersion)
@@ -337,6 +339,8 @@ JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleService_ProcessResults( JNIEnv 
 		}
 	}
 	return err;
+#else 
+	return kDNSServiceErr_NoError;	
 #endif // AUTO_CALLBACKS
 }
 

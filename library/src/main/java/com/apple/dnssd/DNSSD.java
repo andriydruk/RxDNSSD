@@ -85,6 +85,10 @@ abstract public class	DNSSD
 	/** Pass for ifIndex to specify the localhost interface. */
     public static final int     LOCALHOST_ONLY = -1;
 
+	public static void init(String lib){
+		getInstance()._init(lib);
+	}
+
 	/** Browse for instances of a service.<P>
 
 		Note: browsing consumes network bandwidth. Call {@link DNSSDService#stop} when you have finished browsing.<P>
@@ -434,6 +438,8 @@ abstract public class	DNSSD
 		 return fInstance;
 	}
 
+	abstract protected void _init(String lib);
+
 	abstract protected DNSSDService	_makeBrowser( int flags, int ifIndex, String regType, String domain, BrowseListener listener)
 	throws DNSSDException;
 
@@ -539,10 +545,10 @@ class	AppleDNSSDException extends DNSSDException
 // The concrete, default implementation.
 class	AppleDNSSD extends DNSSD
 {
-	static
+	protected void _init(String lib)
 	{
-		System.loadLibrary( "jdns_sd");
-	
+		System.loadLibrary(lib);
+
 		int		libInitResult = InitLibrary( 2);	// Current version number (must be sync'd with jnilib version)
 
 		if (libInitResult != DNSSDException.NO_ERROR)
