@@ -18,7 +18,9 @@ package com.github.druk.rxdnssd;
 import com.apple.dnssd.DNSSDException;
 import com.apple.dnssd.DNSSDService;
 
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.os.Build;
 
 import rx.Observable;
 import rx.Observable.OnSubscribe;
@@ -28,18 +30,17 @@ import rx.functions.Action0;
 import rx.functions.Action1;
 
 /**
- * RxDnssd is reactive wrapper for DNSSD
+ * RxDnssdBindable is implementation of RxDnssd with system's daemon
  *
  * {@see com.apple.dnssd.DNSSD}
  */
-public class RxDnssdDaemonic extends RxDnssdCommon {
+@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+public class RxDnssdBindable extends RxDnssdCommon {
 
-    static final String TAG = "RX";
+    private final Context context;
 
-    private Context context;
-
-    public RxDnssdDaemonic(Context context) {
-        super( "jdns_sd");
+    public RxDnssdBindable(Context context) {
+        super("jdns_sd");
         this.context = context.getApplicationContext();
     }
 

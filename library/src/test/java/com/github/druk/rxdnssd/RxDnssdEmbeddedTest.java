@@ -17,6 +17,7 @@ package com.github.druk.rxdnssd;
 
 import com.apple.dnssd.BrowseListener;
 import com.apple.dnssd.DNSSD;
+import com.apple.dnssd.DNSSDEmbedded;
 import com.apple.dnssd.DNSSDException;
 import com.apple.dnssd.DNSSDService;
 import com.apple.dnssd.QueryListener;
@@ -63,7 +64,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({DNSSD.class, RxQueryListener.class, Inet4Address.class, Inet6Address.class})
 @SuppressStaticInitializationFor("com.apple.dnssd.DNSSD")
-public class RxDnssdTest {
+public class RxDnssdEmbeddedTest {
 
     static final int FLAGS = 0;
     static final int IF_INDEX = 0;
@@ -88,13 +89,14 @@ public class RxDnssdTest {
 
     Context appContext;
     DNSSDService mockService;
+    RxDnssdEmbedded mRxDnssd;
+    DNSSDEmbedded mockRxDnssdEmbedded;
 
     @Before
     public void setup() {
         appContext = mock(Context.class);
         Context context = mock(Context.class);
         when(context.getApplicationContext()).thenReturn(appContext);
-        RxDnssd.init(context);
         RxAndroidPlugins.getInstance().registerSchedulersHook(new RxAndroidSchedulersHook() {
             @Override
             public Scheduler getMainThreadScheduler() {
@@ -104,27 +106,31 @@ public class RxDnssdTest {
         mockService = mock(DNSSDService.class);
         mockStatic(DNSSD.class);
         mockStatic(InetAddress.class);
+        mockRxDnssdEmbedded = mock(DNSSDEmbedded.class);
+        mRxDnssd = new RxDnssdEmbedded(mockRxDnssdEmbedded);
+        PowerMockito.verifyStatic(times(1));
+        DNSSD.init(eq("jdns_sd_embedded"));
     }
 
     @Test
     public void test_browse_unsubscribe() throws DNSSDException {
         PowerMockito.when(DNSSD.browse(anyInt(), anyInt(), anyString(), anyString(), any(BrowseListener.class))).thenReturn(mockService);
-        RxDnssd.browse(REG_TYPE, DOMAIN).subscribe(new TestSubscriber<>()).unsubscribe();
+        mRxDnssd.browse(REG_TYPE, DOMAIN).subscribe(new TestSubscriber<>()).unsubscribe();
         verify(mockService).stop();
     }
 
     @Test
     public void test_browse_start_daemon() throws DNSSDException {
         PowerMockito.when(DNSSD.browse(anyInt(), anyInt(), anyString(), anyString(), any(BrowseListener.class))).thenReturn(mockService);
-        RxDnssd.browse(REG_TYPE, DOMAIN).subscribe(new TestSubscriber<>());
-        verify(appContext).getSystemService(Context.NSD_SERVICE);
+        mRxDnssd.browse(REG_TYPE, DOMAIN).subscribe(new TestSubscriber<>());
+        verify(mockRxDnssdEmbedded).init();
     }
 
     @Test
     public void test_browse_found() throws Exception {
         PowerMockito.when(DNSSD.browse(anyInt(), anyInt(), anyString(), anyString(), any(BrowseListener.class))).thenReturn(mockService);
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        RxDnssd.browse(REG_TYPE, DOMAIN).subscribe(testSubscriber);
+        mRxDnssd.browse(REG_TYPE, DOMAIN).subscribe(testSubscriber);
 
         ArgumentCaptor<BrowseListener> propertiesCaptor = ArgumentCaptor.forClass(BrowseListener.class);
         PowerMockito.verifyStatic();
@@ -137,7 +143,7 @@ public class RxDnssdTest {
     public void test_browse_found_after_unsubscribe() throws Exception {
         PowerMockito.when(DNSSD.browse(anyInt(), anyInt(), anyString(), anyString(), any(BrowseListener.class))).thenReturn(mockService);
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        RxDnssd.browse(REG_TYPE, DOMAIN).subscribe(testSubscriber).unsubscribe();
+        mRxDnssd.browse(REG_TYPE, DOMAIN).subscribe(testSubscriber).unsubscribe();
 
         ArgumentCaptor<BrowseListener> propertiesCaptor = ArgumentCaptor.forClass(BrowseListener.class);
         PowerMockito.verifyStatic();
@@ -150,7 +156,7 @@ public class RxDnssdTest {
     public void test_browse_lost() throws Exception {
         PowerMockito.when(DNSSD.browse(anyInt(), anyInt(), anyString(), anyString(), any(BrowseListener.class))).thenReturn(mockService);
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        RxDnssd.browse(REG_TYPE, DOMAIN).subscribe(testSubscriber);
+        mRxDnssd.browse(REG_TYPE, DOMAIN).subscribe(testSubscriber);
 
         ArgumentCaptor<BrowseListener> propertiesCaptor = ArgumentCaptor.forClass(BrowseListener.class);
         PowerMockito.verifyStatic();
@@ -163,7 +169,7 @@ public class RxDnssdTest {
     public void test_browse_lost_after_unsubscribe() throws Exception {
         PowerMockito.when(DNSSD.browse(anyInt(), anyInt(), anyString(), anyString(), any(BrowseListener.class))).thenReturn(mockService);
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        RxDnssd.browse(REG_TYPE, DOMAIN).subscribe(testSubscriber).unsubscribe();
+        mRxDnssd.browse(REG_TYPE, DOMAIN).subscribe(testSubscriber).unsubscribe();
 
         ArgumentCaptor<BrowseListener> propertiesCaptor = ArgumentCaptor.forClass(BrowseListener.class);
         PowerMockito.verifyStatic();
@@ -176,7 +182,7 @@ public class RxDnssdTest {
     public void test_browse_operation_failed() throws Exception {
         PowerMockito.when(DNSSD.browse(anyInt(), anyInt(), anyString(), anyString(), any(BrowseListener.class))).thenReturn(mockService);
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        RxDnssd.browse(REG_TYPE, DOMAIN).subscribe(testSubscriber);
+        mRxDnssd.browse(REG_TYPE, DOMAIN).subscribe(testSubscriber);
 
         ArgumentCaptor<BrowseListener> propertiesCaptor = ArgumentCaptor.forClass(BrowseListener.class);
         PowerMockito.verifyStatic();
@@ -191,7 +197,7 @@ public class RxDnssdTest {
         mockStatic(DNSSD.class);
         PowerMockito.when(DNSSD.browse(anyInt(), anyInt(), anyString(), anyString(), any(BrowseListener.class))).thenReturn(mockService);
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        RxDnssd.browse(REG_TYPE, DOMAIN).subscribe(testSubscriber).unsubscribe();
+        mRxDnssd.browse(REG_TYPE, DOMAIN).subscribe(testSubscriber).unsubscribe();
 
         ArgumentCaptor<BrowseListener> propertiesCaptor = ArgumentCaptor.forClass(BrowseListener.class);
         PowerMockito.verifyStatic();
@@ -203,21 +209,21 @@ public class RxDnssdTest {
     @Test
     public void test_resolve_unsubscribe() throws DNSSDException {
         PowerMockito.when(DNSSD.resolve(anyInt(), anyInt(), anyString(), anyString(), anyString(), any(ResolveListener.class))).thenReturn(mockService);
-        Observable.just(bonjourService).compose(RxDnssd.resolve()).subscribe(new TestSubscriber<BonjourService>()).unsubscribe();
+        Observable.just(bonjourService).compose(mRxDnssd.resolve()).subscribe(new TestSubscriber<BonjourService>()).unsubscribe();
         verify(mockService).stop();
     }
 
     @Test
     public void test_resolve_start_daemon() throws DNSSDException {
         PowerMockito.when(DNSSD.resolve(anyInt(), anyInt(), anyString(), anyString(), anyString(), any(ResolveListener.class))).thenReturn(mockService);
-        Observable.just(bonjourService).compose(RxDnssd.resolve()).subscribe(new TestSubscriber<BonjourService>()).unsubscribe();
-        verify(appContext).getSystemService(Context.NSD_SERVICE);
+        Observable.just(bonjourService).compose(mRxDnssd.resolve()).subscribe(new TestSubscriber<BonjourService>()).unsubscribe();
+        verify(mockRxDnssdEmbedded).init();
     }
 
     @Test
     public void test_resolve_ignore_lost() throws DNSSDException {
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        Observable.just(lostBonjourService).compose(RxDnssd.resolve()).subscribe(testSubscriber);
+        Observable.just(lostBonjourService).compose(mRxDnssd.resolve()).subscribe(testSubscriber);
         assertServices(testSubscriber.getOnNextEvents(), lostBonjourService);
         testSubscriber.assertCompleted();
     }
@@ -226,7 +232,7 @@ public class RxDnssdTest {
     public void test_resolve_successfully() throws DNSSDException {
         PowerMockito.when(DNSSD.resolve(anyInt(), anyInt(), anyString(), anyString(), anyString(), any(ResolveListener.class))).thenReturn(mockService);
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        Observable.just(bonjourService).compose(RxDnssd.resolve()).subscribe(testSubscriber);
+        Observable.just(bonjourService).compose(mRxDnssd.resolve()).subscribe(testSubscriber);
 
         ArgumentCaptor<ResolveListener> propertiesCaptor = ArgumentCaptor.forClass(ResolveListener.class);
         PowerMockito.verifyStatic();
@@ -240,7 +246,7 @@ public class RxDnssdTest {
     public void test_resolve_successfully_after_unsubscribe() throws DNSSDException {
         PowerMockito.when(DNSSD.resolve(anyInt(), anyInt(), anyString(), anyString(), anyString(), any(ResolveListener.class))).thenReturn(mockService);
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        Observable.just(bonjourService).compose(RxDnssd.resolve()).subscribe(testSubscriber).unsubscribe();
+        Observable.just(bonjourService).compose(mRxDnssd.resolve()).subscribe(testSubscriber).unsubscribe();
 
         ArgumentCaptor<ResolveListener> propertiesCaptor = ArgumentCaptor.forClass(ResolveListener.class);
         PowerMockito.verifyStatic();
@@ -254,7 +260,7 @@ public class RxDnssdTest {
     public void test_resolve_failure() throws DNSSDException {
         PowerMockito.when(DNSSD.resolve(anyInt(), anyInt(), anyString(), anyString(), anyString(), any(ResolveListener.class))).thenReturn(mockService);
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        Observable.just(bonjourService).compose(RxDnssd.resolve()).subscribe(testSubscriber);
+        Observable.just(bonjourService).compose(mRxDnssd.resolve()).subscribe(testSubscriber);
 
         ArgumentCaptor<ResolveListener> propertiesCaptor = ArgumentCaptor.forClass(ResolveListener.class);
         PowerMockito.verifyStatic();
@@ -267,7 +273,7 @@ public class RxDnssdTest {
     public void test_resolve_failure_after_unsubscribe() throws DNSSDException {
         PowerMockito.when(DNSSD.resolve(anyInt(), anyInt(), anyString(), anyString(), anyString(), any(ResolveListener.class))).thenReturn(mockService);
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        Observable.just(bonjourService).compose(RxDnssd.resolve()).subscribe(testSubscriber).unsubscribe();
+        Observable.just(bonjourService).compose(mRxDnssd.resolve()).subscribe(testSubscriber).unsubscribe();
 
         ArgumentCaptor<ResolveListener> propertiesCaptor = ArgumentCaptor.forClass(ResolveListener.class);
         PowerMockito.verifyStatic();
@@ -279,14 +285,14 @@ public class RxDnssdTest {
     @Test
     public void test_query_ipv4_records_unsubscribe() throws DNSSDException {
         PowerMockito.when(DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), any(QueryListener.class))).thenReturn(mockService);
-        Observable.just(resolvedBonjourService).compose(RxDnssd.queryIPV4Records()).subscribe(new TestSubscriber<BonjourService>()).unsubscribe();
+        Observable.just(resolvedBonjourService).compose(mRxDnssd.queryIPV4Records()).subscribe(new TestSubscriber<BonjourService>()).unsubscribe();
         verify(mockService).stop();
     }
 
     @Test
     public void test_query_ipv6_records_unsubscribe() throws DNSSDException {
         PowerMockito.when(DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), any(QueryListener.class))).thenReturn(mockService);
-        Observable.just(resolvedBonjourService).compose(RxDnssd.queryIPV6Records()).subscribe(new TestSubscriber<BonjourService>()).unsubscribe();
+        Observable.just(resolvedBonjourService).compose(mRxDnssd.queryIPV6Records()).subscribe(new TestSubscriber<BonjourService>()).unsubscribe();
         verify(mockService).stop();
     }
 
@@ -294,36 +300,36 @@ public class RxDnssdTest {
     public void test_query_records_unsubscribe() throws DNSSDException {
         PowerMockito.when(DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), any(QueryListener.class))).thenReturn(mockService);
         PowerMockito.when(DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), any(QueryListener.class))).thenReturn(mockService);
-        Observable.just(resolvedBonjourService).compose(RxDnssd.queryRecords()).subscribe(new TestSubscriber<BonjourService>()).unsubscribe();
+        Observable.just(resolvedBonjourService).compose(mRxDnssd.queryRecords()).subscribe(new TestSubscriber<BonjourService>()).unsubscribe();
         verify(mockService, times(2)).stop();
     }
 
     @Test
     public void test_query_ipv4_records_start_daemon() throws DNSSDException {
         PowerMockito.when(DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), any(QueryListener.class))).thenReturn(mockService);
-        Observable.just(resolvedBonjourService).compose(RxDnssd.queryIPV4Records()).subscribe(new TestSubscriber<BonjourService>()).unsubscribe();
-        verify(appContext).getSystemService(Context.NSD_SERVICE);
+        Observable.just(resolvedBonjourService).compose(mRxDnssd.queryIPV4Records()).subscribe(new TestSubscriber<BonjourService>()).unsubscribe();
+        verify(mockRxDnssdEmbedded).init();
     }
 
     @Test
     public void test_query_ipv6_records_start_daemon() throws DNSSDException {
         PowerMockito.when(DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), any(QueryListener.class))).thenReturn(mockService);
-        Observable.just(resolvedBonjourService).compose(RxDnssd.queryIPV6Records()).subscribe(new TestSubscriber<BonjourService>()).unsubscribe();
-        verify(appContext).getSystemService(Context.NSD_SERVICE);
+        Observable.just(resolvedBonjourService).compose(mRxDnssd.queryIPV6Records()).subscribe(new TestSubscriber<BonjourService>()).unsubscribe();
+        verify(mockRxDnssdEmbedded).init();
     }
 
     @Test
     public void test_query_records_start_daemon() throws DNSSDException {
         PowerMockito.when(DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), any(QueryListener.class))).thenReturn(mockService);
         PowerMockito.when(DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), any(QueryListener.class))).thenReturn(mockService);
-        Observable.just(resolvedBonjourService).compose(RxDnssd.queryRecords()).subscribe(new TestSubscriber<BonjourService>()).unsubscribe();
-        verify(appContext, times(2)).getSystemService(Context.NSD_SERVICE);
+        Observable.just(resolvedBonjourService).compose(mRxDnssd.queryRecords()).subscribe(new TestSubscriber<BonjourService>()).unsubscribe();
+        verify(mockRxDnssdEmbedded, times(2)).init();
     }
 
     @Test
     public void test_query_ipv4_records_ignore_lost() throws DNSSDException {
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        Observable.just(lostBonjourService).compose(RxDnssd.queryIPV4Records()).subscribe(testSubscriber);
+        Observable.just(lostBonjourService).compose(mRxDnssd.queryIPV4Records()).subscribe(testSubscriber);
         assertServices(testSubscriber.getOnNextEvents(), lostBonjourService);
         testSubscriber.assertCompleted();
     }
@@ -331,7 +337,7 @@ public class RxDnssdTest {
     @Test
     public void test_query_ipv6_records_ignore_lost() throws DNSSDException {
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        Observable.just(lostBonjourService).compose(RxDnssd.queryIPV6Records()).subscribe(testSubscriber);
+        Observable.just(lostBonjourService).compose(mRxDnssd.queryIPV6Records()).subscribe(testSubscriber);
         assertServices(testSubscriber.getOnNextEvents(), lostBonjourService);
         testSubscriber.assertCompleted();
     }
@@ -339,7 +345,7 @@ public class RxDnssdTest {
     @Test
     public void test_query_records_ignore_lost() throws DNSSDException {
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        Observable.just(lostBonjourService).compose(RxDnssd.queryRecords()).subscribe(testSubscriber);
+        Observable.just(lostBonjourService).compose(mRxDnssd.queryRecords()).subscribe(testSubscriber);
         assertServices(testSubscriber.getOnNextEvents(), lostBonjourService);
         testSubscriber.assertCompleted();
     }
@@ -351,7 +357,7 @@ public class RxDnssdTest {
         ArgumentCaptor<QueryListener> propertiesCaptor = ArgumentCaptor.forClass(QueryListener.class);
 
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        Observable.just(resolvedBonjourService).compose(RxDnssd.queryIPV4Records()).subscribe(testSubscriber);
+        Observable.just(resolvedBonjourService).compose(mRxDnssd.queryIPV4Records()).subscribe(testSubscriber);
         PowerMockito.verifyStatic();
         DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());
         propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, new byte[0], 0);
@@ -366,7 +372,7 @@ public class RxDnssdTest {
         ArgumentCaptor<QueryListener> propertiesCaptor = ArgumentCaptor.forClass(QueryListener.class);
 
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        Observable.just(resolvedBonjourService).compose(RxDnssd.queryIPV6Records()).subscribe(testSubscriber);
+        Observable.just(resolvedBonjourService).compose(mRxDnssd.queryIPV6Records()).subscribe(testSubscriber);
         PowerMockito.verifyStatic();
         DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), propertiesCaptor.capture());
         propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, null, 0);
@@ -385,7 +391,7 @@ public class RxDnssdTest {
         ArgumentCaptor<QueryListener> propertiesCaptor = ArgumentCaptor.forClass(QueryListener.class);
 
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        Observable.just(resolvedBonjourService).compose(RxDnssd.queryRecords()).subscribe(testSubscriber);
+        Observable.just(resolvedBonjourService).compose(mRxDnssd.queryRecords()).subscribe(testSubscriber);
         PowerMockito.verifyStatic();
         DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());
         propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, ipv4, 0);
@@ -407,7 +413,7 @@ public class RxDnssdTest {
         ArgumentCaptor<QueryListener> propertiesCaptor = ArgumentCaptor.forClass(QueryListener.class);
 
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        Observable.just(resolvedBonjourService).compose(RxDnssd.queryRecords()).subscribe(testSubscriber);
+        Observable.just(resolvedBonjourService).compose(mRxDnssd.queryRecords()).subscribe(testSubscriber);
         PowerMockito.verifyStatic();
         DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), propertiesCaptor.capture());
         propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, ipv6, 0);
@@ -424,7 +430,7 @@ public class RxDnssdTest {
         PowerMockito.when(InetAddress.getByAddress(any(byte[].class))).thenThrow(new UnknownHostException());
 
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        Observable.just(resolvedBonjourService).compose(RxDnssd.queryIPV4Records()).subscribe(testSubscriber);
+        Observable.just(resolvedBonjourService).compose(mRxDnssd.queryIPV4Records()).subscribe(testSubscriber);
 
         ArgumentCaptor<QueryListener> propertiesCaptor = ArgumentCaptor.forClass(QueryListener.class);
         PowerMockito.verifyStatic();
@@ -441,7 +447,7 @@ public class RxDnssdTest {
         PowerMockito.when(InetAddress.getByAddress(any(byte[].class))).thenThrow(new UnknownHostException());
 
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        Observable.just(resolvedBonjourService).compose(RxDnssd.queryIPV6Records()).subscribe(testSubscriber);
+        Observable.just(resolvedBonjourService).compose(mRxDnssd.queryIPV6Records()).subscribe(testSubscriber);
 
         ArgumentCaptor<QueryListener> propertiesCaptor = ArgumentCaptor.forClass(QueryListener.class);
         PowerMockito.verifyStatic();
@@ -463,7 +469,7 @@ public class RxDnssdTest {
         ArgumentCaptor<QueryListener> propertiesCaptor = ArgumentCaptor.forClass(QueryListener.class);
 
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        Observable.just(resolvedBonjourService).compose(RxDnssd.queryRecords()).subscribe(testSubscriber);
+        Observable.just(resolvedBonjourService).compose(mRxDnssd.queryRecords()).subscribe(testSubscriber);
         PowerMockito.verifyStatic();
         DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());
         propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, ipv4, 0);
@@ -485,7 +491,7 @@ public class RxDnssdTest {
         ArgumentCaptor<QueryListener> propertiesCaptor = ArgumentCaptor.forClass(QueryListener.class);
 
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        Observable.just(resolvedBonjourService).compose(RxDnssd.queryRecords()).subscribe(testSubscriber);
+        Observable.just(resolvedBonjourService).compose(mRxDnssd.queryRecords()).subscribe(testSubscriber);
         PowerMockito.verifyStatic();
         DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), propertiesCaptor.capture());
         propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, ipv6, 0);
@@ -507,7 +513,7 @@ public class RxDnssdTest {
         ArgumentCaptor<QueryListener> propertiesCaptor = ArgumentCaptor.forClass(QueryListener.class);
 
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        Observable.just(resolvedBonjourService).compose(RxDnssd.queryRecords()).subscribe(testSubscriber);
+        Observable.just(resolvedBonjourService).compose(mRxDnssd.queryRecords()).subscribe(testSubscriber);
         PowerMockito.verifyStatic();
         DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), propertiesCaptor.capture());
         propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, ipv6, 0);
@@ -529,7 +535,7 @@ public class RxDnssdTest {
         ArgumentCaptor<QueryListener> propertiesCaptor = ArgumentCaptor.forClass(QueryListener.class);
 
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        Observable.just(resolvedBonjourService).compose(RxDnssd.queryRecords()).subscribe(testSubscriber);
+        Observable.just(resolvedBonjourService).compose(mRxDnssd.queryRecords()).subscribe(testSubscriber);
         PowerMockito.verifyStatic();
         DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());
         propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, ipv4, 0);
@@ -546,7 +552,7 @@ public class RxDnssdTest {
         PowerMockito.when(InetAddress.getByAddress(any(byte[].class))).thenReturn(inet4Address);
 
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        Observable.just(resolvedBonjourService).compose(RxDnssd.queryIPV4Records()).subscribe(testSubscriber).unsubscribe();
+        Observable.just(resolvedBonjourService).compose(mRxDnssd.queryIPV4Records()).subscribe(testSubscriber).unsubscribe();
 
         ArgumentCaptor<QueryListener> propertiesCaptor = ArgumentCaptor.forClass(QueryListener.class);
         PowerMockito.verifyStatic();
@@ -564,7 +570,7 @@ public class RxDnssdTest {
         PowerMockito.when(InetAddress.getByAddress(any(byte[].class))).thenReturn(inet6Address);
 
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        Observable.just(resolvedBonjourService).compose(RxDnssd.queryIPV6Records()).subscribe(testSubscriber).unsubscribe();
+        Observable.just(resolvedBonjourService).compose(mRxDnssd.queryIPV6Records()).subscribe(testSubscriber).unsubscribe();
 
         ArgumentCaptor<QueryListener> propertiesCaptor = ArgumentCaptor.forClass(QueryListener.class);
         PowerMockito.verifyStatic();
@@ -587,7 +593,7 @@ public class RxDnssdTest {
         ArgumentCaptor<QueryListener> propertiesCaptor = ArgumentCaptor.forClass(QueryListener.class);
 
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        Observable.just(resolvedBonjourService).compose(RxDnssd.queryRecords()).subscribe(testSubscriber).unsubscribe();
+        Observable.just(resolvedBonjourService).compose(mRxDnssd.queryRecords()).subscribe(testSubscriber).unsubscribe();
 
         PowerMockito.verifyStatic();
         DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());
@@ -606,7 +612,7 @@ public class RxDnssdTest {
         PowerMockito.when(DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), any(QueryListener.class))).thenReturn(mockService);
 
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        Observable.just(resolvedBonjourService).compose(RxDnssd.queryIPV4Records()).subscribe(testSubscriber);
+        Observable.just(resolvedBonjourService).compose(mRxDnssd.queryIPV4Records()).subscribe(testSubscriber);
 
         ArgumentCaptor<QueryListener> propertiesCaptor = ArgumentCaptor.forClass(QueryListener.class);
         PowerMockito.verifyStatic();
@@ -622,7 +628,7 @@ public class RxDnssdTest {
         PowerMockito.when(DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), any(QueryListener.class))).thenReturn(mockService);
 
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        Observable.just(resolvedBonjourService).compose(RxDnssd.queryIPV6Records()).subscribe(testSubscriber);
+        Observable.just(resolvedBonjourService).compose(mRxDnssd.queryIPV6Records()).subscribe(testSubscriber);
 
         ArgumentCaptor<QueryListener> propertiesCaptor = ArgumentCaptor.forClass(QueryListener.class);
         PowerMockito.verifyStatic();
@@ -640,7 +646,7 @@ public class RxDnssdTest {
         ArgumentCaptor<QueryListener> propertiesCaptor = ArgumentCaptor.forClass(QueryListener.class);
 
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        Observable.just(resolvedBonjourService).compose(RxDnssd.queryRecords()).subscribe(testSubscriber);
+        Observable.just(resolvedBonjourService).compose(mRxDnssd.queryRecords()).subscribe(testSubscriber);
 
         PowerMockito.verifyStatic();
         DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());
@@ -658,7 +664,7 @@ public class RxDnssdTest {
         PowerMockito.when(DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), any(QueryListener.class))).thenReturn(mockService);
 
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        Observable.just(resolvedBonjourService).compose(RxDnssd.queryIPV4Records()).subscribe(testSubscriber).unsubscribe();
+        Observable.just(resolvedBonjourService).compose(mRxDnssd.queryIPV4Records()).subscribe(testSubscriber).unsubscribe();
 
         ArgumentCaptor<QueryListener> propertiesCaptor = ArgumentCaptor.forClass(QueryListener.class);
         PowerMockito.verifyStatic();
@@ -674,7 +680,7 @@ public class RxDnssdTest {
         PowerMockito.when(DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), any(QueryListener.class))).thenReturn(mockService);
 
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        Observable.just(resolvedBonjourService).compose(RxDnssd.queryIPV6Records()).subscribe(testSubscriber).unsubscribe();
+        Observable.just(resolvedBonjourService).compose(mRxDnssd.queryIPV6Records()).subscribe(testSubscriber).unsubscribe();
 
         ArgumentCaptor<QueryListener> propertiesCaptor = ArgumentCaptor.forClass(QueryListener.class);
         PowerMockito.verifyStatic();
@@ -692,7 +698,7 @@ public class RxDnssdTest {
         ArgumentCaptor<QueryListener> propertiesCaptor = ArgumentCaptor.forClass(QueryListener.class);
 
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        Observable.just(resolvedBonjourService).compose(RxDnssd.queryRecords()).subscribe(testSubscriber).unsubscribe();
+        Observable.just(resolvedBonjourService).compose(mRxDnssd.queryRecords()).subscribe(testSubscriber).unsubscribe();
 
         PowerMockito.verifyStatic();
         DNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());

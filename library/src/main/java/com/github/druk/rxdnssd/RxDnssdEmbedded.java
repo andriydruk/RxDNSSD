@@ -19,10 +19,6 @@ import com.apple.dnssd.DNSSDEmbedded;
 import com.apple.dnssd.DNSSDException;
 import com.apple.dnssd.DNSSDService;
 
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-
 import rx.Observable;
 import rx.Observable.OnSubscribe;
 import rx.Subscriber;
@@ -31,19 +27,22 @@ import rx.functions.Action0;
 import rx.functions.Action1;
 
 /**
- * RxDnssd is reactive wrapper for DNSSD
+ * RxDnssd is implementation of RxDnssd with embedded DNS-SD
  *
  * {@see com.apple.dnssd.DNSSD}
  */
-public class RxDnssdEmbedded extends RxDnssdCommon{
-
-    private static final String TAG = "RxDnssdEmbedded";
+public class RxDnssdEmbedded extends RxDnssdCommon {
 
     private int serviceCount = 0;
-    private DNSSDEmbedded mDNSSDEmbedded = new DNSSDEmbedded();
+    private final DNSSDEmbedded dnssdEmbedded;
 
     public RxDnssdEmbedded() {
-        super( "jdns_sd_embedded");
+        this(new DNSSDEmbedded());
+    }
+
+    /* default */ RxDnssdEmbedded(DNSSDEmbedded dnssdEmbedded) {
+        super("jdns_sd_embedded");
+        this.dnssdEmbedded = dnssdEmbedded;
     }
 
     @Override
@@ -64,7 +63,7 @@ public class RxDnssdEmbedded extends RxDnssdCommon{
         @Override
         public void call(Subscriber<? super T> subscriber) {
             if (!subscriber.isUnsubscribed() && creator != null) {
-                mDNSSDEmbedded.init();
+                dnssdEmbedded.init();
                 try {
                     service = creator.getService(subscriber);
                     serviceCount++;
@@ -85,7 +84,7 @@ public class RxDnssdEmbedded extends RxDnssdCommon{
                                 service.stop();
                                 serviceCount--;
                                 if (serviceCount == 0) {
-                                    mDNSSDEmbedded.exit();
+                                    dnssdEmbedded.exit();
                                 }
                             }
                         });
