@@ -174,7 +174,7 @@ public class BonjourService implements Parcelable {
      * @return true if service was lost
      */
     public boolean isLost() {
-        return (flags & LOST) != LOST;
+        return (flags & LOST) == LOST;
     }
 
     @Override
