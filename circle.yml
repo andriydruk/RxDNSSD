@@ -12,6 +12,10 @@ machine:
     java:
         version: oraclejdk8
 
+checkout:
+    post:
+        - echo "ndk.dir=${ANDROID_NDK}" >> local.properties
+
 dependencies:
     override:
         - echo y | android update sdk --no-ui --all --filter "tools"

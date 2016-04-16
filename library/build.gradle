@@ -1,3 +1,5 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
 apply plugin: 'com.android.library'
 apply plugin: 'com.novoda.bintray-release'
 
@@ -105,6 +107,51 @@ task checkstyle(type: Checkstyle) {
     }
     classpath = files()
 }
+
+def getNdkCommand() {
+    def ndk_command_path
+    def local_properties = project.rootProject.file('local.properties')
+    if (local_properties.exists()) {
+        Properties properties = new Properties()
+        properties.load(local_properties.newDataInputStream())
+        ndk_command_path = properties.getProperty('ndk.dir')
+    }
+
+    def ndk_command
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        ndk_command = 'ndk-build.cmd'
+    } else {
+        ndk_command = 'ndk-build'
+    }
+
+    def ndk_full_command
+    if (ndk_command_path) {
+        ndk_full_command = sprintf("%s%s%s", ndk_command_path, File.separator, ndk_command)
+    } else {
+        ndk_full_command = ndk_command
+    }
+
+    return ndk_full_command
+}
+
+task ndkBuild(type: Exec) {
+    commandLine getNdkCommand(),
+        'NDK_LIBS_OUT=libs',
+        '-C', file('src/main').absolutePath
+}
+
+tasks.withType(JavaCompile) {
+    compileTask -> compileTask.dependsOn ndkBuild
+}
+
+task cleanNdkBuild(type: Exec) {
+    commandLine getNdkCommand(),
+        'NDK_LIBS_OUT=libs',
+        '-C', file('src/main').absolutePath,
+        'clean'
+}
+
+clean.dependsOn 'cleanNdkBuild'
 
 check.doLast {
     project.tasks.getByName("pmd").execute()
