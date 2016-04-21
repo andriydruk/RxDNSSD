@@ -4,41 +4,35 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.mockito.Mockito.after;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.times;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({DNSSDEmbedded.class})
 public class DNSSDEmbeddedTest {
 
-    private static final int DEFAULT_TIMEOUT = 50;
-    private static final int EXIT_TIMEOUT = 500;
-    private static final int EXIT_TIMEOUT_TIMEOUT = 1000;
+    private static final int TIMEOUT = 5000;
 
     DNSSDEmbedded mDNSSDEmbedded;
 
     @Before
     public void setup() {
-        mDNSSDEmbedded = new DNSSDEmbedded(EXIT_TIMEOUT);
+        mDNSSDEmbedded = new DNSSDEmbedded(TIMEOUT);
         mockStatic(DNSSDEmbedded.class);
     }
 
     @Test
-    public void init() throws InterruptedException {
+    public void init() throws InterruptedException { 
         mDNSSDEmbedded.init();
         PowerMockito.verifyStatic();
         DNSSDEmbedded.Init();
-        PowerMockito.verifyStatic(timeout(DEFAULT_TIMEOUT));
+        PowerMockito.verifyStatic(timeout(TIMEOUT));
         DNSSDEmbedded.Loop();
     }
 
@@ -48,14 +42,14 @@ public class DNSSDEmbeddedTest {
         mDNSSDEmbedded.init();
         PowerMockito.verifyStatic();
         DNSSDEmbedded.Init();
-        PowerMockito.verifyStatic(after(EXIT_TIMEOUT_TIMEOUT).never());
+        PowerMockito.verifyStatic(after(TIMEOUT).never());
         DNSSDEmbedded.Loop();
     }
 
     @Test
     public void exit() throws InterruptedException {
         mDNSSDEmbedded.exit();
-        PowerMockito.verifyStatic(timeout(EXIT_TIMEOUT + DEFAULT_TIMEOUT));
+        PowerMockito.verifyStatic(timeout(2 * TIMEOUT));
         DNSSDEmbedded.Exit();
     }
 
@@ -64,16 +58,16 @@ public class DNSSDEmbeddedTest {
         mDNSSDEmbedded.init();
         PowerMockito.verifyStatic();
         DNSSDEmbedded.Init();
-        PowerMockito.verifyStatic(timeout(DEFAULT_TIMEOUT));
+        PowerMockito.verifyStatic(timeout(TIMEOUT));
         DNSSDEmbedded.Loop();
         mDNSSDEmbedded.exit();
-        Thread.sleep(EXIT_TIMEOUT/2);
+        Thread.sleep(TIMEOUT / 2);
         mDNSSDEmbedded.init();
-        Thread.sleep(EXIT_TIMEOUT/2);
+        Thread.sleep(TIMEOUT / 2);
         PowerMockito.verifyStatic(never());
         DNSSDEmbedded.Exit();
         mDNSSDEmbedded.exit();
-        PowerMockito.verifyStatic(timeout(EXIT_TIMEOUT_TIMEOUT));
+        PowerMockito.verifyStatic(timeout(2 * TIMEOUT));
         DNSSDEmbedded.Exit();
     }
 
