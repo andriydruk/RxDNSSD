@@ -2,6 +2,7 @@ package com.apple.dnssd;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
@@ -14,6 +15,7 @@ import static org.mockito.Mockito.timeout;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 @RunWith(PowerMockRunner.class)
+@Ignore
 @PrepareForTest({DNSSDEmbedded.class})
 public class DNSSDEmbeddedTest {
 
@@ -28,7 +30,7 @@ public class DNSSDEmbeddedTest {
     }
 
     @Test
-    public void init() throws InterruptedException { 
+    public void init() throws InterruptedException {
         mDNSSDEmbedded.init();
         PowerMockito.verifyStatic();
         DNSSDEmbedded.Init();
