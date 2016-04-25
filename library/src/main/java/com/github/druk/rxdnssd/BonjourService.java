@@ -129,7 +129,7 @@ public class BonjourService implements Parcelable {
     }
 
     /** Get domain */
-    @NonNull
+    @Nullable
     public String getDomain() {
         return domain;
     }
@@ -257,7 +257,7 @@ public class BonjourService implements Parcelable {
          * @param regType     regType of BonjourService.
          * @param domain      domain of BonjourService.
          */
-        public Builder(int flags, int ifIndex, @NonNull String serviceName, @NonNull String regType, @NonNull String domain) {
+        public Builder(int flags, int ifIndex, @NonNull String serviceName, @NonNull String regType, String domain) {
             this.flags = flags;
             this.serviceName = serviceName;
             this.regType = regType;

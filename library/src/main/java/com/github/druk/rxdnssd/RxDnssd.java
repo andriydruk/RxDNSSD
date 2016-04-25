@@ -79,4 +79,7 @@ public interface RxDnssd {
      */
     @NonNull
     Observable.Transformer<BonjourService, BonjourService> queryIPV6Records();
+
+    @NonNull
+    Observable<BonjourService> register(@NonNull final BonjourService bs);
 }

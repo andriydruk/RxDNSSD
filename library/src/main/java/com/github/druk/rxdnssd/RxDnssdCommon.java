@@ -3,8 +3,11 @@ package com.github.druk.rxdnssd;
 import com.apple.dnssd.DNSSD;
 import com.apple.dnssd.DNSSDException;
 import com.apple.dnssd.DNSSDService;
+import com.apple.dnssd.TXTRecord;
 
 import android.support.annotation.NonNull;
+
+import java.util.Map;
 
 import rx.Observable;
 import rx.Subscriber;
@@ -175,9 +178,29 @@ abstract class RxDnssdCommon implements RxDnssd {
         };
     }
 
+    @NonNull
+    @Override
+    public Observable<BonjourService> register(@NonNull final BonjourService bs) {
+        return createObservable(new DNSSDServiceCreator<BonjourService>() {
+            @Override
+            public DNSSDService getService(Subscriber<? super BonjourService> subscriber) throws DNSSDException {
+                return DNSSD.register(bs.getFlags(), bs.getIfIndex(), bs.getServiceName(), bs.getRegType(), bs.getDomain(), null, bs.getPort(),
+                        createTxtRecord(bs.getTxtRecords()), new RxRegisterListener(subscriber, bs));
+            }
+        });
+    }
+
     protected interface DNSSDServiceCreator<T> {
         DNSSDService getService(Subscriber<? super T> subscriber) throws DNSSDException;
     }
 
     abstract protected <T> Observable<T> createObservable(DNSSDServiceCreator<T> creator);
+
+    static TXTRecord createTxtRecord(Map<String, String> records) {
+        TXTRecord txtRecord = new TXTRecord();
+        for (Map.Entry<String, String> entry : records.entrySet()) {
+            txtRecord.set(entry.getKey(), entry.getValue());
+        }
+        return txtRecord;
+    }
 }
