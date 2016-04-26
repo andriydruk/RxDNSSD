@@ -22,11 +22,9 @@ import rx.Subscriber;
 
 class RxRegisterListener implements com.apple.dnssd.RegisterListener {
     private final Subscriber<? super BonjourService> subscriber;
-    private final BonjourService bonjourService;
 
-    RxRegisterListener(Subscriber<? super BonjourService> subscriber, BonjourService bonjourService) {
+    RxRegisterListener(Subscriber<? super BonjourService> subscriber) {
         this.subscriber = subscriber;
-        this.bonjourService = bonjourService;
     }
 
     @Override
@@ -34,8 +32,8 @@ class RxRegisterListener implements com.apple.dnssd.RegisterListener {
         if (subscriber.isUnsubscribed()) {
             return;
         }
-        //BonjourService service = new BonjourService.Builder(flags, 0, serviceName, regType, domain).build();
-        subscriber.onNext(bonjourService);
+        BonjourService service = new BonjourService.Builder(flags, 0, serviceName, regType, domain).build();
+        subscriber.onNext(service);
     }
 
     @Override

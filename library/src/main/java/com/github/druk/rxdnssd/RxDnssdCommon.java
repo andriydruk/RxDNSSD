@@ -185,7 +185,7 @@ abstract class RxDnssdCommon implements RxDnssd {
             @Override
             public DNSSDService getService(Subscriber<? super BonjourService> subscriber) throws DNSSDException {
                 return DNSSD.register(bs.getFlags(), bs.getIfIndex(), bs.getServiceName(), bs.getRegType(), bs.getDomain(), null, bs.getPort(),
-                        createTxtRecord(bs.getTxtRecords()), new RxRegisterListener(subscriber, bs));
+                        createTxtRecord(bs.getTxtRecords()), new RxRegisterListener(subscriber));
             }
         });
     }
