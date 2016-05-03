@@ -239,7 +239,6 @@ public class RxDnssdEmbeddedTest {
         DNSSD.resolve(anyInt(), anyInt(), anyString(), anyString(), anyString(), propertiesCaptor.capture());
         propertiesCaptor.getValue().serviceResolved(mockService, FLAGS, IF_INDEX, SERVICE_NAME, HOSTNAME, PORT, new TXTRecord());
         assertServices(testSubscriber.getOnNextEvents(), resolvedBonjourService);
-        testSubscriber.assertCompleted();
     }
 
     @Test
