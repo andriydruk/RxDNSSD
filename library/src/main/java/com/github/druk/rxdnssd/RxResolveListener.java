@@ -41,7 +41,6 @@ class RxResolveListener implements com.apple.dnssd.ResolveListener {
         }
         BonjourService bonjourService = builder.port(port).hostname(hostName).dnsRecords(parseTXTRecords(txtRecord)).build();
         subscriber.onNext(bonjourService);
-        subscriber.onCompleted();
     }
 
     @Override
