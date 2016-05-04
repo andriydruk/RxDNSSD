@@ -2,19 +2,47 @@
 
 Android library which is Rx wrapper for Apple DNSSD Java API.
 
-#####Why RxDNSSD?
+##Why RxDNSSD?
 My [explanation](http://andriydruk.com/post/mdnsresponder/) about why jmDNS, Android NSD Services and Google Nearby API are not good enough, and why I maintain this library.
 
-## Download
+##Binaries
 ```groovy
-compile 'com.github.andriydruk:rxdnssd:0.5.0'
+compile 'com.github.andriydruk:rxdnssd:0.8.0'
 ```
 
-####Some examples
+##How to use
+
+RxDNSSD provides two implementations of RxDnssd interface: 
+
+- RxDnssdBindable
+- RxDnssdEmbedded
+
+RxDnssdBindable is an implementation of RxDnssd with system's daemon. Use it for Android project with min API higher than 4.1 for an economy of battery consumption (Also some Samsung devices can don't work with this implementation).
+
+```java
+RxDnssd rxdnssd = new RxDnssdBindable(context); 
+```
+
+RxDnssdEmbedded is an implementation of RxDnssd with embedded DNS-SD core. Can be used for any Android device with min API higher than Android 4.0.
+
+```java
+RxDnssd rxdnssd = new RxDnssdEmbedded(); 
+```
+
+#####Register service
+```java
+Subscription subscription = rxdnssd.register(bonjourService)
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(service -> {
+      		updateUi();
+      }, throwable -> {
+        	Log.e("DNSSD", "Error: ", throwable);
+      });
+```
 
 #####Browse services example
 ```java
-mSubscription = RxDnssd.browse("_ftp._tcp" /*reqType*/, "." /*domain*/)
+Subscription subscription = rxdnssd.browse("_ftp._tcp" /*reqType*/, "." /*domain*/)
 	.compose(RxDnssd.resolve())
     .compose(RxDnssd.queryRecords())
     .observeOn(AndroidSchedulers.mainThread())
@@ -28,7 +56,6 @@ mSubscription = RxDnssd.browse("_ftp._tcp" /*reqType*/, "." /*domain*/)
      }, throwable -> {
         Log.e("DNSSD", "Error: ", throwable);
      });
-
 ```
 
 License
