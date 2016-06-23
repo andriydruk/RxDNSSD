@@ -59,8 +59,7 @@ class RxResolveListener implements com.apple.dnssd.ResolveListener {
                 if (!TextUtils.isEmpty(record.getKey(i)) && !TextUtils.isEmpty(record.getValueAsString(i))) {
                     result.put(record.getKey(i), record.getValueAsString(i));
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 Log.w("RxResolveListener", "Parsing error of " + i + " TXT record", e);
             }
         }
