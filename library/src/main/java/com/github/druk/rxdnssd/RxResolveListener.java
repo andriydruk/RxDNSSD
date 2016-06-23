@@ -19,6 +19,7 @@ import com.apple.dnssd.DNSSDService;
 import com.apple.dnssd.TXTRecord;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -54,8 +55,13 @@ class RxResolveListener implements com.apple.dnssd.ResolveListener {
     private static Map<String, String> parseTXTRecords(TXTRecord record) {
         Map<String, String> result = new HashMap<>(record.size());
         for (int i = 0; i < record.size(); i++) {
-            if (!TextUtils.isEmpty(record.getKey(i)) && !TextUtils.isEmpty(record.getValueAsString(i))) {
-                result.put(record.getKey(i), record.getValueAsString(i));
+            try {
+                if (!TextUtils.isEmpty(record.getKey(i)) && !TextUtils.isEmpty(record.getValueAsString(i))) {
+                    result.put(record.getKey(i), record.getValueAsString(i));
+                }
+            }
+            catch (Exception e) {
+                Log.w("RxResolveListener", "Parsing error of " + i + " TXT record", e);
             }
         }
         return result;
