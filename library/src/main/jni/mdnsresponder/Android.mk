@@ -34,12 +34,6 @@ commonFlags := \
 
 include $(CLEAR_VARS)
 
-# uds_daemon.c explicitly dereferences a non-volatile null pointer. Clang rather
-# unhelpfully says "I know what you're trying to do, but I'm going to optimize
-# it away anyway". There's no way to disable this behavior, so just stick with
-# gcc.
-LOCAL_CLANG := false
-
 LOCAL_SRC_FILES :=  mDNSPosix/PosixDaemon.c    \
                     mDNSPosix/mDNSPosix.c      \
                     mDNSPosix/mDNSUNP.c        \
