@@ -453,6 +453,7 @@ static void DNSSD_API	ServiceResolveReply( DNSServiceRef sdRef _UNUSED, DNSServi
 								pContext->JavaObj, flags, interfaceIndex, jFullName, jHostTarget, port, txtObj);
 			(*pContext->Env)->DeleteLocalRef( pContext->Env, jFullName);
 			(*pContext->Env)->DeleteLocalRef( pContext->Env, jHostTarget);
+			(*pContext->Env)->DeleteLocalRef( pContext->Env, txtObj);
 		}
 		else
 			ReportError( pContext->Env, pContext->ClientObj, pContext->JavaObj, errorCode);
@@ -821,6 +822,7 @@ static void DNSSD_API	ServiceQueryReply( DNSServiceRef sdRef _UNUSED, DNSService
 			(*pContext->Env)->CallVoidMethod( pContext->Env, pContext->ClientObj, pContext->Callback,
 								pContext->JavaObj, flags, interfaceIndex, jServiceName, rrtype, rrclass, rDataObj, ttl);
 			(*pContext->Env)->DeleteLocalRef( pContext->Env, jServiceName);
+			(*pContext->Env)->DeleteLocalRef( pContext->Env, rDataObj);
 		}
 		else
 			ReportError( pContext->Env, pContext->ClientObj, pContext->JavaObj, errorCode);

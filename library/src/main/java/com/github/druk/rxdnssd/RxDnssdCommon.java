@@ -190,13 +190,13 @@ abstract class RxDnssdCommon implements RxDnssd {
         });
     }
 
-    protected interface DNSSDServiceCreator<T> {
+    /* default */ interface DNSSDServiceCreator<T> {
         DNSSDService getService(Subscriber<? super T> subscriber) throws DNSSDException;
     }
 
     abstract protected <T> Observable<T> createObservable(DNSSDServiceCreator<T> creator);
 
-    static TXTRecord createTxtRecord(Map<String, String> records) {
+    private static TXTRecord createTxtRecord(Map<String, String> records) {
         TXTRecord txtRecord = new TXTRecord();
         for (Map.Entry<String, String> entry : records.entrySet()) {
             txtRecord.set(entry.getKey(), entry.getValue());
