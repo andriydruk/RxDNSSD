@@ -287,7 +287,7 @@ mDNSexport DNameListElem *AutoBrowseDomains;		// List created from those local-o
 mDNSlocal void FatalError(char *errmsg)
 	{
 	LogMsg("%s: %s", errmsg, dnssd_strerror(dnssd_errno));
-	*(long*)0 = 0;	// On OS X abort() doesn't generate a crash log, but writing to zero does
+	*(volatile long*)0 = 0;	// On OS X abort() doesn't generate a crash log, but writing to zero does
 	abort();		// On platforms where writing to zero doesn't generate an exception, abort instead
 	}
 
