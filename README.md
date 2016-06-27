@@ -7,7 +7,7 @@ My [explanation](http://andriydruk.com/post/mdnsresponder/) about why jmDNS, And
 
 ##Binaries
 ```groovy
-compile 'com.github.andriydruk:rxdnssd:0.8.0'
+compile 'com.github.andriydruk:rxdnssd:0.8.1'
 ```
 
 ##How to use
@@ -42,20 +42,22 @@ Subscription subscription = rxdnssd.register(bonjourService)
 
 #####Browse services example
 ```java
-Subscription subscription = rxdnssd.browse("_ftp._tcp" /*reqType*/, "." /*domain*/)
-	.compose(RxDnssd.resolve())
-    .compose(RxDnssd.queryRecords())
+Subscription subscription = rxDnssd.browse("_http._tcp", "local.")
+	.compose(rxDnssd.resolve())
+    .compose(rxDnssd.queryRecords())
+    .subscribeOn(Schedulers.io())
     .observeOn(AndroidSchedulers.mainThread())
-    .subscribe(bonjourService -> {
-		if (!bonjourService.isLost()){
-        	mAdapter.add(bonjourService);
-        } else {
-            mAdapter.remove(bonjourService);
+    .subscribe(new Action1<BonjourService>() {
+    	@Override
+        public void call(BonjourService bonjourService) {
+        	Log.d("TAG", bonjourService.toString());
         }
-        mAdapter.notifyDataSetChanged();
-     }, throwable -> {
-        Log.e("DNSSD", "Error: ", throwable);
-     });
+    }, new Action1<Throwable>() {
+        @Override
+        public void call(Throwable throwable) {
+        	Log.e("TAG", "error", throwable);
+        }
+	});
 ```
 
 License
