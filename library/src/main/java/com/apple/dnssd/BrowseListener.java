@@ -45,7 +45,7 @@ public interface BrowseListener extends BaseListener
 					The domain in which the service was discovered.
 	*/
 	void	serviceFound(DNSSDService browser, int flags, int ifIndex,
-                         String serviceName, String regType, String domain);
+                         byte[] serviceName, byte[] regType, byte[] domain);
 
 	/** Called to report services which have been deregistered.<P> 
 
@@ -68,6 +68,6 @@ public interface BrowseListener extends BaseListener
 					The domain in which the service was discovered.
 	*/
 	void	serviceLost(DNSSDService browser, int flags, int ifIndex,
-                        String serviceName, String regType, String domain);
+                        byte[] serviceName, byte[] regType, byte[] domain);
 }
 

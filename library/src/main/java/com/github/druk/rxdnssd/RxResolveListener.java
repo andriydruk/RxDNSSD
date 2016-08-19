@@ -26,6 +26,8 @@ import java.util.Map;
 
 import rx.Subscriber;
 
+import static com.github.druk.rxdnssd.RxDnssdCommon.UTF_8;
+
 class RxResolveListener implements com.apple.dnssd.ResolveListener {
     private final Subscriber<? super BonjourService> subscriber;
     private final BonjourService.Builder builder;
@@ -36,11 +38,11 @@ class RxResolveListener implements com.apple.dnssd.ResolveListener {
     }
 
     @Override
-    public void serviceResolved(DNSSDService resolver, int flags, int ifIndex, String fullName, String hostName, int port, TXTRecord txtRecord) {
+    public void serviceResolved(DNSSDService resolver, int flags, int ifIndex, byte[] fullName, byte[] hostName, int port, TXTRecord txtRecord) {
         if (subscriber.isUnsubscribed()) {
             return;
         }
-        BonjourService bonjourService = builder.port(port).hostname(hostName).dnsRecords(parseTXTRecords(txtRecord)).build();
+        BonjourService bonjourService = builder.port(port).hostname(new String(hostName, UTF_8)).dnsRecords(parseTXTRecords(txtRecord)).build();
         subscriber.onNext(bonjourService);
     }
 

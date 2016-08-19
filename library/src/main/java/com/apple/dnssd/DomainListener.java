@@ -39,7 +39,7 @@ public interface DomainListener extends BaseListener
 		@param	domain
 					The name of the domain.
 	*/
-	void	domainFound(DNSSDService domainEnum, int flags, int ifIndex, String domain);
+	void	domainFound(DNSSDService domainEnum, int flags, int ifIndex, byte[] domain);
 
 	/** Called to report that a domain has disappeared.<P> 
 
@@ -55,6 +55,6 @@ public interface DomainListener extends BaseListener
 		@param	domain
 					The name of the domain.
 	*/
-	void	domainLost(DNSSDService domainEnum, int flags, int ifIndex, String domain);
+	void	domainLost(DNSSDService domainEnum, int flags, int ifIndex, byte[] domain);
 }
 

@@ -617,7 +617,7 @@ class	AppleDNSSD extends DNSSD
 
 	protected String			_getNameForIfIndex( int ifIndex)
 	{
-		return GetNameForIfIndex( ifIndex);
+		return new String(GetNameForIfIndex( ifIndex));
 	}
 
 	protected int				_getIfIndexForName( String ifName)
@@ -631,7 +631,7 @@ class	AppleDNSSD extends DNSSD
 	protected native void	ReconfirmRecord( int flags, int ifIndex, String fullName, int rrtype,
 										int rrclass, byte[] rdata);
 
-	protected native String	GetNameForIfIndex( int ifIndex);
+	protected native byte[]	GetNameForIfIndex( int ifIndex);
 
 	protected native int	GetIfIndexForName( String ifName);
 

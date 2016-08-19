@@ -19,6 +19,8 @@ import com.apple.dnssd.DNSSDService;
 
 import rx.Subscriber;
 
+import static com.github.druk.rxdnssd.RxDnssdCommon.UTF_8;
+
 class RxBrowseListener implements com.apple.dnssd.BrowseListener {
     private final Subscriber<? super BonjourService> subscriber;
 
@@ -27,20 +29,22 @@ class RxBrowseListener implements com.apple.dnssd.BrowseListener {
     }
 
     @Override
-    public void serviceFound(DNSSDService browser, int flags, int ifIndex, String serviceName, String regType, String domain) {
+    public void serviceFound(DNSSDService browser, int flags, int ifIndex, byte[] serviceName, byte[] regType, byte[] domain) {
         if (subscriber.isUnsubscribed()) {
             return;
         }
-        BonjourService service = new BonjourService.Builder(flags, ifIndex, serviceName, regType, domain).build();
+        BonjourService service = new BonjourService.Builder(flags, ifIndex, new String(serviceName, UTF_8), new String(regType, UTF_8),
+                new String(domain, UTF_8)).build();
         subscriber.onNext(service);
     }
 
     @Override
-    public void serviceLost(DNSSDService browser, int flags, int ifIndex, String serviceName, String regType, String domain) {
+    public void serviceLost(DNSSDService browser, int flags, int ifIndex, byte[] serviceName, byte[] regType, byte[] domain) {
         if (subscriber.isUnsubscribed()) {
             return;
         }
-        BonjourService service = new BonjourService.Builder(flags | BonjourService.LOST, ifIndex, serviceName, regType, domain).build();
+        BonjourService service = new BonjourService.Builder(flags | BonjourService.LOST, ifIndex, new String(serviceName, UTF_8),
+                new String(regType, UTF_8), new String(domain, UTF_8)).build();
         subscriber.onNext(service);
     }
 

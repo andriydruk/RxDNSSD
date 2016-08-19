@@ -20,6 +20,8 @@ import com.apple.dnssd.DNSSDService;
 
 import rx.Subscriber;
 
+import static com.github.druk.rxdnssd.RxDnssdCommon.UTF_8;
+
 class RxRegisterListener implements com.apple.dnssd.RegisterListener {
     private final Subscriber<? super BonjourService> subscriber;
 
@@ -28,11 +30,12 @@ class RxRegisterListener implements com.apple.dnssd.RegisterListener {
     }
 
     @Override
-    public void serviceRegistered(DNSSDRegistration registration, int flags, String serviceName, String regType, String domain) {
+    public void serviceRegistered(DNSSDRegistration registration, int flags, byte[] serviceName, byte[] regType, byte[] domain) {
         if (subscriber.isUnsubscribed()) {
             return;
         }
-        BonjourService service = new BonjourService.Builder(flags, 0, serviceName, regType, domain).build();
+        BonjourService service = new BonjourService.Builder(flags, 0, new String(serviceName, UTF_8), new String(regType, UTF_8),
+                new String(domain, UTF_8)).build();
         subscriber.onNext(service);
     }
 

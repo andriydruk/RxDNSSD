@@ -1,5 +1,3 @@
-import org.apache.tools.ant.taskdefs.condition.Os
-
 apply plugin: 'com.android.library'
 apply plugin: 'com.novoda.bintray-release'
 
@@ -8,20 +6,14 @@ repositories {
 }
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    compileSdkVersion 24
+    buildToolsVersion "24.0.0"
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 23
+        targetSdkVersion 24
         versionCode 1
         versionName "1.0"
-
-        sourceSets.main {
-            jni.srcDirs = [] //disable auto ndk-build
-            jniLibs.srcDir 'src/main/libs'
-
-        }
     }
 
     buildTypes {
@@ -34,12 +26,19 @@ android {
     testOptions {
         unitTests.returnDefaultValues = true
     }
+
+
+    externalNativeBuild {
+        ndkBuild {
+            path "src/main/jni/Android.mk"
+        }
+    }
 }
 
 dependencies {
-    compile 'io.reactivex:rxandroid:1.1.0'
-    compile 'io.reactivex:rxjava:1.1.3'
-    compile 'com.android.support:support-annotations:23.3.0'
+    compile 'io.reactivex:rxandroid:1.2.0'
+    compile 'io.reactivex:rxjava:1.1.9'
+    compile 'com.android.support:support-annotations:24.2.0'
     compile 'com.google.code.findbugs:annotations:2.0.1'
 
     testCompile 'junit:junit:4.12'
@@ -57,7 +56,7 @@ dependencies {
 publish {
     groupId = 'com.github.andriydruk'
     artifactId = 'rxdnssd'
-    publishVersion = '0.8.1'
+    publishVersion = '0.8.2'
     desc = 'Android library which is Rx wrapper for Apple DNSSD Java API'
     licences = ['Apache-2.0']
     website = 'https://github.com/andriydruk/RxDNSSD'
@@ -111,51 +110,6 @@ task checkstyle(type: Checkstyle) {
     }
     classpath = files()
 }
-
-def getNdkCommand() {
-    def ndk_command_path
-    def local_properties = project.rootProject.file('local.properties')
-    if (local_properties.exists()) {
-        Properties properties = new Properties()
-        properties.load(local_properties.newDataInputStream())
-        ndk_command_path = properties.getProperty('ndk.dir')
-    }
-
-    def ndk_command
-    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-        ndk_command = 'ndk-build.cmd'
-    } else {
-        ndk_command = 'ndk-build'
-    }
-
-    def ndk_full_command
-    if (ndk_command_path) {
-        ndk_full_command = sprintf("%s%s%s", ndk_command_path, File.separator, ndk_command)
-    } else {
-        ndk_full_command = ndk_command
-    }
-
-    return ndk_full_command
-}
-
-task ndkBuild(type: Exec) {
-    commandLine getNdkCommand(),
-        'NDK_LIBS_OUT=libs',
-        '-C', file('src/main').absolutePath
-}
-
-tasks.withType(JavaCompile) {
-    compileTask -> compileTask.dependsOn ndkBuild
-}
-
-task cleanNdkBuild(type: Exec) {
-    commandLine getNdkCommand(),
-        'NDK_LIBS_OUT=libs',
-        '-C', file('src/main').absolutePath,
-        'clean'
-}
-
-clean.dependsOn 'cleanNdkBuild'
 
 check.doLast {
     project.tasks.getByName("pmd").execute()

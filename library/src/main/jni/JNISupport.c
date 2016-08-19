@@ -357,9 +357,12 @@ static void DNSSD_API	ServiceBrowseReply( DNSServiceRef sdRef _UNUSED, DNSServic
 	{
 		if ( errorCode == kDNSServiceErr_NoError)
 		{
-			jstring jServiceName = (*pContext->Env)->NewStringUTF( pContext->Env, serviceName);
-			jstring jRegType = (*pContext->Env)->NewStringUTF( pContext->Env, regtype);
-			jstring jReplyDomain = (*pContext->Env)->NewStringUTF( pContext->Env, replyDomain);
+			jbyteArray jServiceName = (*pContext->Env)->NewByteArray(pContext->Env, (jsize)strlen(serviceName));
+			(*pContext->Env)->SetByteArrayRegion (pContext->Env, jServiceName, 0, (jsize)strlen(serviceName), (const jbyte *) serviceName);
+			jbyteArray jRegType = (*pContext->Env)->NewByteArray(pContext->Env, (jsize)strlen(regtype));
+			(*pContext->Env)->SetByteArrayRegion (pContext->Env, jRegType, 0, (jsize)strlen(regtype), (const jbyte *) regtype);
+			jbyteArray jReplyDomain = (*pContext->Env)->NewByteArray(pContext->Env, (jsize)strlen(replyDomain));
+			(*pContext->Env)->SetByteArrayRegion (pContext->Env, jReplyDomain, 0, (jsize)strlen(replyDomain), (const jbyte *) replyDomain);
 			(*pContext->Env)->CallVoidMethod( pContext->Env, pContext->ClientObj,
 								( flags & kDNSServiceFlagsAdd) != 0 ? pContext->Callback : pContext->Callback2,
 								pContext->JavaObj, flags, interfaceIndex, jServiceName, jRegType, jReplyDomain);
@@ -384,7 +387,7 @@ JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleBrowser_CreateBrowser( JNIEnv *
 
 	if ( contextField != 0)
 		pContext = NewContext( pEnv, pThis, "serviceFound",
-								"(Lcom/apple/dnssd/DNSSDService;IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+								"(Lcom/apple/dnssd/DNSSDService;II[B[B[B)V");
 	else
 		err = kDNSServiceErr_BadParam;
 
@@ -395,7 +398,7 @@ JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleBrowser_CreateBrowser( JNIEnv *
 
 		pContext->Callback2 = (*pEnv)->GetMethodID( pEnv,
 								(*pEnv)->GetObjectClass( pEnv, pContext->ClientObj),
-								"serviceLost", "(Lcom/apple/dnssd/DNSSDService;IILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+								"serviceLost", "(Lcom/apple/dnssd/DNSSDService;II[B[B[B)V");
 
 		err = DNSServiceBrowse( &pContext->ServiceRef, flags, ifIndex, regStr, domainStr, ServiceBrowseReply, pContext);
 		if ( err == kDNSServiceErr_NoError)
@@ -447,8 +450,10 @@ static void DNSSD_API	ServiceResolveReply( DNSServiceRef sdRef _UNUSED, DNSServi
 			txtObj = (*pContext->Env)->NewObject( pContext->Env, txtCls, txtCtor, txtBytes);
 			(*pContext->Env)->DeleteLocalRef( pContext->Env, txtBytes);
 
-			jstring jFullName = (*pContext->Env)->NewStringUTF( pContext->Env, fullname);
-			jstring jHostTarget = (*pContext->Env)->NewStringUTF( pContext->Env, hosttarget);
+			jbyteArray jFullName = (*pContext->Env)->NewByteArray(pContext->Env, (jsize)strlen(fullname));
+			(*pContext->Env)->SetByteArrayRegion (pContext->Env, jFullName, 0, (jsize)strlen(fullname), (const jbyte *) fullname);
+			jbyteArray jHostTarget = (*pContext->Env)->NewByteArray(pContext->Env, (jsize)strlen(hosttarget));
+			(*pContext->Env)->SetByteArrayRegion (pContext->Env, jHostTarget, 0, (jsize)strlen(hosttarget), (const jbyte *) hosttarget);
 			(*pContext->Env)->CallVoidMethod( pContext->Env, pContext->ClientObj, pContext->Callback,
 								pContext->JavaObj, flags, interfaceIndex, jFullName, jHostTarget, port, txtObj);
 			(*pContext->Env)->DeleteLocalRef( pContext->Env, jFullName);
@@ -472,7 +477,7 @@ JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleResolver_CreateResolver( JNIEnv
 
 	if ( contextField != 0)
 		pContext = NewContext( pEnv, pThis, "serviceResolved",
-								"(Lcom/apple/dnssd/DNSSDService;IILjava/lang/String;Ljava/lang/String;ILcom/apple/dnssd/TXTRecord;)V");
+								"(Lcom/apple/dnssd/DNSSDService;II[B[BILcom/apple/dnssd/TXTRecord;)V");
 	else
 		err = kDNSServiceErr_BadParam;
 
@@ -512,9 +517,12 @@ static void DNSSD_API	ServiceRegisterReply( DNSServiceRef sdRef _UNUSED, DNSServ
 	{
 		if ( errorCode == kDNSServiceErr_NoError)
 		{
-			jstring jServiceName = (*pContext->Env)->NewStringUTF( pContext->Env, serviceName);
-			jstring jRegType = (*pContext->Env)->NewStringUTF( pContext->Env, regType);
-			jstring jDomain = (*pContext->Env)->NewStringUTF( pContext->Env, domain);
+			jbyteArray jServiceName = (*pContext->Env)->NewByteArray(pContext->Env, (jsize)strlen(serviceName));
+			(*pContext->Env)->SetByteArrayRegion (pContext->Env, jServiceName, 0, (jsize)strlen(serviceName), (const jbyte *) serviceName);
+			jbyteArray jRegType = (*pContext->Env)->NewByteArray(pContext->Env, (jsize)strlen(regType));
+			(*pContext->Env)->SetByteArrayRegion (pContext->Env, jRegType, 0, (jsize)strlen(regType), (const jbyte *) regType);
+			jbyteArray jDomain = (*pContext->Env)->NewByteArray(pContext->Env, (jsize)strlen(domain));
+			(*pContext->Env)->SetByteArrayRegion (pContext->Env, jDomain, 0, (jsize)strlen(domain), (const jbyte *) domain);
 
 			(*pContext->Env)->CallVoidMethod( pContext->Env, pContext->ClientObj, pContext->Callback,
 								pContext->JavaObj, flags,jServiceName, jRegType, jDomain);
@@ -544,7 +552,7 @@ JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleRegistration_BeginRegister( JNI
 
 	if ( contextField != 0)
 		pContext = NewContext( pEnv, pThis, "serviceRegistered",
-								"(Lcom/apple/dnssd/DNSSDRegistration;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+								"(Lcom/apple/dnssd/DNSSDRegistration;I[B[B[B)V");
 	else
 		err = kDNSServiceErr_BadParam;
 
@@ -818,7 +826,8 @@ static void DNSSD_API	ServiceQueryReply( DNSServiceRef sdRef _UNUSED, DNSService
 			memcpy( pBytes, rdata, rdlen);
 			(*pContext->Env)->ReleaseByteArrayElements( pContext->Env, rDataObj, pBytes, JNI_COMMIT);
 
-			jstring jServiceName = (*pContext->Env)->NewStringUTF( pContext->Env, serviceName);
+			jbyteArray jServiceName = (*pContext->Env)->NewByteArray(pContext->Env, (jsize)strlen(serviceName));
+			(*pContext->Env)->SetByteArrayRegion (pContext->Env, jServiceName, 0, (jsize)strlen(serviceName), (const jbyte *) serviceName);
 			(*pContext->Env)->CallVoidMethod( pContext->Env, pContext->ClientObj, pContext->Callback,
 								pContext->JavaObj, flags, interfaceIndex, jServiceName, rrtype, rrclass, rDataObj, ttl);
 			(*pContext->Env)->DeleteLocalRef( pContext->Env, jServiceName);
@@ -840,7 +849,7 @@ JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleQuery_CreateQuery( JNIEnv *pEnv
 
 	if ( contextField != 0)
 		pContext = NewContext( pEnv, pThis, "queryAnswered",
-								"(Lcom/apple/dnssd/DNSSDService;IILjava/lang/String;II[BI)V");
+								"(Lcom/apple/dnssd/DNSSDService;II[BII[BI)V");
 	else
 		err = kDNSServiceErr_BadParam;
 
@@ -875,7 +884,8 @@ static void DNSSD_API	DomainEnumReply( DNSServiceRef sdRef _UNUSED, DNSServiceFl
 	{
 		if ( errorCode == kDNSServiceErr_NoError)
 		{
-			jstring jReplyDomain = (*pContext->Env)->NewStringUTF( pContext->Env, replyDomain);
+			jbyteArray jReplyDomain = (*pContext->Env)->NewByteArray(pContext->Env, (jsize)strlen(replyDomain));
+			(*pContext->Env)->SetByteArrayRegion (pContext->Env, jReplyDomain, 0, (jsize)strlen(replyDomain), (const jbyte *) replyDomain);
 			(*pContext->Env)->CallVoidMethod( pContext->Env, pContext->ClientObj,
 								( flags & kDNSServiceFlagsAdd) != 0 ? pContext->Callback : pContext->Callback2,
 								pContext->JavaObj, flags, interfaceIndex, jReplyDomain);
@@ -897,7 +907,7 @@ JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleDomainEnum_BeginEnum( JNIEnv *p
 
 	if ( contextField != 0)
 		pContext = NewContext( pEnv, pThis, "domainFound",
-								"(Lcom/apple/dnssd/DNSSDService;IILjava/lang/String;)V");
+								"(Lcom/apple/dnssd/DNSSDService;II[B)V");
 	else
 		err = kDNSServiceErr_BadParam;
 
@@ -905,7 +915,7 @@ JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleDomainEnum_BeginEnum( JNIEnv *p
 	{
 		pContext->Callback2 = (*pEnv)->GetMethodID( pEnv,
 								(*pEnv)->GetObjectClass( pEnv, pContext->ClientObj),
-								"domainLost", "(Lcom/apple/dnssd/DNSSDService;IILjava/lang/String;)V");
+								"domainLost", "(Lcom/apple/dnssd/DNSSDService;II[B)V");
 
 		err = DNSServiceEnumerateDomains( &pContext->ServiceRef, flags, ifIndex,
 											DomainEnumReply, pContext);
@@ -977,7 +987,9 @@ JNIEXPORT jstring JNICALL Java_com_apple_dnssd_AppleDNSSD_GetNameForIfIndex( JNI
 	else if (ifIndex != (jint) kDNSServiceInterfaceIndexLocalOnly)
 		p = if_indextoname( ifIndex, nameBuff );
 
-	return (*pEnv)->NewStringUTF( pEnv, p);
+	jbyteArray jP = (*pEnv)->NewByteArray(pEnv, (jsize)strlen(p));
+	(*pEnv)->SetByteArrayRegion (pEnv, jP, 0, (jsize)strlen(p), (const jbyte *) p);
+	return jP;
 }
 
 

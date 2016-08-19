@@ -7,6 +7,7 @@ import com.apple.dnssd.TXTRecord;
 
 import android.support.annotation.NonNull;
 
+import java.nio.charset.Charset;
 import java.util.Map;
 
 import rx.Observable;
@@ -14,6 +15,8 @@ import rx.Subscriber;
 import rx.functions.Func1;
 
 abstract class RxDnssdCommon implements RxDnssd {
+
+    public static final Charset UTF_8 = Charset.forName("UTF-8");
 
     RxDnssdCommon(String lib) {
         DNSSD.init(lib);

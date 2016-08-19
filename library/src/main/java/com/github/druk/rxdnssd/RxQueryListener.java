@@ -34,7 +34,7 @@ class RxQueryListener implements com.apple.dnssd.QueryListener {
     }
 
     @Override
-    public void queryAnswered(DNSSDService query, int flags, int ifIndex, String fullName, int rrtype, int rrclass, byte[] rdata, int ttl) {
+    public void queryAnswered(DNSSDService query, int flags, int ifIndex, byte[] fullName, int rrtype, int rrclass, byte[] rdata, int ttl) {
         if (subscriber.isUnsubscribed()) {
             return;
         }

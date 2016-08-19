@@ -50,7 +50,7 @@ public interface ResolveListener extends BaseListener
 		@param	txtRecord
 					The service's primary txt record.
 	*/
-	void	serviceResolved(DNSSDService resolver, int flags, int ifIndex, String fullName,
-                            String hostName, int port, TXTRecord txtRecord);
+	void	serviceResolved(DNSSDService resolver, int flags, int ifIndex, byte[] fullName,
+                            byte[] hostName, int port, TXTRecord txtRecord);
 }
 

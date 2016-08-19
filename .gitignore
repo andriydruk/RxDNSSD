@@ -44,3 +44,4 @@ keys/
 
 # Native libaries
 *.so
+.externalNativeBuild

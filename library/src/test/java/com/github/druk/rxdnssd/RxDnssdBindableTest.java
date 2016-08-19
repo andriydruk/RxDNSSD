@@ -33,7 +33,9 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.os.Build;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -63,19 +65,25 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({DNSSD.class, RxQueryListener.class, Inet4Address.class, Inet6Address.class})
 @SuppressStaticInitializationFor("com.apple.dnssd.DNSSD")
+@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
 public class RxDnssdBindableTest {
 
     static final int FLAGS = 0;
     static final int IF_INDEX = 0;
-    static final String SERVICE_NAME = "serviceName";
-    static final String REG_TYPE = "regType";
-    static final String DOMAIN = "domain";
+    static final String SERVICE_NAME_STRING = "serviceName";
+    static final String REG_TYPE_STRING = "regType";
+    static final String DOMAIN_STRING = "domain";
     static final int PORT = 443;
-    static final String HOSTNAME = "hostname";
+    static final String HOSTNAME_STRING = "hostname";
 
-    static BonjourService bonjourService = new BonjourService.Builder(FLAGS, IF_INDEX, SERVICE_NAME, REG_TYPE, DOMAIN).build();
-    static BonjourService lostBonjourService = new BonjourService.Builder(BonjourService.LOST, IF_INDEX, SERVICE_NAME, REG_TYPE, DOMAIN).build();
-    static BonjourService resolvedBonjourService = new BonjourService.Builder(bonjourService).port(PORT).hostname(HOSTNAME)
+    static final byte[] SERVICE_NAME = SERVICE_NAME_STRING.getBytes();
+    static final byte[] REG_TYPE = REG_TYPE_STRING.getBytes();
+    static final byte[] DOMAIN = DOMAIN_STRING.getBytes();
+    static final byte[] HOSTNAME = HOSTNAME_STRING.getBytes();
+
+    static BonjourService bonjourService = new BonjourService.Builder(FLAGS, IF_INDEX, SERVICE_NAME_STRING, REG_TYPE_STRING, DOMAIN_STRING).build();
+    static BonjourService lostBonjourService = new BonjourService.Builder(BonjourService.LOST, IF_INDEX, SERVICE_NAME_STRING, REG_TYPE_STRING, DOMAIN_STRING).build();
+    static BonjourService resolvedBonjourService = new BonjourService.Builder(bonjourService).port(PORT).hostname(HOSTNAME_STRING)
             .dnsRecords(new HashMap<String, String>(0)).build();
 
     static Inet4Address inet4Address = PowerMockito.mock(Inet4Address.class);
@@ -112,14 +120,14 @@ public class RxDnssdBindableTest {
     @Test
     public void test_browse_unsubscribe() throws DNSSDException {
         PowerMockito.when(DNSSD.browse(anyInt(), anyInt(), anyString(), anyString(), any(BrowseListener.class))).thenReturn(mockService);
-        mRxDnssd.browse(REG_TYPE, DOMAIN).subscribe(new TestSubscriber<>()).unsubscribe();
+        mRxDnssd.browse(REG_TYPE_STRING, DOMAIN_STRING).subscribe(new TestSubscriber<>()).unsubscribe();
         verify(mockService).stop();
     }
 
     @Test
     public void test_browse_start_daemon() throws DNSSDException {
         PowerMockito.when(DNSSD.browse(anyInt(), anyInt(), anyString(), anyString(), any(BrowseListener.class))).thenReturn(mockService);
-        mRxDnssd.browse(REG_TYPE, DOMAIN).subscribe(new TestSubscriber<>());
+        mRxDnssd.browse(REG_TYPE_STRING, DOMAIN_STRING).subscribe(new TestSubscriber<>());
         verify(appContext).getSystemService(Context.NSD_SERVICE);
     }
 
@@ -127,7 +135,7 @@ public class RxDnssdBindableTest {
     public void test_browse_found() throws Exception {
         PowerMockito.when(DNSSD.browse(anyInt(), anyInt(), anyString(), anyString(), any(BrowseListener.class))).thenReturn(mockService);
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        mRxDnssd.browse(REG_TYPE, DOMAIN).subscribe(testSubscriber);
+        mRxDnssd.browse(REG_TYPE_STRING, DOMAIN_STRING).subscribe(testSubscriber);
 
         ArgumentCaptor<BrowseListener> propertiesCaptor = ArgumentCaptor.forClass(BrowseListener.class);
         PowerMockito.verifyStatic();
@@ -140,7 +148,7 @@ public class RxDnssdBindableTest {
     public void test_browse_found_after_unsubscribe() throws Exception {
         PowerMockito.when(DNSSD.browse(anyInt(), anyInt(), anyString(), anyString(), any(BrowseListener.class))).thenReturn(mockService);
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        mRxDnssd.browse(REG_TYPE, DOMAIN).subscribe(testSubscriber).unsubscribe();
+        mRxDnssd.browse(REG_TYPE_STRING, DOMAIN_STRING).subscribe(testSubscriber).unsubscribe();
 
         ArgumentCaptor<BrowseListener> propertiesCaptor = ArgumentCaptor.forClass(BrowseListener.class);
         PowerMockito.verifyStatic();
@@ -153,7 +161,7 @@ public class RxDnssdBindableTest {
     public void test_browse_lost() throws Exception {
         PowerMockito.when(DNSSD.browse(anyInt(), anyInt(), anyString(), anyString(), any(BrowseListener.class))).thenReturn(mockService);
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        mRxDnssd.browse(REG_TYPE, DOMAIN).subscribe(testSubscriber);
+        mRxDnssd.browse(REG_TYPE_STRING, DOMAIN_STRING).subscribe(testSubscriber);
 
         ArgumentCaptor<BrowseListener> propertiesCaptor = ArgumentCaptor.forClass(BrowseListener.class);
         PowerMockito.verifyStatic();
@@ -166,7 +174,7 @@ public class RxDnssdBindableTest {
     public void test_browse_lost_after_unsubscribe() throws Exception {
         PowerMockito.when(DNSSD.browse(anyInt(), anyInt(), anyString(), anyString(), any(BrowseListener.class))).thenReturn(mockService);
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        mRxDnssd.browse(REG_TYPE, DOMAIN).subscribe(testSubscriber).unsubscribe();
+        mRxDnssd.browse(REG_TYPE_STRING, DOMAIN_STRING).subscribe(testSubscriber).unsubscribe();
 
         ArgumentCaptor<BrowseListener> propertiesCaptor = ArgumentCaptor.forClass(BrowseListener.class);
         PowerMockito.verifyStatic();
@@ -179,7 +187,7 @@ public class RxDnssdBindableTest {
     public void test_browse_operation_failed() throws Exception {
         PowerMockito.when(DNSSD.browse(anyInt(), anyInt(), anyString(), anyString(), any(BrowseListener.class))).thenReturn(mockService);
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        mRxDnssd.browse(REG_TYPE, DOMAIN).subscribe(testSubscriber);
+        mRxDnssd.browse(REG_TYPE_STRING, DOMAIN_STRING).subscribe(testSubscriber);
 
         ArgumentCaptor<BrowseListener> propertiesCaptor = ArgumentCaptor.forClass(BrowseListener.class);
         PowerMockito.verifyStatic();
@@ -194,7 +202,7 @@ public class RxDnssdBindableTest {
         mockStatic(DNSSD.class);
         PowerMockito.when(DNSSD.browse(anyInt(), anyInt(), anyString(), anyString(), any(BrowseListener.class))).thenReturn(mockService);
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
-        mRxDnssd.browse(REG_TYPE, DOMAIN).subscribe(testSubscriber).unsubscribe();
+        mRxDnssd.browse(REG_TYPE_STRING, DOMAIN_STRING).subscribe(testSubscriber).unsubscribe();
 
         ArgumentCaptor<BrowseListener> propertiesCaptor = ArgumentCaptor.forClass(BrowseListener.class);
         PowerMockito.verifyStatic();

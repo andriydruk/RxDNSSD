@@ -53,7 +53,7 @@ public interface QueryListener extends BaseListener
 		@param	ttl
 					The resource record's time to live, in seconds.
 	*/
-	void	queryAnswered(DNSSDService query, int flags, int ifIndex, String fullName,
+	void	queryAnswered(DNSSDService query, int flags, int ifIndex, byte[] fullName,
                           int rrtype, int rrclass, byte[] rdata, int ttl);
 }
 

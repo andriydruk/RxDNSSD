@@ -43,7 +43,7 @@ public interface RegisterListener extends BaseListener
 					specify a domain in DNSSD.register(), this is the default domain
 					on which the service was registered.
 	*/
-	void	serviceRegistered(DNSSDRegistration registration, int flags, String serviceName,
-                              String regType, String domain);
+	void	serviceRegistered(DNSSDRegistration registration, int flags, byte[] serviceName,
+                              byte[] regType, byte[] domain);
 }
 
