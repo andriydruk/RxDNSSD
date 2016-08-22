@@ -30,9 +30,7 @@ import rx.functions.Action0;
 import rx.functions.Action1;
 
 /**
- * RxDnssdBindable is implementation of RxDnssd with system's daemon
- *
- * {@see com.apple.dnssd.DNSSD}
+ * RxDnssdBindable is implementation of RxDnssd with system's daemon {@link com.apple.dnssd.DNSSD}
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
 public class RxDnssdBindable extends RxDnssdCommon {

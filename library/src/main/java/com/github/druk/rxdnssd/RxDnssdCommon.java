@@ -32,7 +32,7 @@ abstract class RxDnssdCommon implements RxDnssd {
      *                Most applications will not specify a domain, instead browsing on the
      *                default domain(s).
      *                <P>
-     * @return A {@link Observable <BonjourService>} that represents the active browse operation.
+     * @return A {@link Observable} that represents the active browse operation.
      */
     @NonNull
     @Override
@@ -48,7 +48,7 @@ abstract class RxDnssdCommon implements RxDnssd {
     }
 
     /**
-     * Resolve a {@link Observable<BonjourService>} to a target host name, port number, and txt record.<P>
+     * Resolve a {@link Observable} to a target host name, port number, and txt record.<P>
      *
      * Note: Applications should NOT use resolve() solely for txt record monitoring - use
      * queryRecord() instead, as it is more efficient for this task.<P>
@@ -57,7 +57,7 @@ abstract class RxDnssdCommon implements RxDnssd {
      * a single TXT record (the TXT record may be empty.)  To resolve non-standard services with
      * multiple SRV or TXT records, use queryRecord().<P>
      *
-     * @return A {@link Observable.Transformer<BonjourService, BonjourService>} that transform not resolved object to resolved.
+     * @return A {@link Observable.Transformer} that transform not resolved object to resolved.
      */
     @NonNull
     @Override
@@ -87,7 +87,7 @@ abstract class RxDnssdCommon implements RxDnssd {
     /**
      * Query ipv4 and ipv6 addresses
      *
-     * @return A {@link Observable.Transformer<BonjourService, BonjourService>} that transform object without addresses to object with addresses.
+     * @return A {@link Observable.Transformer} that transform object without addresses to object with addresses.
      */
     @NonNull
     @Override
@@ -124,7 +124,7 @@ abstract class RxDnssdCommon implements RxDnssd {
     /**
      * Query ipv4 address
      *
-     * @return A {@link Observable.Transformer<BonjourService, BonjourService>} that transform object without address to object with address.
+     * @return A {@link Observable.Transformer} that transform object without address to object with address.
      */
     @NonNull
     @Override
@@ -154,7 +154,7 @@ abstract class RxDnssdCommon implements RxDnssd {
     /**
      * Query ipv6 address
      *
-     * @return A {@link Observable.Transformer<BonjourService, BonjourService>} that transform object without address to object with address.
+     * @return A {@link Observable.Transformer} that transform object without address to object with address.
      */
     @NonNull
     @Override

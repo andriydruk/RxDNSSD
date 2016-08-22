@@ -49,16 +49,13 @@ public interface	DNSSDRecordRegistrar extends DNSSDService
 		@param	ttl
 					The time to live of the resource record, in seconds. Pass 0 to use a default value.
 		<P>
-		@param	listener
-					This object will get called when the service is registered.
-		<P>
 		@return		A {@link DNSSDService} that can be used to abort the record registration.
 
 		@throws SecurityException If a security manager is present and denies <tt>RuntimePermission("getDNSSDInstance")</tt>.
 		@see    RuntimePermission
 	*/
 	public DNSRecord	registerRecord(int flags, int ifIndex, String fullname, int rrtype,
-                                       int rrclass, byte[] rdata, int ttl)
+                                       int rrclass, byte[] rData, int ttl)
 	throws DNSSDException;
 } 
 

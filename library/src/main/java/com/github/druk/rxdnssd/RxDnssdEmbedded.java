@@ -27,9 +27,7 @@ import rx.functions.Action0;
 import rx.functions.Action1;
 
 /**
- * RxDnssd is implementation of RxDnssd with embedded DNS-SD
- *
- * {@see com.apple.dnssd.DNSSD}
+ * RxDnssd is implementation of RxDnssd with embedded DNS-SD  {@link com.apple.dnssd.DNSSD}
  */
 public class RxDnssdEmbedded extends RxDnssdCommon {
 
