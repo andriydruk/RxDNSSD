@@ -7,7 +7,7 @@ My [explanation](http://andriydruk.com/post/mdnsresponder/) about why jmDNS, And
 
 ##Binaries
 ```groovy
-compile 'com.github.andriydruk:rxdnssd:0.8.1'
+compile 'com.github.andriydruk:rxdnssd:0.8.2'
 ```
 
 ##How to use
