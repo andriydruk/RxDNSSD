@@ -86,7 +86,7 @@ struct ifi_info *get_ifi_info_linuxv6(int family, int doaliases)
 	FILE *fp = NULL;
 	char addr[8][5];
 	int flags, myflags, index, plen, scope;
-	char ifname[9], lastname[IFNAMSIZ];
+	char ifname[IFNAMSIZ], lastname[IFNAMSIZ];
 	char addr6[32+7+1]; /* don't forget the seven ':' */
 	struct addrinfo hints, *res0;
 	struct sockaddr_in6 *sin6;
@@ -106,7 +106,7 @@ struct ifi_info *get_ifi_info_linuxv6(int family, int doaliases)
 			goto gotError;
 		}
 		while (fscanf(fp,
-					  "%4s%4s%4s%4s%4s%4s%4s%4s %02x %02x %02x %02x %8s\n",
+					  "%4s%4s%4s%4s%4s%4s%4s%4s %02x %02x %02x %02x %15s\n",
 					  addr[0],addr[1],addr[2],addr[3],
 					  addr[4],addr[5],addr[6],addr[7],
 					  &index, &plen, &scope, &flags, ifname) != EOF) {
