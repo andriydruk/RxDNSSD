@@ -7,7 +7,12 @@ My [explanation](http://andriydruk.com/post/mdnsresponder/) about why jmDNS, And
 
 ##Binaries
 ```groovy
-compile 'com.github.andriydruk:rxdnssd:0.8.2'
+compile 'com.github.andriydruk:rxdnssd:0.8.3'
+```
+* It's built with Andorid NDK r13b for all platforms (2.18 MB). If you prefer another NDK version or subset of platforms, please build it from source with command:
+
+```groovy
+./gradlew clean build
 ```
 
 ##How to use
