@@ -7,7 +7,7 @@ repositories {
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.0"
+    buildToolsVersion "25.0.2"
 
     defaultConfig {
         minSdkVersion 14
@@ -38,7 +38,7 @@ android {
 dependencies {
     compile 'io.reactivex:rxandroid:1.2.0'
     compile 'io.reactivex:rxjava:1.1.9'
-    compile 'com.android.support:support-annotations:25.0.0'
+    compile 'com.android.support:support-annotations:25.2.0'
     compile 'com.google.code.findbugs:annotations:2.0.1'
 
     testCompile 'junit:junit:4.12'

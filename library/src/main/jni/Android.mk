@@ -5,8 +5,6 @@ commonSources := \
     mdnsresponder/mDNSShared/dnssd_clientstub.c \
     mdnsresponder/mDNSShared/dnssd_ipc.c
 
-commonLibs := libcutils liblog
-
 commonFlags := \
     -O2 -g \
     -fno-strict-aliasing \
@@ -66,9 +64,6 @@ LOCAL_CFLAGS += $(commonFlags) \
                 -DAUTO_CALLBACKS=1 \
                 -DEMBEDDED
 
-LOCAL_MODULE_TAGS := optional
-LOCAL_SYSTEM_SHARED_LIBRARIES := libc libcutils
-LOCAL_SHARED_LIBRARIES := $(commonLibs)
 LOCAL_EXPORT_C_INCLUDE_DIRS := external/mdnsresponder/mDNSShared
 
 ifeq ($(TARGET_BUILD_TYPE),debug)
@@ -87,9 +82,6 @@ LOCAL_C_INCLUDES := $(LOCAL_PATH)/mdnsresponder/mDNSPosix \
 LOCAL_SRC_FILES := $(commonSources) \
                     JNISupport.c
 LOCAL_MODULE := jdns_sd
-LOCAL_MODULE_TAGS := optional
 LOCAL_CFLAGS := $(commonFlags)
-LOCAL_SYSTEM_SHARED_LIBRARIES := libc
-LOCAL_SHARED_LIBRARIES := $(commonLibs)
 LOCAL_EXPORT_C_INCLUDE_DIRS := external/mdnsresponder/mDNSShared
 include $(BUILD_SHARED_LIBRARY)
