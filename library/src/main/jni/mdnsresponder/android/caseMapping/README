@@ -1,0 +1,3 @@
+Windows filesystems, and consequently Windows C include files, are
+case-insensitive. This folder provides alternately-cased versions of header
+files for cases where that becomes a problem.
