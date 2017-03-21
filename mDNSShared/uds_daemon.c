@@ -1594,6 +1594,7 @@ mDNSlocal mStatus handle_regservice_request(request_state *request)
 	char type_as_string[MAX_ESCAPED_DOMAIN_NAME];
 	domainname d, srv;
 	mStatus err;
+	const char *msgTXTData;
 
 	DNSServiceFlags flags = get_flags(&request->msgptr, request->msgend);
 	mDNSu32 interfaceIndex = get_uint32(&request->msgptr, request->msgend);
@@ -1612,7 +1613,7 @@ mDNSlocal mStatus handle_regservice_request(request_state *request)
 	request->u.servicereg.instances = NULL;
 	request->u.servicereg.txtlen  = 0;
 	request->u.servicereg.txtdata = NULL;
-	mDNSPlatformStrCopy(request->u.servicereg.type_as_string, type_as_string);
+	mDNSPlatformStrLCopy(request->u.servicereg.type_as_string, type_as_string, sizeof(request->u.servicereg.type_as_string));
 
 	if (request->msgptr + 2 > request->msgend) request->msgptr = NULL;
 	else
@@ -1622,14 +1623,19 @@ mDNSlocal mStatus handle_regservice_request(request_state *request)
 		}
 
 	request->u.servicereg.txtlen = get_uint16(&request->msgptr, request->msgend);
+	msgTXTData = get_rdata(&request->msgptr, request->msgend, request->u.servicereg.txtlen);
+	if (!request->msgptr)
+		{
+		LogMsg("%3d: DNSServiceRegister(unreadable parameters)", request->sd);
+		return(mStatus_BadParamErr);
+		}
+
 	if (request->u.servicereg.txtlen)
 		{
 		request->u.servicereg.txtdata = mallocL("service_info txtdata", request->u.servicereg.txtlen);
 		if (!request->u.servicereg.txtdata) FatalError("ERROR: handle_regservice_request - malloc");
-		mDNSPlatformMemCopy(request->u.servicereg.txtdata, get_rdata(&request->msgptr, request->msgend, request->u.servicereg.txtlen), request->u.servicereg.txtlen);
+		mDNSPlatformMemCopy(request->u.servicereg.txtdata, msgTXTData, request->u.servicereg.txtlen);
 		}
-
-	if (!request->msgptr) { LogMsg("%3d: DNSServiceRegister(unreadable parameters)", request->sd); return(mStatus_BadParamErr); }
 
 	// Check for sub-types after the service type
 	request->u.servicereg.num_subtypes = ChopSubTypes(request->u.servicereg.type_as_string);	// Note: Modifies regtype string to remove trailing subtypes
@@ -2169,7 +2175,7 @@ mDNSlocal mStatus handle_browse_request(request_state *request)
 
 	if (!MakeDomainNameFromDNSNameString(&temp, regtype)) return(mStatus_BadParamErr);
 	// For over-long service types, we only allow domain "local"
-	if (temp.c[0] > 15 && domain[0] == 0) mDNSPlatformStrCopy(domain, "local.");
+	if (temp.c[0] > 15 && domain[0] == 0) mDNSPlatformStrLCopy(domain, "local.", sizeof(domain));
 
 	// Set up browser info
 	request->u.browser.ForceMCast = (flags & kDNSServiceFlagsForceMulticast) != 0;

@@ -54,6 +54,17 @@
 #ifndef __mDNSClientAPI_h
 #define __mDNSClientAPI_h
 
+/* MinGW thinks "#define interface struct" is a cute way to do ObjC
+ * compatibility. Everything is terrible.
+ */
+#ifdef _WIN32
+#ifndef interface
+#warning "MinGW no longer does weird things with 'interface'. "\
+         "You can remove this code."
+#endif /* ! interface */
+#undef interface
+#endif /* _WIN32 */
+
 #if defined(EFI32) || defined(EFI64) || defined(EFIX64)
 // EFI doesn't have stdarg.h unless it's building with GCC.
 #include "Tiano.h"
@@ -2548,8 +2559,9 @@ mDNSInterfaceID InterfaceID, UDPSocket *src, const mDNSAddr *dst, mDNSIPPort dst
 extern void     mDNSPlatformLock        (const mDNS *const m);
 extern void     mDNSPlatformUnlock      (const mDNS *const m);
 
-extern void     mDNSPlatformStrCopy     (      void *dst, const void *src);
-extern mDNSu32  mDNSPlatformStrLen      (                 const void *src);
+mDNSexport void     mDNSPlatformStrCopy(      void *dst, const void *src);
+mDNSexport mDNSu32  mDNSPlatformStrLCopy(     void *dst, const void *src, mDNSu32 dstlen);
+mDNSexport mDNSu32  mDNSPlatformStrLen (                 const void *src);
 extern void     mDNSPlatformMemCopy     (      void *dst, const void *src, mDNSu32 len);
 extern mDNSBool mDNSPlatformMemSame     (const void *dst, const void *src, mDNSu32 len);
 extern void     mDNSPlatformMemZero     (      void *dst,                  mDNSu32 len);
