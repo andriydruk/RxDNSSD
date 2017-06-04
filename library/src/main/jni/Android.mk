@@ -24,7 +24,6 @@ commonFlags := \
     -Wno-array-bounds \
     -Wno-pointer-sign \
     -Wno-unused \
-    -Wno-unused-but-set-variable \
     -Wno-unused-parameter \
     -Werror=implicit-function-declaration \
 
