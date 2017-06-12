@@ -1,11 +1,11 @@
-#RxDNSSD [![Circle CI](https://circleci.com/gh/andriydruk/RxDNSSD.svg?style=shield&circle-token=5f0cb1ee907a20bdb08aa4b073b5690afbaaabe1)](https://circleci.com/gh/andriydruk/RxDNSSD)
+# RxDNSSD [![Circle CI](https://circleci.com/gh/andriydruk/RxDNSSD.svg?style=shield&circle-token=5f0cb1ee907a20bdb08aa4b073b5690afbaaabe1)](https://circleci.com/gh/andriydruk/RxDNSSD)
 
 Android library which is Rx wrapper for Apple DNSSD Java API.
 
-##Why RxDNSSD?
+## Why RxDNSSD?
 My [explanation](http://andriydruk.com/post/mdnsresponder/) about why jmDNS, Android NSD Services and Google Nearby API are not good enough, and why I maintain this library.
 
-##Binaries
+## Binaries
 ```groovy
 compile 'com.github.andriydruk:rxdnssd:0.8.4'
 ```
@@ -15,7 +15,7 @@ compile 'com.github.andriydruk:rxdnssd:0.8.4'
 ./gradlew clean build
 ```
 
-##How to use
+## How to use
 
 RxDNSSD provides two implementations of RxDnssd interface: 
 
@@ -34,7 +34,7 @@ RxDnssdEmbedded is an implementation of RxDnssd with embedded DNS-SD core. Can b
 RxDnssd rxdnssd = new RxDnssdEmbedded(); 
 ```
 
-#####Register service
+##### Register service
 ```java
 Subscription subscription = rxdnssd.register(bonjourService)
       .observeOn(AndroidSchedulers.mainThread())
@@ -45,7 +45,7 @@ Subscription subscription = rxdnssd.register(bonjourService)
       });
 ```
 
-#####Browse services example
+##### Browse services example
 ```java
 Subscription subscription = rxDnssd.browse("_http._tcp", "local.")
 	.compose(rxDnssd.resolve())
