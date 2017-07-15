@@ -9,6 +9,10 @@
     <exclude-pattern>.*/R.java</exclude-pattern>
     <exclude-pattern>.*/gen/.*</exclude-pattern>
 
+    <!-- It's Apple source code. I don't wanna change it a lot -->
+    <exclude-pattern>.*/InternalDNSSD.java</exclude-pattern>
+    <exclude-pattern>.*/TXTRecord.java</exclude-pattern>
+
     <rule ref="rulesets/java/unnecessary.xml"/>
     <rule ref="rulesets/java/imports.xml">
         <exclude name="TooManyStaticImports"/>

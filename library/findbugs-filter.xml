@@ -36,4 +36,40 @@
         <Class name="~.*\$\$Lambda\$.*"/>
     </Match>
 
+    <!-- Do not check auto-generated resources classes -->
+    <Match>
+        <Class name="~.*\$\$InternalDNSSD\$.*a"/>
+    </Match>
+
+    <Match>
+      <Class name="com.github.druk.dnssd.AppleBrowser" />
+   </Match>
+    <Match>
+      <Class name="com.github.druk.dnssd.AppleDNSRecord" />
+   </Match>
+    <Match>
+      <Class name="com.github.druk.dnssd.AppleDNSSD" />
+   </Match>
+    <Match>
+      <Class name="com.github.druk.dnssd.AppleDomainEnum" />
+   </Match>
+    <Match>
+      <Class name="com.github.druk.dnssd.AppleQuery" />
+   </Match>
+    <Match>
+      <Class name="com.github.druk.dnssd.AppleRecordRegistrar" />
+   </Match>
+    <Match>
+      <Class name="com.github.druk.dnssd.AppleRegistration" />
+   </Match>
+    <Match>
+      <Class name="com.github.druk.dnssd.AppleResolver" />
+   </Match>
+    <Match>
+      <Class name="com.github.druk.dnssd.AppleService" />
+   </Match>
+    <Match>
+      <Class name="com.github.druk.dnssd.TXTRecord" />
+   </Match>
+
 </FindBugsFilter>

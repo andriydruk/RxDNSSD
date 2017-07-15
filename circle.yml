@@ -20,9 +20,8 @@ dependencies:
     override:
         - echo y | android update sdk --no-ui --all --filter "tools"
         - echo y | android update sdk --no-ui --all --filter "platform-tools"
-        - echo y | android update sdk --no-ui --all --filter "build-tools-25.0.2"
-        - echo y | android update sdk --no-ui --all --filter "android-25"
-        - echo y | android update sdk --no-ui --all --filter "extra-android-m2repository"
+        - echo y | android update sdk --no-ui --all --filter "build-tools-26.0.1"
+        - echo y | android update sdk --no-ui --all --filter "android-26"
         - ANDROID_HOME=/usr/local/android-sdk-linux ./gradlew dependencies
 
 test:
@@ -39,3 +38,7 @@ test:
         - cp -r library/build/outputs/aar/* $CIRCLE_ARTIFACTS
         # copy the test results to the test results directory.
         - cp -r library/build/reports/* $CIRCLE_TEST_REPORTS
+        # copy the build outputs to artifacts
+        - cp -r rxdnssd/build/outputs/aar/* $CIRCLE_ARTIFACTS
+        # copy the test results to the test results directory.
+        - cp -r rxdnssd/build/reports/* $CIRCLE_TEST_REPORT

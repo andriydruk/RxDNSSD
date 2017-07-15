@@ -113,24 +113,24 @@ int init();
 int loop();
 void stopLoop();
 
-JNIEXPORT jint JNICALL Java_com_apple_dnssd_DNSSDEmbedded_Init( JNIEnv *pEnv, jclass cls)
+JNIEXPORT jint JNICALL Java_com_github_druk_dnssd_DNSSDEmbedded_nativeInit( JNIEnv *pEnv, jclass cls)
 {
 	pLoopEnv = pEnv;
   	return init();
 }
 
-JNIEXPORT jint JNICALL Java_com_apple_dnssd_DNSSDEmbedded_Loop( JNIEnv *pEnv, jclass cls)
+JNIEXPORT jint JNICALL Java_com_github_druk_dnssd_DNSSDEmbedded_nativeLoop( JNIEnv *pEnv, jclass cls)
 {
 	return loop();
 }
 
-JNIEXPORT void JNICALL Java_com_apple_dnssd_DNSSDEmbedded_Exit( JNIEnv *pEnv, jclass cls)
+JNIEXPORT void JNICALL Java_com_github_druk_dnssd_DNSSDEmbedded_nativeExit( JNIEnv *pEnv, jclass cls)
 {
 	stopLoop();
 }
 #endif
 
-JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleDNSSD_InitLibrary( JNIEnv *pEnv, jclass cls, 
+JNIEXPORT jint JNICALL Java_com_github_druk_dnssd_AppleDNSSD_InitLibrary( JNIEnv *pEnv, jclass cls, 
 						jint callerVersion)
 {
 	/* Ensure that caller & interface versions match. */
@@ -210,7 +210,7 @@ static OpContext	*NewContext( JNIEnv *pEnv, jobject owner,
 	if ( pContext != NULL)
 	{
 		jfieldID		clientField = (*pEnv)->GetFieldID( pEnv, (*pEnv)->GetObjectClass( pEnv, owner),
-															"fListener", "Lcom/apple/dnssd/BaseListener;");
+															"fListener", "Lcom/github/druk/dnssd/BaseListener;");
 
 		pContext->JavaObj = (*pEnv)->NewWeakGlobalRef( pEnv, owner);	// must convert local ref to global to cache;
 		pContext->ClientObj = (*pEnv)->GetObjectField( pEnv, owner, clientField);
@@ -230,12 +230,12 @@ static void			ReportError( JNIEnv *pEnv, jobject target, jobject service, DNSSer
 {
 	jclass			cls = (*pEnv)->GetObjectClass( pEnv, target);
 	jmethodID		opFailed = (*pEnv)->GetMethodID( pEnv, cls, "operationFailed",
-								"(Lcom/apple/dnssd/DNSSDService;I)V");
+								"(Lcom/github/druk/dnssd/DNSSDService;I)V");
 
 	(*pEnv)->CallVoidMethod( pEnv, target, opFailed, service, err);
 }
 
-JNIEXPORT void JNICALL Java_com_apple_dnssd_AppleService_HaltOperation( JNIEnv *pEnv, jobject pThis)
+JNIEXPORT void JNICALL Java_com_github_druk_dnssd_AppleService_HaltOperation( JNIEnv *pEnv, jobject pThis)
 /* Deallocate the dns_sd service browser and set the Java object's fNativeContext field to 0. */
 {
 	jclass			cls = (*pEnv)->GetObjectClass( pEnv, pThis);
@@ -259,7 +259,7 @@ JNIEXPORT void JNICALL Java_com_apple_dnssd_AppleService_HaltOperation( JNIEnv *
 }
 
 
-JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleService_BlockForData( JNIEnv *pEnv, jobject pThis)
+JNIEXPORT jint JNICALL Java_com_github_druk_dnssd_AppleService_BlockForData( JNIEnv *pEnv, jobject pThis)
 /* Block until data arrives, or one second passes. Returns 1 if data present, 0 otherwise. */
 {
 // BlockForData() not supported with AUTO_CALLBACKS 
@@ -303,7 +303,7 @@ JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleService_BlockForData( JNIEnv *p
 }
 
 
-JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleService_ProcessResults( JNIEnv *pEnv, jobject pThis)
+JNIEXPORT jint JNICALL Java_com_github_druk_dnssd_AppleService_ProcessResults( JNIEnv *pEnv, jobject pThis)
 /* Call through to DNSServiceProcessResult() while data remains on socket. */
 {
 #if !AUTO_CALLBACKS	// ProcessResults() not supported with AUTO_CALLBACKS 
@@ -377,7 +377,7 @@ static void DNSSD_API	ServiceBrowseReply( DNSServiceRef sdRef _UNUSED, DNSServic
 	TeardownCallbackState();
 }
 
-JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleBrowser_CreateBrowser( JNIEnv *pEnv, jobject pThis,
+JNIEXPORT jint JNICALL Java_com_github_druk_dnssd_AppleBrowser_CreateBrowser( JNIEnv *pEnv, jobject pThis,
 							jint flags, jint ifIndex, jstring regType, jstring domain)
 {
 	jclass					cls = (*pEnv)->GetObjectClass( pEnv, pThis);
@@ -387,7 +387,7 @@ JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleBrowser_CreateBrowser( JNIEnv *
 
 	if ( contextField != 0)
 		pContext = NewContext( pEnv, pThis, "serviceFound",
-								"(Lcom/apple/dnssd/DNSSDService;II[B[B[B)V");
+								"(Lcom/github/druk/dnssd/DNSSDService;II[B[B[B)V");
 	else
 		err = kDNSServiceErr_BadParam;
 
@@ -398,7 +398,7 @@ JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleBrowser_CreateBrowser( JNIEnv *
 
 		pContext->Callback2 = (*pEnv)->GetMethodID( pEnv,
 								(*pEnv)->GetObjectClass( pEnv, pContext->ClientObj),
-								"serviceLost", "(Lcom/apple/dnssd/DNSSDService;II[B[B[B)V");
+								"serviceLost", "(Lcom/github/druk/dnssd/DNSSDService;II[B[B[B)V");
 
 		err = DNSServiceBrowse( &pContext->ServiceRef, flags, ifIndex, regStr, domainStr, ServiceBrowseReply, pContext);
 		if ( err == kDNSServiceErr_NoError)
@@ -429,7 +429,7 @@ static void DNSSD_API	ServiceResolveReply( DNSServiceRef sdRef _UNUSED, DNSServi
 
 	SetupCallbackState( &pContext->Env);
 
-	txtCls = (*pContext->Env)->FindClass( pContext->Env, "com/apple/dnssd/TXTRecord");
+	txtCls = (*pContext->Env)->FindClass( pContext->Env, "com/github/druk/dnssd/TXTRecord");
 	txtCtor = (*pContext->Env)->GetMethodID( pContext->Env, txtCls, "<init>", "([B)V");
 
 	if ( pContext->ClientObj != NULL && pContext->Callback != NULL && txtCtor != NULL &&
@@ -467,7 +467,7 @@ static void DNSSD_API	ServiceResolveReply( DNSServiceRef sdRef _UNUSED, DNSServi
 	TeardownCallbackState();
 }
 
-JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleResolver_CreateResolver( JNIEnv *pEnv, jobject pThis,
+JNIEXPORT jint JNICALL Java_com_github_druk_dnssd_AppleResolver_CreateResolver( JNIEnv *pEnv, jobject pThis,
 							jint flags, jint ifIndex, jstring serviceName, jstring regType, jstring domain)
 {
 	jclass					cls = (*pEnv)->GetObjectClass( pEnv, pThis);
@@ -477,7 +477,7 @@ JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleResolver_CreateResolver( JNIEnv
 
 	if ( contextField != 0)
 		pContext = NewContext( pEnv, pThis, "serviceResolved",
-								"(Lcom/apple/dnssd/DNSSDService;II[B[BILcom/apple/dnssd/TXTRecord;)V");
+								"(Lcom/github/druk/dnssd/DNSSDService;II[B[BILcom/github/druk/dnssd/TXTRecord;)V");
 	else
 		err = kDNSServiceErr_BadParam;
 
@@ -536,7 +536,7 @@ static void DNSSD_API	ServiceRegisterReply( DNSServiceRef sdRef _UNUSED, DNSServ
 	TeardownCallbackState();
 }
 
-JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleRegistration_BeginRegister( JNIEnv *pEnv, jobject pThis,
+JNIEXPORT jint JNICALL Java_com_github_druk_dnssd_AppleRegistration_BeginRegister( JNIEnv *pEnv, jobject pThis,
 							jint ifIndex, jint flags, jstring serviceName, jstring regType,
 							jstring domain, jstring host, jint port, jbyteArray txtRecord)
 {
@@ -552,7 +552,7 @@ JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleRegistration_BeginRegister( JNI
 
 	if ( contextField != 0)
 		pContext = NewContext( pEnv, pThis, "serviceRegistered",
-								"(Lcom/apple/dnssd/DNSSDRegistration;I[B[B[B)V");
+								"(Lcom/github/druk/dnssd/DNSSDRegistration;I[B[B[B)V");
 	else
 		err = kDNSServiceErr_BadParam;
 
@@ -595,7 +595,7 @@ JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleRegistration_BeginRegister( JNI
 	return err;
 }
 
-JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleRegistration_AddRecord( JNIEnv *pEnv, jobject pThis,
+JNIEXPORT jint JNICALL Java_com_github_druk_dnssd_AppleRegistration_AddRecord( JNIEnv *pEnv, jobject pThis,
 							jint flags, jint rrType, jbyteArray rData, jint ttl, jobject destObj)
 {
 	jclass					cls = (*pEnv)->GetObjectClass( pEnv, pThis);
@@ -628,11 +628,11 @@ JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleRegistration_AddRecord( JNIEnv 
 	return err;
 }
 
-JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleDNSRecord_Update( JNIEnv *pEnv, jobject pThis,
+JNIEXPORT jint JNICALL Java_com_github_druk_dnssd_AppleDNSRecord_Update( JNIEnv *pEnv, jobject pThis,
 														jint flags, jbyteArray rData, jint ttl)
 {
 	jclass					cls = (*pEnv)->GetObjectClass( pEnv, pThis);
-	jfieldID				ownerField = (*pEnv)->GetFieldID( pEnv, cls, "fOwner", "Lcom/apple/dnssd/AppleService;");
+	jfieldID				ownerField = (*pEnv)->GetFieldID( pEnv, cls, "fOwner", "Lcom/github/druk/dnssd/AppleService;");
 	jfieldID				recField = (*pEnv)->GetFieldID( pEnv, cls, "fRecord", "J");
 	OpContext				*pContext = NULL;
 	DNSServiceErrorType		err = kDNSServiceErr_NoError;
@@ -664,10 +664,10 @@ JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleDNSRecord_Update( JNIEnv *pEnv,
 	return err;
 }
 
-JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleDNSRecord_Remove( JNIEnv *pEnv, jobject pThis)
+JNIEXPORT jint JNICALL Java_com_github_druk_dnssd_AppleDNSRecord_Remove( JNIEnv *pEnv, jobject pThis)
 {
 	jclass					cls = (*pEnv)->GetObjectClass( pEnv, pThis);
-	jfieldID				ownerField = (*pEnv)->GetFieldID( pEnv, cls, "fOwner", "Lcom/apple/dnssd/AppleService;");
+	jfieldID				ownerField = (*pEnv)->GetFieldID( pEnv, cls, "fOwner", "Lcom/github/druk/dnssd/AppleService;");
 	jfieldID				recField = (*pEnv)->GetFieldID( pEnv, cls, "fRecord", "J");
 	OpContext				*pContext = NULL;
 	DNSServiceErrorType		err = kDNSServiceErr_NoError;
@@ -692,7 +692,7 @@ JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleDNSRecord_Remove( JNIEnv *pEnv,
 }
 
 
-JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleRecordRegistrar_CreateConnection( JNIEnv *pEnv, jobject pThis)
+JNIEXPORT jint JNICALL Java_com_github_druk_dnssd_AppleRecordRegistrar_CreateConnection( JNIEnv *pEnv, jobject pThis)
 {
 	jclass					cls = (*pEnv)->GetObjectClass( pEnv, pThis);
 	jfieldID				contextField = (*pEnv)->GetFieldID( pEnv, cls, "fNativeContext", "J");
@@ -700,7 +700,7 @@ JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleRecordRegistrar_CreateConnectio
 	DNSServiceErrorType		err = kDNSServiceErr_NoError;
 
 	if ( contextField != 0)
-		pContext = NewContext( pEnv, pThis, "recordRegistered", "(Lcom/apple/dnssd/DNSRecord;I)V");
+		pContext = NewContext( pEnv, pThis, "recordRegistered", "(Lcom/github/druk/dnssd/DNSRecord;I)V");
 	else
 		err = kDNSServiceErr_BadParam;
 
@@ -751,7 +751,7 @@ static void DNSSD_API	RegisterRecordReply( DNSServiceRef sdRef _UNUSED,
 	TeardownCallbackState();
 }
 
-JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleRecordRegistrar_RegisterRecord( JNIEnv *pEnv, jobject pThis, 
+JNIEXPORT jint JNICALL Java_com_github_druk_dnssd_AppleRecordRegistrar_RegisterRecord( JNIEnv *pEnv, jobject pThis, 
 							jint flags, jint ifIndex, jstring fullname, jint rrType, jint rrClass, 
 							jbyteArray rData, jint ttl, jobject destObj)
 {
@@ -839,7 +839,7 @@ static void DNSSD_API	ServiceQueryReply( DNSServiceRef sdRef _UNUSED, DNSService
 	TeardownCallbackState();
 }
 
-JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleQuery_CreateQuery( JNIEnv *pEnv, jobject pThis,
+JNIEXPORT jint JNICALL Java_com_github_druk_dnssd_AppleQuery_CreateQuery( JNIEnv *pEnv, jobject pThis,
 							jint flags, jint ifIndex, jstring serviceName, jint rrtype, jint rrclass)
 {
 	jclass					cls = (*pEnv)->GetObjectClass( pEnv, pThis);
@@ -849,7 +849,7 @@ JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleQuery_CreateQuery( JNIEnv *pEnv
 
 	if ( contextField != 0)
 		pContext = NewContext( pEnv, pThis, "queryAnswered",
-								"(Lcom/apple/dnssd/DNSSDService;II[BII[BI)V");
+								"(Lcom/github/druk/dnssd/DNSSDService;II[BII[BI)V");
 	else
 		err = kDNSServiceErr_BadParam;
 
@@ -897,7 +897,7 @@ static void DNSSD_API	DomainEnumReply( DNSServiceRef sdRef _UNUSED, DNSServiceFl
 	TeardownCallbackState();
 }
 
-JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleDomainEnum_BeginEnum( JNIEnv *pEnv, jobject pThis,
+JNIEXPORT jint JNICALL Java_com_github_druk_dnssd_AppleDomainEnum_BeginEnum( JNIEnv *pEnv, jobject pThis,
 							jint flags, jint ifIndex)
 {
 	jclass					cls = (*pEnv)->GetObjectClass( pEnv, pThis);
@@ -907,7 +907,7 @@ JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleDomainEnum_BeginEnum( JNIEnv *p
 
 	if ( contextField != 0)
 		pContext = NewContext( pEnv, pThis, "domainFound",
-								"(Lcom/apple/dnssd/DNSSDService;II[B)V");
+								"(Lcom/github/druk/dnssd/DNSSDService;II[B)V");
 	else
 		err = kDNSServiceErr_BadParam;
 
@@ -915,7 +915,7 @@ JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleDomainEnum_BeginEnum( JNIEnv *p
 	{
 		pContext->Callback2 = (*pEnv)->GetMethodID( pEnv,
 								(*pEnv)->GetObjectClass( pEnv, pContext->ClientObj),
-								"domainLost", "(Lcom/apple/dnssd/DNSSDService;II[B)V");
+								"domainLost", "(Lcom/github/druk/dnssd/DNSSDService;II[B)V");
 
 		err = DNSServiceEnumerateDomains( &pContext->ServiceRef, flags, ifIndex,
 											DomainEnumReply, pContext);
@@ -931,7 +931,7 @@ JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleDomainEnum_BeginEnum( JNIEnv *p
 }
 
 
-JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleDNSSD_ConstructName( JNIEnv *pEnv, jobject pThis _UNUSED,
+JNIEXPORT jint JNICALL Java_com_github_druk_dnssd_AppleDNSSD_ConstructName( JNIEnv *pEnv, jobject pThis _UNUSED,
 							jstring serviceName, jstring regtype, jstring domain, jobjectArray pOut)
 {
 	DNSServiceErrorType		err = kDNSServiceErr_NoError;
@@ -955,7 +955,7 @@ JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleDNSSD_ConstructName( JNIEnv *pE
 	return err;
 }
 
-JNIEXPORT void JNICALL Java_com_apple_dnssd_AppleDNSSD_ReconfirmRecord( JNIEnv *pEnv, jobject pThis _UNUSED,
+JNIEXPORT void JNICALL Java_com_github_druk_dnssd_AppleDNSSD_ReconfirmRecord( JNIEnv *pEnv, jobject pThis _UNUSED,
 							jint flags, jint ifIndex, jstring fullName,
 							jint rrtype, jint rrclass, jbyteArray rdata)
 {
@@ -977,7 +977,7 @@ JNIEXPORT void JNICALL Java_com_apple_dnssd_AppleDNSSD_ReconfirmRecord( JNIEnv *
 #define LOCAL_ONLY_NAME "loo"
 #define P2P_NAME "p2p"
 
-JNIEXPORT jstring JNICALL Java_com_apple_dnssd_AppleDNSSD_GetNameForIfIndex( JNIEnv *pEnv, jobject pThis _UNUSED,
+JNIEXPORT jstring JNICALL Java_com_github_druk_dnssd_AppleDNSSD_GetNameForIfIndex( JNIEnv *pEnv, jobject pThis _UNUSED,
 							jint ifIndex)
 {
 	char					*p = LOCAL_ONLY_NAME, nameBuff[IF_NAMESIZE];
@@ -993,7 +993,7 @@ JNIEXPORT jstring JNICALL Java_com_apple_dnssd_AppleDNSSD_GetNameForIfIndex( JNI
 }
 
 
-JNIEXPORT jint JNICALL Java_com_apple_dnssd_AppleDNSSD_GetIfIndexForName( JNIEnv *pEnv, jobject pThis _UNUSED,
+JNIEXPORT jint JNICALL Java_com_github_druk_dnssd_AppleDNSSD_GetIfIndexForName( JNIEnv *pEnv, jobject pThis _UNUSED,
 							jstring ifName)
 {
 	uint32_t				ifIndex = kDNSServiceInterfaceIndexLocalOnly;
