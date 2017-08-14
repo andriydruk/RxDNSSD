@@ -86,7 +86,7 @@ public class DNSSDActivity extends AppCompatActivity {
 
         };
 
-        RecyclerView recyclerView =  (RecyclerView) findViewById(R.id.recycler_view);
+        RecyclerView recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(mServiceAdapter);
     }
