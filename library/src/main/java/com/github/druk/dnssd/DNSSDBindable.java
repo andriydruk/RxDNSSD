@@ -42,4 +42,17 @@ public final class DNSSDBindable extends DNSSD {
     public void onServiceStopped() {
         // Not used in bindable version
     }
+
+    /** Return the canonical name of a particular interface index.<P>
+     @param	ifIndex
+     A valid interface index. Must not be ALL_INTERFACES.
+     <P>
+     @return		The name of the interface, which should match java.net.NetworkInterface.getName().
+
+     @throws SecurityException If a security manager is present and denies <tt>RuntimePermission("getDNSSDInstance")</tt>.
+     @see    RuntimePermission
+     */
+    public String getNameForIfIndex(int ifIndex) {
+        return InternalDNSSD.getNameForIfIndex(ifIndex);
+    }
 }

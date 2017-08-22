@@ -75,7 +75,9 @@ public class DNSSDEmbedded extends DNSSD {
                 Log.i(TAG, "init");
                 int err = nativeInit();
                 isStarted = true;
-                DNSSDEmbedded.class.notifyAll();
+                synchronized (DNSSDEmbedded.class) {
+                    DNSSDEmbedded.class.notifyAll();
+                }
                 if (err != 0) {
                     Log.e(TAG, "error: " + err);
                     return;

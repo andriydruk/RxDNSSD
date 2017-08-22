@@ -59,7 +59,7 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHold
         else {
             holder.text2.setText(R.string.unresolved);
         }
-        holder.text3.setText("Interface: " + DNSSD.getNameForIfIndex(bs.getIfIndex()));
+        holder.text3.setText("Interface: " + bs.getIfIndex());
     }
 
     @Override
