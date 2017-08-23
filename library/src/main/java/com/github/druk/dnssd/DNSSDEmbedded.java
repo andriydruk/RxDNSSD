@@ -23,7 +23,9 @@ import java.util.TimerTask;
 
 /**
  * RxDnssd is implementation of RxDnssd with embedded DNS-SD  {@link InternalDNSSD}
+ * Deprecated: use bindable version
  */
+@Deprecated
 public class DNSSDEmbedded extends DNSSD {
 
     public static final int DEFAULT_STOP_TIMER_DELAY = 5000; //5 sec
@@ -74,8 +76,8 @@ public class DNSSDEmbedded extends DNSSD {
             public void run() {
                 Log.i(TAG, "init");
                 int err = nativeInit();
-                isStarted = true;
                 synchronized (DNSSDEmbedded.class) {
+                    isStarted = true;
                     DNSSDEmbedded.class.notifyAll();
                 }
                 if (err != 0) {
@@ -103,7 +105,7 @@ public class DNSSDEmbedded extends DNSSD {
     public void exit() {
         synchronized (DNSSDEmbedded.class) {
             mStopTimer = new Timer();
-            mStopTimer.schedule(exiteTask, mStopTimerDelay);
+            mStopTimer.schedule(exitTask, mStopTimerDelay);
         }
     }
 
@@ -119,7 +121,7 @@ public class DNSSDEmbedded extends DNSSD {
         }
     }
 
-    private static TimerTask exiteTask = new TimerTask() {
+    private static TimerTask exitTask = new TimerTask() {
         @Override
         public void run() {
             nativeExit();

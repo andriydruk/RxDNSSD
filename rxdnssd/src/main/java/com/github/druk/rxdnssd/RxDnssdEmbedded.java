@@ -19,7 +19,9 @@ import com.github.druk.dnssd.DNSSDEmbedded;
 
 /**
  * RxDnssdEmbedded is implementation of RxDnssd with embedded DNS-SD  {@link RxDnssd}
+ * Deprecated: use bindable version
  */
+@Deprecated
 public class RxDnssdEmbedded extends RxDnssdCommon {
 
     public RxDnssdEmbedded() {
