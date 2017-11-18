@@ -50,7 +50,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({InternalDNSSD.class, InetAddress.class, Inet4Address.class, Inet6Address.class})
-@SuppressStaticInitializationFor("com.github,druk.dnssd.InternalDNSSD")
+@SuppressStaticInitializationFor("com.github.druk.dnssd.InternalDNSSD")
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
 public class DnssdTest {
 

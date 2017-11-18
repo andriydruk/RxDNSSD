@@ -7,7 +7,7 @@ repositories {
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.1"
+    buildToolsVersion "26.0.2"
 
     defaultConfig {
         minSdkVersion 14
@@ -36,13 +36,14 @@ android {
 }
 
 dependencies {
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:2.0.5-beta'
-    testCompile ('org.powermock:powermock-api-mockito:1.6.2') {
+    testImplementation 'junit:junit:4.12'
+    // Last version that support Power Mock: https://github.com/powermock/powermock/wiki/Mockito#supported-versions
+    testImplementation 'org.mockito:mockito-core:2.8.9'
+    testImplementation ('org.powermock:powermock-api-mockito2:1.7.3') {
         exclude module: 'hamcrest-core'
         exclude module: 'objenesis'
     }
-    testCompile ('org.powermock:powermock-module-junit4:1.6.2') {
+    testImplementation ('org.powermock:powermock-module-junit4:1.7.3') {
         exclude module: 'hamcrest-core'
         exclude module: 'objenesis'
     }
@@ -51,22 +52,20 @@ dependencies {
 publish {
     groupId = 'com.github.andriydruk'
     artifactId = 'dnssd'
-    publishVersion = '0.9.0'
+    publishVersion = '0.9.2'
     desc = 'Android library which is Rx wrapper for Apple DNSSD Java API'
     licences = ['Apache-2.0']
     website = 'https://github.com/andriydruk/RxDNSSD'
 }
 
 //Add PMD checks
-plugins.apply('pmd')
+apply plugin: 'pmd'
 pmd {
     toolVersion = '5.4.0'
-}
-task pmd(type: Pmd) {
     ignoreFailures = false // Fail early.
     ruleSetFiles = files("${buildscript.sourceFile.parent}/pmd.xml")
     ruleSets = []
-    source = fileTree('src/main/java/com/github')
+    //sourceSets = fileTree('src/main/java/com/github')
 }
 
 //Add findbugs
@@ -107,8 +106,8 @@ task findbugs(type: FindBugs) {
 //    classpath = files()
 //}
 
-check.doLast {
-    project.tasks.getByName("pmd").execute()
-    project.tasks.getByName("findbugs").execute()
-    //project.tasks.getByName("checkstyle").execute()
-}
+//check.doLast {
+//    project.tasks.getByName("pmd").execute()
+//    project.tasks.getByName("findbugs").execute()
+//    //project.tasks.getByName("checkstyle").execute()
+//}

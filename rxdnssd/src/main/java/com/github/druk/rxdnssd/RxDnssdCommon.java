@@ -43,7 +43,6 @@ abstract class RxDnssdCommon implements RxDnssd {
     @NonNull
     @Override
     //TODO: Finbugs: new DNSSDServiceCreator<BonjourService> should be a static class (Performance issue ???)
-    @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "SIC_INNER_SHOULD_BE_STATIC_ANON", justification = "I know what I'm doing")
     public Observable<BonjourService> browse(@NonNull final String regType, @NonNull final String domain) {
         return createObservable(new DNSSDServiceCreator<BonjourService>() {
             @Override

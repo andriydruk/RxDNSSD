@@ -32,13 +32,13 @@ My [explanation](http://andriydruk.com/post/mdnsresponder/) about why jmDNS, And
 My dnssd library:
 
 ```groovy
-compile 'com.github.andriydruk:dnssd:0.9.1'
+compile 'com.github.andriydruk:dnssd:0.9.2'
 ```
 
 My rxdnssd library:
 
 ```groovy
-compile 'com.github.andriydruk:rxdnssd:0.9.1'
+compile 'com.github.andriydruk:rxdnssd:0.9.2'
 ```
 
 My rxdnssd2 library:
