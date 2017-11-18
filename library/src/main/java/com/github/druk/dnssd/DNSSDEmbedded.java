@@ -105,7 +105,12 @@ public class DNSSDEmbedded extends DNSSD {
     public void exit() {
         synchronized (DNSSDEmbedded.class) {
             mStopTimer = new Timer();
-            mStopTimer.schedule(exitTask, mStopTimerDelay);
+            mStopTimer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    nativeExit();
+                }
+            }, mStopTimerDelay);
         }
     }
 
@@ -120,13 +125,6 @@ public class DNSSDEmbedded extends DNSSD {
             }
         }
     }
-
-    private static TimerTask exitTask = new TimerTask() {
-        @Override
-        public void run() {
-            nativeExit();
-        }
-    };
 
     @Override
     public void onServiceStarting() {
