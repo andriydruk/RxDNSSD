@@ -1305,14 +1305,18 @@ mDNSexport void mDNSPlatformClose(mDNS *const m)
 	ClearInterfaceList(m);
 	if (m->p->unicastSocket4 != -1)
 		{
-		int ipv4_closed = close(m->p->unicastSocket4);
-		assert(ipv4_closed == 0);
+			int ipv4_closed = close(m->p->unicastSocket4);
+			if (ipv4_closed != 0) {
+				LogMsg("error: ipv4 close failed");
+			}
 		}
 #if HAVE_IPV6
 	if (m->p->unicastSocket6 != -1)
 		{
-		int ipv6_closed = close(m->p->unicastSocket6);
-		assert(ipv6_closed == 0);
+			int ipv6_closed = close(m->p->unicastSocket6);
+			if (ipv6_closed != 0) {
+				LogMsg("error: ipv6 close failed");
+			}
 		}
 #endif
 	}
