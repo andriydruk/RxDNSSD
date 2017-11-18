@@ -23,9 +23,7 @@ import java.util.TimerTask;
 
 /**
  * RxDnssd is implementation of RxDnssd with embedded DNS-SD  {@link InternalDNSSD}
- * Deprecated: use bindable version
  */
-@Deprecated
 public class DNSSDEmbedded extends DNSSD {
 
     public static final int DEFAULT_STOP_TIMER_DELAY = 5000; //5 sec

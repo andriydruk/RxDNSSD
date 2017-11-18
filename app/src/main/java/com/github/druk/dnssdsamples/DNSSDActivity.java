@@ -2,13 +2,13 @@ package com.github.druk.dnssdsamples;
 
 import com.github.druk.dnssd.BrowseListener;
 import com.github.druk.dnssd.DNSSD;
+import com.github.druk.dnssd.DNSSDEmbedded;
 import com.github.druk.dnssd.DNSSDException;
 import com.github.druk.dnssd.DNSSDRegistration;
 import com.github.druk.dnssd.DNSSDService;
 import com.github.druk.dnssd.QueryListener;
 import com.github.druk.dnssd.RegisterListener;
 import com.github.druk.dnssd.ResolveListener;
-import com.github.druk.dnssd.DNSSDBindable;
 import com.github.druk.rxdnssd.BonjourService;
 
 import android.os.Build;
@@ -32,7 +32,7 @@ import java.util.Map;
 
 public class DNSSDActivity extends AppCompatActivity {
 
-    private DNSSDBindable dnssd;
+    private DNSSD dnssd;
 
     private ServiceAdapter mServiceAdapter;
     private Handler mHandler;
@@ -49,7 +49,7 @@ public class DNSSDActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        dnssd = new DNSSDBindable(this.getApplicationContext());
+        dnssd = new DNSSDEmbedded();
 
         mHandler = new Handler(Looper.getMainLooper());
 
@@ -89,6 +89,27 @@ public class DNSSDActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(mServiceAdapter);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (browseService == null) {
+            ((TextView) findViewById(R.id.browse)).setText(R.string.browse_stop);
+            findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
+            startBrowse();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (browseService != null) {
+            ((TextView)findViewById(R.id.browse)).setText(R.string.browse_start);
+            findViewById(R.id.progressBar).setVisibility(View.INVISIBLE);
+            stopBrowse();
+            mServiceAdapter.clear();
+        }
     }
 
     private void startBrowse() {

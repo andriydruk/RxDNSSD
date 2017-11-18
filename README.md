@@ -7,6 +7,10 @@ My [explanation](http://andriydruk.com/post/mdnsresponder/) about why jmDNS, And
 
 ## Hierarchy
 
+There are two version of mDNSReposder. 
+
+Bindable version:
+
 ```
                                    +--------------------+       +--------------------+
                                    |      RxDNSSD       |       |       RxDNSSD2     |
@@ -24,6 +28,28 @@ My [explanation](http://andriydruk.com/post/mdnsresponder/) about why jmDNS, And
                  | Platform Support |
                  +------------------+
                     System process                Your Android app
+
+```
+
+Embedded version:
+
+```
+                     +--------------------+       +--------------------+
+                     |      RxDNSSD       |       |       RxDNSSD2     |
+                     +--------------------+       +--------------------+
+                                |                            |
+                                |   +--------------------+   |
+                                 -->| Android Java DNSSD |<--
+                                    +--------------------+
+                                    |   Apple Java DNSSD |    
+                                    +--------------------+
+                                    |    mDNS Client     |
+                                    +--------------------+
+                                    | Embedded mDNS Core |
+                                    +--------------------+
+                                    | Platform Support   |
+                                    +--------------------+
+                                      Your Android app
 
 ```
 
@@ -57,8 +83,18 @@ Still in progress ...
 
 ### DNSSD
 
+Dnssd library provides two implementations of DNSSD interface: 
+
+DNSSDBindable is an implementation of DNSSD with system's daemon. Use it for Android project with min API higher than 4.1 for an economy of battery consumption (Also some Samsung devices can don't work with this implementation).
+
 ```
 DNSSD dnssd = new DNSSDBindable(context); 
+```
+
+DNSSDEmbedded is an implementation of RxDnssd with embedded DNS-SD core. Can be used for any Android device with min API higher than Android 4.0.
+
+```
+DNSSD dnssd = new DNSSDEmbedded(); 
 ```
 
 ##### Register service
@@ -114,8 +150,15 @@ You can find more samples in app inside this repository.
 
 ### RxDNSSD
 
+RxDNSSD also provides two implementations of RxDnssd interface: 
+
+- RxDnssdBindable
 ```
 RxDnssd rxdnssd = new RxDnssdBindable(context); 
+```
+- RxDnssdEmbedded
+```
+RxDnssd rxdnssd = new RxDnssdEmbedded(); 
 ```
 
 ##### Register service

@@ -3,6 +3,7 @@ package com.github.druk.dnssdsamples;
 import com.github.druk.rxdnssd.BonjourService;
 import com.github.druk.rxdnssd.RxDnssd;
 import com.github.druk.rxdnssd.RxDnssdBindable;
+import com.github.druk.rxdnssd.RxDnssdEmbedded;
 
 import android.os.Build;
 import android.os.Bundle;
@@ -34,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        rxDnssd = new RxDnssdBindable(this.getApplicationContext());
+        rxDnssd = new RxDnssdEmbedded();
 
         findViewById(R.id.register).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,6 +71,27 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView recyclerView =  (RecyclerView) findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(mServiceAdapter);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (browseSubscription == null) {
+            ((TextView) findViewById(R.id.browse)).setText(R.string.browse_stop);
+            findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
+            startBrowse();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (browseSubscription != null) {
+            ((TextView) findViewById(R.id.browse)).setText(R.string.browse_start);
+            findViewById(R.id.progressBar).setVisibility(View.INVISIBLE);
+            stopBrowse();
+            mServiceAdapter.clear();
+        }
     }
 
     private void startBrowse() {
