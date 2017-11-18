@@ -28,7 +28,7 @@ class RxResolveListener implements ResolveListener {
 
     RxResolveListener(Subscriber<? super BonjourService> subscriber, BonjourService service) {
         this.subscriber = subscriber;
-        builder = new BonjourService.Builder(service);
+        this.builder = new BonjourService.Builder(service);
     }
 
     @Override
@@ -38,6 +38,7 @@ class RxResolveListener implements ResolveListener {
         }
         BonjourService bonjourService = builder.port(port).hostname(hostName).dnsRecords(txtRecord).build();
         subscriber.onNext(bonjourService);
+        subscriber.onCompleted();
     }
 
     @Override
