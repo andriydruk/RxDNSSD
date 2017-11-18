@@ -47,7 +47,7 @@ My rxdnssd2 library:
 Still in progress ...
 ```
 
-* It's built with Andorid NDK r14b for all platforms (2.18 MB). If you prefer another NDK version or subset of platforms, please build it from source with command:
+* It's built with Andorid NDK r16 for all platforms (2.18 MB). If you prefer another NDK version or subset of platforms, please build it from source with command:
 
 ```groovy
 ./gradlew clean build
