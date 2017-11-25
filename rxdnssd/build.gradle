@@ -26,11 +26,13 @@ android {
 
 dependencies {
     compile project(':library')
-    //implementation 'com.github.andriydruk:dnssd:0.9.3'
 
     implementation 'io.reactivex:rxandroid:1.2.1'
-    implementation 'io.reactivex:rxjava:1.3.0'
-    implementation 'com.android.support:support-annotations:27.0.1'
+
+    // Transitively export that dependencies to other modules
+    //api 'com.github.andriydruk:dnssd:0.9.4'
+    api 'io.reactivex:rxjava:1.3.4'
+    api 'com.android.support:support-annotations:27.0.1'
 
     testImplementation 'junit:junit:4.12'
     // Last version that support Power Mock: https://github.com/powermock/powermock/wiki/Mockito#supported-versions
@@ -48,7 +50,7 @@ dependencies {
 publish {
     groupId = 'com.github.andriydruk'
     artifactId = 'rxdnssd'
-    publishVersion = '0.9.3'
+    publishVersion = '0.9.4'
     desc = 'Android library which is Rx wrapper for Apple DNSSD Java API'
     licences = ['Apache-2.0']
     website = 'https://github.com/andriydruk/RxDNSSD'
