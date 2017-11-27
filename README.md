@@ -58,13 +58,13 @@ Embedded version:
 My dnssd library:
 
 ```groovy
-compile 'com.github.andriydruk:dnssd:0.9.4'
+compile 'com.github.andriydruk:dnssd:0.9.5'
 ```
 
 My rxdnssd library:
 
 ```groovy
-compile 'com.github.andriydruk:rxdnssd:0.9.4'
+compile 'com.github.andriydruk:rxdnssd:0.9.5'
 ```
 
 My rxdnssd2 library:

@@ -27,10 +27,9 @@ android {
 dependencies {
     compile project(':library')
 
-    implementation 'io.reactivex:rxandroid:1.2.1'
-
     // Transitively export that dependencies to other modules
-    //api 'com.github.andriydruk:dnssd:0.9.4'
+    //api 'com.github.andriydruk:dnssd:0.9.5'
+    api 'io.reactivex:rxandroid:1.2.1'
     api 'io.reactivex:rxjava:1.3.4'
     api 'com.android.support:support-annotations:27.0.1'
 
@@ -50,7 +49,7 @@ dependencies {
 publish {
     groupId = 'com.github.andriydruk'
     artifactId = 'rxdnssd'
-    publishVersion = '0.9.4'
+    publishVersion = '0.9.5'
     desc = 'Android library which is Rx wrapper for Apple DNSSD Java API'
     licences = ['Apache-2.0']
     website = 'https://github.com/andriydruk/RxDNSSD'
