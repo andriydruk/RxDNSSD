@@ -144,6 +144,7 @@ abstract class Rx2DnssdCommon implements Rx2Dnssd {
                         createTxtRecord(bs.getTxtRecords()), new Rx2RegisterListener(emitter)));
     }
 
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     private static class DNSSDServiceAction<T> implements FlowableOnSubscribe<T>, Action {
 
         private final DNSSDServiceCreator<T> creator;
