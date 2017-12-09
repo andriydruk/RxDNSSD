@@ -30,7 +30,7 @@ android {
 }
 
 dependencies {
-    compile project(':library')
+    api project(':library')
 
     // Transitively export that dependencies to other modules
     //api 'com.github.andriydruk:dnssd:0.9.5'
@@ -109,8 +109,4 @@ task checkstyle(type: Checkstyle) {
     classpath = files()
 }
 
-check.doLast {
-    project.tasks.getByName("pmd").execute()
-    project.tasks.getByName("findbugs").execute()
-    project.tasks.getByName("checkstyle").execute()
-}
+check.finalizedBy "checkstyle", "findbugs", "pmd"
