@@ -76,7 +76,7 @@ public class Rx2DnssdTest {
             bonjourService = new BonjourService.Builder(FLAGS, IF_INDEX, SERVICE_NAME_STRING, REG_TYPE_STRING, DOMAIN_STRING).build();
     static BonjourService lostBonjourService = new BonjourService.Builder(BonjourService.LOST, IF_INDEX, SERVICE_NAME_STRING, REG_TYPE_STRING, DOMAIN_STRING).build();
     static BonjourService resolvedBonjourService = new BonjourService.Builder(bonjourService).port(PORT).hostname(HOSTNAME_STRING)
-            .dnsRecords(new HashMap<String, String>(0)).build();
+            .dnsRecords(new HashMap<>(0)).build();
 
     static Inet4Address inet4Address = PowerMockito.mock(Inet4Address.class);
     static Inet6Address inet6Address = PowerMockito.mock(Inet6Address.class);
@@ -92,12 +92,7 @@ public class Rx2DnssdTest {
 
     @Before
     public void setup() {
-        RxAndroidPlugins.setMainThreadSchedulerHandler(new Function<Scheduler, Scheduler>() {
-            @Override
-            public Scheduler apply(Scheduler scheduler) throws Exception {
-                return Schedulers.trampoline();
-            }
-        });
+        RxAndroidPlugins.setMainThreadSchedulerHandler(scheduler -> Schedulers.trampoline());
         mockService = mock(DNSSDService.class);
         mockDNSSD = mock(DNSSD.class);
         rxDnssd = new Rx2DnssdCommon(mockDNSSD) {
@@ -208,7 +203,7 @@ public class Rx2DnssdTest {
 
         ArgumentCaptor<ResolveListener> propertiesCaptor = ArgumentCaptor.forClass(ResolveListener.class);
         verify(mockDNSSD).resolve(anyInt(), anyInt(), anyString(), anyString(), anyString(), propertiesCaptor.capture());
-        propertiesCaptor.getValue().serviceResolved(mockService, FLAGS, IF_INDEX, SERVICE_NAME, HOSTNAME, PORT, new HashMap<String, String>());
+        propertiesCaptor.getValue().serviceResolved(mockService, FLAGS, IF_INDEX, SERVICE_NAME, HOSTNAME, PORT, new HashMap<>());
         assertServices(testSubscriber, resolvedBonjourService);
     }
 
@@ -220,7 +215,7 @@ public class Rx2DnssdTest {
 
         ArgumentCaptor<ResolveListener> propertiesCaptor = ArgumentCaptor.forClass(ResolveListener.class);
         verify(mockDNSSD).resolve(anyInt(), anyInt(), anyString(), anyString(), anyString(), propertiesCaptor.capture());
-        propertiesCaptor.getValue().serviceResolved(mockService, FLAGS, IF_INDEX, SERVICE_NAME, HOSTNAME, PORT, new HashMap<String, String>());
+        propertiesCaptor.getValue().serviceResolved(mockService, FLAGS, IF_INDEX, SERVICE_NAME, HOSTNAME, PORT, new HashMap<>());
         testSubscriber.assertNoValues();
         testSubscriber.assertNotTerminated();
     }
@@ -609,22 +604,19 @@ public class Rx2DnssdTest {
     public static void assertServices(TestSubscriber<BonjourService> testSubscriber, BonjourService... services) {
         int serviceIndex = 0;
         for (final BonjourService service : services) {
-            testSubscriber.assertValueAt(serviceIndex++, new Predicate<BonjourService>() {
-                @Override
-                public boolean test(BonjourService origin) throws Exception {
-                    if (origin.getFlags() != service.getFlags()) fail();
-                    if (origin.getIfIndex() != service.getIfIndex()) fail();
-                    if (origin.getPort() != service.getPort()) fail();
-                    if (!origin.getServiceName().equals(service.getServiceName())) fail();
-                    if (!origin.getRegType().equals(service.getRegType())) fail();
-                    if (!origin.getDomain().equals(service.getDomain())) fail();
-                    if (origin.getInet4Address() != service.getInet4Address()) fail();
-                    if (origin.getInet6Address() != service.getInet6Address()) fail();
-                    if (!origin.getTxtRecords().equals(service.getTxtRecords())) fail();
-                    if (origin.getHostname() != null ? !origin.getHostname().equals(service.getHostname()) : service.getHostname() != null)
-                        fail();
-                    return true;
-                }
+            testSubscriber.assertValueAt(serviceIndex++, origin -> {
+                if (origin.getFlags() != service.getFlags()) fail();
+                if (origin.getIfIndex() != service.getIfIndex()) fail();
+                if (origin.getPort() != service.getPort()) fail();
+                if (!origin.getServiceName().equals(service.getServiceName())) fail();
+                if (!origin.getRegType().equals(service.getRegType())) fail();
+                if (!origin.getDomain().equals(service.getDomain())) fail();
+                if (origin.getInet4Address() != service.getInet4Address()) fail();
+                if (origin.getInet6Address() != service.getInet6Address()) fail();
+                if (!origin.getTxtRecords().equals(service.getTxtRecords())) fail();
+                if (origin.getHostname() != null ? !origin.getHostname().equals(service.getHostname()) : service.getHostname() != null)
+                    fail();
+                return true;
             });
         }
         testSubscriber.assertValueCount(serviceIndex);
