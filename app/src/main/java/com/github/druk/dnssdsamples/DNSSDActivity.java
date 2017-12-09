@@ -1,16 +1,5 @@
 package com.github.druk.dnssdsamples;
 
-import com.github.druk.dnssd.BrowseListener;
-import com.github.druk.dnssd.DNSSD;
-import com.github.druk.dnssd.DNSSDEmbedded;
-import com.github.druk.dnssd.DNSSDException;
-import com.github.druk.dnssd.DNSSDRegistration;
-import com.github.druk.dnssd.DNSSDService;
-import com.github.druk.dnssd.QueryListener;
-import com.github.druk.dnssd.RegisterListener;
-import com.github.druk.dnssd.ResolveListener;
-import com.github.druk.rxdnssd.BonjourService;
-
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,6 +13,17 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.github.druk.dnssd.BrowseListener;
+import com.github.druk.dnssd.DNSSD;
+import com.github.druk.dnssd.DNSSDEmbedded;
+import com.github.druk.dnssd.DNSSDException;
+import com.github.druk.dnssd.DNSSDRegistration;
+import com.github.druk.dnssd.DNSSDService;
+import com.github.druk.dnssd.QueryListener;
+import com.github.druk.dnssd.RegisterListener;
+import com.github.druk.dnssd.ResolveListener;
+import com.github.druk.rx2dnssd.BonjourService;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -58,8 +58,7 @@ public class DNSSDActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (registerService == null) {
                     register((Button) v);
-                }
-                else {
+                } else {
                     unregistered((Button) v);
                 }
             }
@@ -69,12 +68,11 @@ public class DNSSDActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (browseService == null) {
-                    ((TextView)v).setText(R.string.browse_stop);
+                    ((TextView) v).setText(R.string.browse_stop);
                     findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
                     startBrowse();
-                }
-                else {
-                    ((TextView)v).setText(R.string.browse_start);
+                } else {
+                    ((TextView) v).setText(R.string.browse_start);
                     findViewById(R.id.progressBar).setVisibility(View.INVISIBLE);
                     stopBrowse();
                     mServiceAdapter.clear();
@@ -105,7 +103,7 @@ public class DNSSDActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         if (browseService != null) {
-            ((TextView)findViewById(R.id.browse)).setText(R.string.browse_start);
+            ((TextView) findViewById(R.id.browse)).setText(R.string.browse_start);
             findViewById(R.id.progressBar).setVisibility(View.INVISIBLE);
             stopBrowse();
             mServiceAdapter.clear();
@@ -199,7 +197,7 @@ public class DNSSDActivity extends AppCompatActivity {
         Log.i("TAG", "register");
         button.setEnabled(false);
         try {
-            registerService = dnssd.register(Build.DEVICE, "_rxdnssd._tcp", 123,  new RegisterListener() {
+            registerService = dnssd.register(Build.DEVICE, "_rxdnssd._tcp", 123, new RegisterListener() {
                 @Override
                 public void serviceRegistered(DNSSDRegistration registration, int flags, String serviceName, String regType, String domain) {
                     Log.i("TAG", "Register successfully " + Build.DEVICE);
