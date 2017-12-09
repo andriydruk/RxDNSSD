@@ -18,7 +18,6 @@ import com.github.druk.rx2dnssd.Rx2DnssdEmbedded;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
@@ -39,30 +38,24 @@ public class MainActivity extends AppCompatActivity {
 
         rxDnssd = new Rx2DnssdEmbedded();
 
-        findViewById(R.id.register).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (registerDisposable == null) {
-                    register((Button) v);
-                } else {
-                    unregister((Button) v);
-                }
+        findViewById(R.id.register).setOnClickListener(v -> {
+            if (registerDisposable == null) {
+                register((Button) v);
+            } else {
+                unregister((Button) v);
             }
         });
 
-        findViewById(R.id.browse).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (browseDisposable == null) {
-                    ((TextView) v).setText(R.string.browse_stop);
-                    findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
-                    startBrowse();
-                } else {
-                    ((TextView) v).setText(R.string.browse_start);
-                    findViewById(R.id.progressBar).setVisibility(View.INVISIBLE);
-                    stopBrowse();
-                    mServiceAdapter.clear();
-                }
+        findViewById(R.id.browse).setOnClickListener(v -> {
+            if (browseDisposable == null) {
+                ((TextView) v).setText(R.string.browse_stop);
+                findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
+                startBrowse();
+            } else {
+                ((TextView) v).setText(R.string.browse_start);
+                findViewById(R.id.progressBar).setVisibility(View.INVISIBLE);
+                stopBrowse();
+                mServiceAdapter.clear();
             }
         });
 
@@ -101,22 +94,14 @@ public class MainActivity extends AppCompatActivity {
                 .compose(rxDnssd.queryRecords())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<BonjourService>() {
-                    @Override
-                    public void accept(BonjourService bonjourService) {
-                        Log.d("TAG", bonjourService.toString());
-                        if (bonjourService.isLost()) {
-                            mServiceAdapter.remove(bonjourService);
-                        } else {
-                            mServiceAdapter.add(bonjourService);
-                        }
+                .subscribe(bonjourService -> {
+                    Log.d("TAG", bonjourService.toString());
+                    if (bonjourService.isLost()) {
+                        mServiceAdapter.remove(bonjourService);
+                    } else {
+                        mServiceAdapter.add(bonjourService);
                     }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) {
-                        Log.e("TAG", "error", throwable);
-                    }
-                });
+                }, throwable -> Log.e("TAG", "error", throwable));
     }
 
     private void stopBrowse() {
@@ -134,20 +119,14 @@ public class MainActivity extends AppCompatActivity {
         registerDisposable = rxDnssd.register(bs)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<BonjourService>() {
-                    @Override
-                    public void accept(BonjourService bonjourService) {
-                        Log.i("TAG", "Register successfully " + bonjourService.toString());
-                        button.setEnabled(true);
-                        button.setText(R.string.unregister);
-                        Toast.makeText(MainActivity.this, "Rgstrd " + Build.DEVICE, Toast.LENGTH_SHORT).show();
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) {
-                        Log.e("TAG", "error", throwable);
-                        button.setEnabled(true);
-                    }
+                .subscribe(bonjourService -> {
+                    Log.i("TAG", "Register successfully " + bonjourService.toString());
+                    button.setEnabled(true);
+                    button.setText(R.string.unregister);
+                    Toast.makeText(MainActivity.this, "Rgstrd " + Build.DEVICE, Toast.LENGTH_SHORT).show();
+                }, throwable -> {
+                    Log.e("TAG", "error", throwable);
+                    button.setEnabled(true);
                 });
     }
 

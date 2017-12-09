@@ -16,8 +16,6 @@ import io.reactivex.FlowableOnSubscribe;
 import io.reactivex.FlowableTransformer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Action;
-import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
 
 abstract class Rx2DnssdCommon implements Rx2Dnssd {
 
@@ -47,12 +45,9 @@ abstract class Rx2DnssdCommon implements Rx2Dnssd {
     @Override
     //TODO: Finbugs: new DNSSDServiceCreator<BonjourService> should be a static class (Performance issue ???)
     public Flowable<BonjourService> browse(@NonNull final String regType, @NonNull final String domain) {
-        return createFlowable(new DNSSDServiceCreator<BonjourService>() {
-            @Override
-            public DNSSDService getService(FlowableEmitter<? super BonjourService> emitter) throws DNSSDException {
-                return mDNSSD.browse(0, DNSSD.ALL_INTERFACES, regType, domain, new Rx2BrowseListener(emitter));
-            }
-        });
+        return createFlowable(emitter ->
+                mDNSSD.browse(0, DNSSD.ALL_INTERFACES, regType, domain,
+                        new Rx2BrowseListener(emitter)));
     }
 
     /**
@@ -70,26 +65,14 @@ abstract class Rx2DnssdCommon implements Rx2Dnssd {
     @NonNull
     @Override
     public FlowableTransformer<BonjourService, BonjourService> resolve() {
-        return new FlowableTransformer<BonjourService, BonjourService>() {
-            @Override
-            public Flowable<BonjourService> apply(Flowable<BonjourService> observable) {
-                return observable.flatMap(new Function<BonjourService, Flowable<? extends BonjourService>>() {
-                    @Override
-                    public Flowable<? extends BonjourService> apply(final BonjourService bs) {
-                        if ((bs.getFlags() & BonjourService.LOST) == BonjourService.LOST) {
-                            return Flowable.just(bs);
-                        }
-                        return createFlowable(new DNSSDServiceCreator<BonjourService>() {
-                            @Override
-                            public DNSSDService getService(FlowableEmitter<? super BonjourService> emitter) throws DNSSDException {
-                                return mDNSSD.resolve(bs.getFlags(), bs.getIfIndex(), bs.getServiceName(), bs.getRegType(), bs.getDomain(),
-                                        new Rx2ResolveListener(emitter, bs));
-                            }
-                        });
-                    }
-                });
+        return flowable -> flowable.flatMap(bs -> {
+            if ((bs.getFlags() & BonjourService.LOST) == BonjourService.LOST) {
+                return Flowable.just(bs);
             }
-        };
+            return createFlowable(emitter ->
+                    mDNSSD.resolve(bs.getFlags(), bs.getIfIndex(), bs.getServiceName(), bs.getRegType(), bs.getDomain(),
+                            new Rx2ResolveListener(emitter, bs)));
+        });
     }
 
     /**
@@ -100,33 +83,21 @@ abstract class Rx2DnssdCommon implements Rx2Dnssd {
     @NonNull
     @Override
     public FlowableTransformer<BonjourService, BonjourService> queryRecords() {
-        return new FlowableTransformer<BonjourService, BonjourService>() {
-            @Override
-            public Flowable<BonjourService> apply(Flowable<BonjourService> observable) {
-                return observable.flatMap(new Function<BonjourService, Flowable<? extends BonjourService>>() {
-                    @Override
-                    public Flowable<? extends BonjourService> apply(final BonjourService bs) {
-                        if ((bs.getFlags() & BonjourService.LOST) == BonjourService.LOST) {
-                            return Flowable.just(bs);
-                        }
-                        final BonjourService.Builder builder = new BonjourService.Builder(bs);
-                        return createFlowable(new DNSSDServiceCreator<BonjourService>() {
-                            @Override
-                            public DNSSDService getService(FlowableEmitter<? super BonjourService> emitter) throws DNSSDException {
-                                return mDNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 1 /* ns_t_a */, 1 /* ns_c_in */,
-                                        new Rx2QueryListener(emitter, builder));
-                            }
-                        }).mergeWith(createFlowable(new DNSSDServiceCreator<BonjourService>() {
-                            @Override
-                            public DNSSDService getService(FlowableEmitter<? super BonjourService> emitter) throws DNSSDException {
-                                return mDNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 28 /* ns_t_aaaa */, 1 /* ns_c_in */,
-                                        new Rx2QueryListener(emitter, builder));
-                            }
-                        }));
-                    }
-                });
+        return flowable -> flowable.flatMap(bs -> {
+            if ((bs.getFlags() & BonjourService.LOST) == BonjourService.LOST) {
+                return Flowable.just(bs);
             }
-        };
+            BonjourService.Builder builder = new BonjourService.Builder(bs);
+
+            Flowable<BonjourService> flowableV4 = createFlowable(emitter ->
+                    mDNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 1 /* ns_t_a */, 1 /* ns_c_in */,
+                            new Rx2QueryListener(emitter, builder)));
+            Flowable<BonjourService> flowableV6 = createFlowable(emitter ->
+                    mDNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 28 /* ns_t_aaaa */, 1 /* ns_c_in */,
+                            new Rx2QueryListener(emitter, builder)));
+
+            return flowableV4.mergeWith(flowableV6);
+        });
     }
 
     /**
@@ -137,26 +108,14 @@ abstract class Rx2DnssdCommon implements Rx2Dnssd {
     @NonNull
     @Override
     public FlowableTransformer<BonjourService, BonjourService> queryIPV4Records() {
-        return new FlowableTransformer<BonjourService, BonjourService>() {
-            @Override
-            public Flowable<BonjourService> apply(Flowable<BonjourService> observable) {
-                return observable.flatMap(new Function<BonjourService, Flowable<? extends BonjourService>>() {
-                    @Override
-                    public Flowable<? extends BonjourService> apply(final BonjourService bs) {
-                        if ((bs.getFlags() & BonjourService.LOST) == BonjourService.LOST) {
-                            return Flowable.just(bs);
-                        }
-                        return createFlowable(new DNSSDServiceCreator<BonjourService>() {
-                            @Override
-                            public DNSSDService getService(FlowableEmitter<? super BonjourService> emitter) throws DNSSDException {
-                                return mDNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 1 /* ns_t_a */, 1 /* ns_c_in */,
-                                        new Rx2QueryListener(emitter, new BonjourService.Builder(bs)));
-                            }
-                        });
-                    }
-                });
+        return flowable -> flowable.flatMap(bs -> {
+            if ((bs.getFlags() & BonjourService.LOST) == BonjourService.LOST) {
+                return Flowable.just(bs);
             }
-        };
+            return createFlowable(emitter ->
+                    mDNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 1 /* ns_t_a */, 1 /* ns_c_in */,
+                            new Rx2QueryListener(emitter, new BonjourService.Builder(bs))));
+        });
     }
 
     /**
@@ -167,38 +126,22 @@ abstract class Rx2DnssdCommon implements Rx2Dnssd {
     @NonNull
     @Override
     public FlowableTransformer<BonjourService, BonjourService> queryIPV6Records() {
-        return new FlowableTransformer<BonjourService, BonjourService>() {
-            @Override
-            public Flowable<BonjourService> apply(Flowable<BonjourService> observable) {
-                return observable.flatMap(new Function<BonjourService, Flowable<? extends BonjourService>>() {
-                    @Override
-                    public Flowable<? extends BonjourService> apply(final BonjourService bs) {
-                        if ((bs.getFlags() & BonjourService.LOST) == BonjourService.LOST) {
-                            return Flowable.just(bs);
-                        }
-                        return createFlowable(new DNSSDServiceCreator<BonjourService>() {
-                            @Override
-                            public DNSSDService getService(FlowableEmitter<? super BonjourService> emitter) throws DNSSDException {
-                                return mDNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 28 /* ns_t_aaaa */, 1 /* ns_c_in */,
-                                        new Rx2QueryListener(emitter, new BonjourService.Builder(bs)));
-                            }
-                        });
-                    }
-                });
+        return flowable -> flowable.flatMap(bs -> {
+            if ((bs.getFlags() & BonjourService.LOST) == BonjourService.LOST) {
+                return Flowable.just(bs);
             }
-        };
+            return createFlowable(emitter ->
+                    mDNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 28 /* ns_t_aaaa */, 1 /* ns_c_in */,
+                            new Rx2QueryListener(emitter, new BonjourService.Builder(bs))));
+        });
     }
 
     @NonNull
     @Override
     public Flowable<BonjourService> register(@NonNull final BonjourService bs) {
-        return createFlowable(new DNSSDServiceCreator<BonjourService>() {
-            @Override
-            public DNSSDService getService(FlowableEmitter<? super BonjourService> emitter) throws DNSSDException {
-                return mDNSSD.register(bs.getFlags(), bs.getIfIndex(), bs.getServiceName(), bs.getRegType(), bs.getDomain(), null, bs.getPort(),
-                        createTxtRecord(bs.getTxtRecords()), new Rx2RegisterListener(emitter));
-            }
-        });
+        return createFlowable(emitter ->
+                mDNSSD.register(bs.getFlags(), bs.getIfIndex(), bs.getServiceName(), bs.getRegType(), bs.getDomain(), null, bs.getPort(),
+                        createTxtRecord(bs.getTxtRecords()), new Rx2RegisterListener(emitter)));
     }
 
     private static class DNSSDServiceAction<T> implements FlowableOnSubscribe<T>, Action {
@@ -226,17 +169,7 @@ abstract class Rx2DnssdCommon implements Rx2Dnssd {
             if (service != null) {
                 Flowable.just(service)
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Consumer<DNSSDService>() {
-                            @Override
-                            public void accept(DNSSDService service) {
-                                service.stop();
-                            }
-                        }, new Consumer<Throwable>() {
-                            @Override
-                            public void accept(Throwable throwable) throws Exception {
-                                throwable.printStackTrace();
-                            }
-                        });
+                        .subscribe(DNSSDService::stop);
                 service = null;
             }
         }
