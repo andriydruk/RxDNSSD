@@ -145,6 +145,7 @@ public class DNSSDActivity extends AppCompatActivity {
                 public void serviceResolved(DNSSDService resolver, int flags, int ifIndex, String fullName, String hostName, int port, Map<String, String> txtRecord) {
                     Log.d("TAG", "Resolved " + hostName);
                     startQueryRecords(flags, ifIndex, serviceName, regType, domain, hostName, port, txtRecord);
+                    resolver.stop();
                 }
 
                 @Override
@@ -173,6 +174,7 @@ public class DNSSDActivity extends AppCompatActivity {
                                 builder.inet6Address((Inet6Address) address);
                             }
                             mServiceAdapter.add(builder.build());
+                            query.stop();
                         }
                     });
                 }
