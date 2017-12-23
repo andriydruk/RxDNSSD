@@ -29,6 +29,8 @@ import java.util.Map;
 
 public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener {
 
+    public static final int DNSSD_DEFAULT_TIMEOUT = 60 * 1000; // 60 sec
+
     /**	Flag indicates to a {@link BrowseListener} that another result is
      queued. Applications should not update their UI to display browse
      results if the MORE_COMING flag is set; they will be called at least once
@@ -71,18 +73,29 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
 
     private final Handler handler;
 
+    /** Timeout for resolve and query records operations. Default value: {@value #DNSSD_DEFAULT_TIMEOUT} */
+    private final int serviceTimeout;
+
     DNSSD(String lib) {
         this(lib, Looper.getMainLooper());
     }
 
     DNSSD(String lib, Looper looper) {
         InternalDNSSD.init(lib);
-        handler = new Handler(looper);
+        this.handler = new Handler(looper);
+        this.serviceTimeout = DNSSD_DEFAULT_TIMEOUT;
     }
 
     DNSSD(String lib, Handler handler) {
         InternalDNSSD.init(lib);
         this.handler = handler;
+        this.serviceTimeout = DNSSD_DEFAULT_TIMEOUT;
+    }
+
+    DNSSD(String lib, Handler handler, int serviceTimeout) {
+        InternalDNSSD.init(lib);
+        this.handler = handler;
+        this.serviceTimeout = serviceTimeout;
     }
 
     /** Browse for instances of a service.<P>
@@ -220,30 +233,44 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
     public DNSSDService resolve(int flags, int ifIndex, String serviceName, String regType, String domain, final ResolveListener listener) throws DNSSDException {
         onServiceStarting();
         final DNSSDService[] services = new DNSSDService[1];
+
+        final Runnable timeoutRunnable = new Runnable() {
+            @Override
+            public void run() {
+                services[0].stop();
+            }
+        };
+
         services[0] = new InternalDNSSDService(this, InternalDNSSD.resolve(flags, ifIndex, serviceName, regType, domain, new InternalResolveListener() {
             @Override
-            public void serviceResolved(DNSSDService resolver, final int flags, final int ifIndex, byte[] fullName, byte[] hostName, final int port, TXTRecord txtRecord) {
+            public void serviceResolved(final DNSSDService resolver, final int flags, final int ifIndex, byte[] fullName, byte[] hostName, final int port, TXTRecord txtRecord) {
                 final String fullNameStr =  new String(fullName, UTF_8);
                 final String hostNameStr =  new String(hostName, UTF_8);
                 final Map<String, String> record = parseTXTRecords(txtRecord);
+                handler.removeCallbacks(timeoutRunnable);
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
                         listener.serviceResolved(services[0], flags, ifIndex, fullNameStr, hostNameStr, port, record);
+                        services[0].stop();
                     }
                 });
             }
 
             @Override
             public void operationFailed(final DNSSDService service, final int errorCode) {
+                handler.removeCallbacks(timeoutRunnable);
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
                         listener.operationFailed(services[0], errorCode);
+                        services[0].stop();
                     }
                 });
             }
         }));
+
+        handler.postDelayed(timeoutRunnable, serviceTimeout);
         return services[0];
     }
 
@@ -408,16 +435,26 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
     public DNSSDService queryRecord(int flags, int ifIndex, final String serviceName, int rrtype, int rrclass, final QueryListener listener) throws DNSSDException {
         onServiceStarting();
         final DNSSDService[] services = new DNSSDService[1];
+
+        final Runnable timeoutRunnable = new Runnable() {
+            @Override
+            public void run() {
+                services[0].stop();
+            }
+        };
+
         services[0] = new InternalDNSSDService(this, InternalDNSSD.queryRecord(flags, ifIndex, serviceName, rrtype, rrclass, new InternalQueryListener() {
             @Override
             public void queryAnswered(DNSSDService query, final int flags, final int ifIndex, byte[] fullName, final int rrtype, final int rrclass, byte[] rdata, final int ttl) {
                 final String fullNameStr = new String(fullName, UTF_8);
+                handler.removeCallbacks(timeoutRunnable);
                 try {
                     final InetAddress address = InetAddress.getByAddress(rdata);
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
                             listener.queryAnswered(services[0], flags, ifIndex, fullNameStr, rrtype, rrclass, address, ttl);
+                            services[0].stop();
                         }
                     });
                 } catch (UnknownHostException e) {
@@ -426,6 +463,7 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
                         @Override
                         public void run() {
                             listener.operationFailed(services[0], -1);
+                            services[0].stop();
                         }
                     });
                 }
@@ -434,14 +472,19 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
 
             @Override
             public void operationFailed(DNSSDService service, final int errorCode) {
+                handler.removeCallbacks(timeoutRunnable);
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
                         listener.operationFailed(services[0], errorCode);
+                        services[0].stop();
                     }
                 });
             }
         }));
+
+        handler.postDelayed(timeoutRunnable, serviceTimeout);
+
         return services[0];
     }
 

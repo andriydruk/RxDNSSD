@@ -1,5 +1,9 @@
 package com.github.druk.dnssdsamples;
 
+import com.github.druk.rxdnssd.BonjourService;
+import com.github.druk.rxdnssd.RxDnssd;
+import com.github.druk.rxdnssd.RxDnssdBindable;
+
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -12,13 +16,12 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.github.druk.rx2dnssd.BonjourService;
-import com.github.druk.rx2dnssd.Rx2Dnssd;
-import com.github.druk.rx2dnssd.Rx2DnssdEmbedded;
+import java.util.Set;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,13 +39,39 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        rxDnssd = new Rx2DnssdEmbedded();
+        rxDnssd = new RxDnssdBindable(this);
 
-        findViewById(R.id.register).setOnClickListener(v -> {
-            if (registerDisposable == null) {
-                register((Button) v);
-            } else {
-                unregister((Button) v);
+        findViewById(R.id.check_threads).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                /*
+                 *   When make browse after all services were found and timeout exhausted (default 60 sec) should be only 5 threads:
+                 *   - main
+                 *   - NsdManager
+                 *   - Thread #<n> (it's DNSSD browse thread)
+                 *   - RxIoScheduler-1 (rx possibly can create more or less threads, in my case was 2)
+                 *   - RxIoScheduler-2
+                 */
+                Log.i("Thread", "Thread count " + Thread.activeCount() + ":");
+                Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+                for (Thread thread : threadSet) {
+                    // We only interested in main group
+                    if (thread.getThreadGroup().getName().equals("main")) {
+                        Log.v("Thread", thread.getName());
+                    }
+                }
+            }
+        });
+
+        findViewById(R.id.register).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (registerSubscription == null) {
+                    register((Button) v);
+                }
+                else {
+                    unregistered((Button) v);
+                }
             }
         });
 
