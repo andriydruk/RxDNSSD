@@ -2,7 +2,7 @@ package com.github.druk.dnssdsamples;
 
 import com.github.druk.dnssd.BrowseListener;
 import com.github.druk.dnssd.DNSSD;
-import com.github.druk.dnssd.DNSSDEmbedded;
+import com.github.druk.dnssd.DNSSDBindable;
 import com.github.druk.dnssd.DNSSDException;
 import com.github.druk.dnssd.DNSSDRegistration;
 import com.github.druk.dnssd.DNSSDService;
@@ -29,6 +29,7 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.Map;
+import java.util.Set;
 
 public class DNSSDActivity extends AppCompatActivity {
 
@@ -49,9 +50,29 @@ public class DNSSDActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        dnssd = new DNSSDEmbedded();
+        dnssd = new DNSSDBindable(this);
 
         mHandler = new Handler(Looper.getMainLooper());
+
+        findViewById(R.id.check_threads).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                /*
+                 *   When make browse after all services were found and timeout exhausted (default 60 sec) should be only 3 threads:
+                 *   - main
+                 *   - NsdManager
+                 *   - Thread #<n> (it's DNSSD browse thread)
+                 */
+                Log.i("Thread", "Thread count " + Thread.activeCount() + ":");
+                Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+                for (Thread thread : threadSet) {
+                    // We only interested in main group
+                    if (thread.getThreadGroup().getName().equals("main")) {
+                        Log.v("Thread", thread.getName());
+                    }
+                }
+            }
+        });
 
         findViewById(R.id.register).setOnClickListener(new View.OnClickListener() {
             @Override

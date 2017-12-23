@@ -97,4 +97,5 @@
     <string name="register">Register service</string>
     <string name="unregister">Unrgstr service</string>
     <string name="unresolved">Unresolved</string>
+    <string name="check_threads">Check threads</string>
 </resources>
