@@ -11,9 +11,7 @@ import java.util.Map;
 
 import rx.Observable;
 import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
-import rx.functions.Action1;
 import rx.functions.Func1;
 
 abstract class RxDnssdCommon implements RxDnssd {
@@ -86,8 +84,12 @@ abstract class RxDnssdCommon implements RxDnssd {
                 return Observable.just(bs);
             }
             final BonjourService.Builder builder = new BonjourService.Builder(bs);
-            return createObservable((DNSSDServiceCreator<BonjourService>) subscriber -> mDNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 1 /* ns_t_a */, 1 /* ns_c_in */,
-                    new RxQueryListener(subscriber, builder))).mergeWith(createObservable(subscriber -> mDNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 28 /* ns_t_aaaa */, 1 /* ns_c_in */,
+            // 1 - ns_t_a
+            // 1 - ns_c_in
+            return createObservable((DNSSDServiceCreator<BonjourService>) subscriber -> mDNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 1, 1,
+                    // 28 - ns_t_aaaa
+                    // 1 - ns_c_in
+                    new RxQueryListener(subscriber, builder))).mergeWith(createObservable(subscriber -> mDNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 28, 1,
                             new RxQueryListener(subscriber, builder))));
         });
     }

@@ -1,11 +1,11 @@
 package com.github.druk.rx2dnssd;
 
-import android.support.annotation.NonNull;
-
 import com.github.druk.dnssd.DNSSD;
 import com.github.druk.dnssd.DNSSDException;
 import com.github.druk.dnssd.DNSSDService;
 import com.github.druk.dnssd.TXTRecord;
+
+import android.support.annotation.NonNull;
 
 import java.util.Map;
 
@@ -14,7 +14,6 @@ import io.reactivex.Flowable;
 import io.reactivex.FlowableEmitter;
 import io.reactivex.FlowableOnSubscribe;
 import io.reactivex.FlowableTransformer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.functions.Action;
 
 abstract class Rx2DnssdCommon implements Rx2Dnssd {

@@ -20,7 +20,6 @@ dependencies:
     override:
         - echo y | android update sdk --no-ui --all --filter "tools"
         - echo y | android update sdk --no-ui --all --filter "platform-tools"
-        - echo y | android update sdk --no-ui --all --filter "build-tools-26.0.2"
 
         # WTF?
         - yes | $ANDROID_HOME/tools/bin/sdkmanager "platforms;android-27"

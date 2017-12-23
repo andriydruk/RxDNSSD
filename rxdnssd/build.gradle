@@ -2,12 +2,12 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.novoda.bintray-release'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion "26.0.2"
+    compileSdkVersion 27
+    buildToolsVersion "27.0.1"
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 26
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
     }
@@ -33,10 +33,10 @@ dependencies {
     compile project(':library')
 
     // Transitively export that dependencies to other modules
-    //api 'com.github.andriydruk:dnssd:0.9.5'
-    api 'io.reactivex:rxandroid:1.2.1'
-    api 'io.reactivex:rxjava:1.3.4'
-    api 'com.android.support:support-annotations:27.0.1'
+    //compile 'com.github.andriydruk:dnssd:0.9.7'
+    compile 'io.reactivex:rxandroid:1.2.1'
+    compile 'io.reactivex:rxjava:1.3.4'
+    compile 'com.android.support:support-annotations:27.0.2'
 
     testImplementation 'junit:junit:4.12'
     // Last version that support Power Mock: https://github.com/powermock/powermock/wiki/Mockito#supported-versions
@@ -54,7 +54,7 @@ dependencies {
 publish {
     groupId = 'com.github.andriydruk'
     artifactId = 'rxdnssd'
-    publishVersion = '0.9.5'
+    publishVersion = '0.9.7'
     desc = 'Android library which is Rx wrapper for Apple DNSSD Java API'
     licences = ['Apache-2.0']
     website = 'https://github.com/andriydruk/RxDNSSD'
