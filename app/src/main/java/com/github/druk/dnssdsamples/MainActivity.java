@@ -1,8 +1,8 @@
 package com.github.druk.dnssdsamples;
 
-import com.github.druk.rxdnssd.BonjourService;
-import com.github.druk.rxdnssd.RxDnssd;
-import com.github.druk.rxdnssd.RxDnssdBindable;
+import com.github.druk.rx2dnssd.BonjourService;
+import com.github.druk.rx2dnssd.Rx2Dnssd;
+import com.github.druk.rx2dnssd.Rx2DnssdBindable;
 
 import android.os.Build;
 import android.os.Bundle;
@@ -18,10 +18,10 @@ import android.widget.Toast;
 
 import java.util.Set;
 
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,26 +39,23 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        rxDnssd = new RxDnssdBindable(this);
+        rxDnssd = new Rx2DnssdBindable(this);
 
-        findViewById(R.id.check_threads).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                /*
-                 *   When make browse after all services were found and timeout exhausted (default 60 sec) should be only 5 threads:
-                 *   - main
-                 *   - NsdManager
-                 *   - Thread #<n> (it's DNSSD browse thread)
-                 *   - RxIoScheduler-1 (rx possibly can create more or less threads, in my case was 2)
-                 *   - RxIoScheduler-2
-                 */
-                Log.i("Thread", "Thread count " + Thread.activeCount() + ":");
-                Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
-                for (Thread thread : threadSet) {
-                    // We only interested in main group
-                    if (thread.getThreadGroup().getName().equals("main")) {
-                        Log.v("Thread", thread.getName());
-                    }
+        findViewById(R.id.check_threads).setOnClickListener(v -> {
+            /*
+             *   When make browse after all services were found and timeout exhausted (default 60 sec) should be only 5 threads:
+             *   - main
+             *   - NsdManager
+             *   - Thread #<n> (it's DNSSD browse thread)
+             *   - RxIoScheduler-1 (rx possibly can create more or less threads, in my case was 2)
+             *   - RxIoScheduler-2
+             */
+            Log.i("Thread", "Thread count " + Thread.activeCount() + ":");
+            Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+            for (Thread thread : threadSet) {
+                // We only interested in main group
+                if (thread.getThreadGroup().getName().equals("main")) {
+                    Log.v("Thread", thread.getName());
                 }
             }
         });
@@ -66,11 +63,11 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.register).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (registerSubscription == null) {
+                if (registerDisposable == null) {
                     register((Button) v);
                 }
                 else {
-                    unregistered((Button) v);
+                    unregister((Button) v);
                 }
             }
         });
