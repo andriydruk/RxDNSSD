@@ -15,9 +15,6 @@
  */
 package com.github.druk.dnssdsamples;
 
-import com.github.druk.dnssd.DNSSD;
-import com.github.druk.rxdnssd.BonjourService;
-
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
@@ -27,6 +24,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.github.druk.rx2dnssd.BonjourService;
 
 import java.util.ArrayList;
 import java.util.List;

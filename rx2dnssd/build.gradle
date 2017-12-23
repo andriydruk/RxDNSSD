@@ -1,0 +1,112 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
+
+android {
+    compileSdkVersion 26
+    buildToolsVersion "26.0.2"
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 26
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    api project(':library')
+
+    // Transitively export that dependencies to other modules
+    //api 'com.github.andriydruk:dnssd:0.9.5'
+    api 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    api 'io.reactivex.rxjava2:rxjava:2.1.7'
+    api 'com.android.support:support-annotations:27.0.1'
+
+    testImplementation 'junit:junit:4.12'
+    // Last version that support Power Mock: https://github.com/powermock/powermock/wiki/Mockito#supported-versions
+    testImplementation 'org.mockito:mockito-core:2.8.9'
+    testImplementation ('org.powermock:powermock-api-mockito2:1.7.3') {
+        exclude module: 'hamcrest-core'
+        exclude module: 'objenesis'
+    }
+    testImplementation ('org.powermock:powermock-module-junit4:1.7.3') {
+        exclude module: 'hamcrest-core'
+        exclude module: 'objenesis'
+    }
+}
+
+publish {
+    groupId = 'com.github.andriydruk'
+    artifactId = 'rx2dnssd'
+    publishVersion = '0.9.5'
+    desc = 'Android library which is Rx wrapper for Apple DNSSD Java API'
+    licences = ['Apache-2.0']
+    website = 'https://github.com/andriydruk/RxDNSSD'
+}
+
+//Add PMD checks
+plugins.apply('pmd')
+pmd {
+    toolVersion = '5.4.0'
+}
+task pmd(type: Pmd) {
+    ignoreFailures = false // Fail early.
+    ruleSetFiles = files("${buildscript.sourceFile.parent}/pmd.xml")
+    ruleSets = []
+    source = fileTree('src/main/java/com/github')
+}
+
+//Add findbugs
+plugins.apply('findbugs')
+task findbugs(type: FindBugs) {
+    ignoreFailures = false // Fail early.
+    effort = 'max'
+    reportLevel = 'low' // Report even low priority problems.
+    reports {
+        xml {
+            enabled = false
+        }
+        html {
+            enabled = true
+        }
+    }
+    classes = files("${project.projectDir}/build/intermediates/classes/debug/com/github")
+    source = fileTree('src/main/java/com/github')
+    classpath = files()
+    excludeFilter = file("${buildscript.sourceFile.parent}/findbugs-filter.xml")
+}
+
+//Add checkstyle checks
+plugins.apply('checkstyle')
+checkstyle {
+    toolVersion = '6.15'
+}
+task checkstyle(type: Checkstyle) {
+    configFile file("${buildscript.sourceFile.parent}/checkstyle.xml")
+    ignoreFailures = false // Fail early.
+    showViolations false
+    source 'src/main/java/com/github'
+    include '**/*.java'
+    reports {
+        html.enabled = true
+    }
+    classpath = files()
+}
+
+check.finalizedBy "checkstyle", "findbugs", "pmd"
