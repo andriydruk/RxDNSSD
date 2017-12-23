@@ -1,4 +1,4 @@
-# Android mDNSResponder [![Circle CI](https://circleci.com/gh/andriydruk/RxDNSSD.svg?style=shield&circle-token=5f0cb1ee907a20bdb08aa4b073b5690afbaaabe1)](https://circleci.com/gh/andriydruk/RxDNSSD) [![Download](https://api.bintray.com/packages/andriydruk/maven/dnssd/images/download.svg)](https://bintray.com/andriydruk/maven/rxdnssd/_latestVersion) [![Download](https://api.bintray.com/packages/andriydruk/maven/rxdnssd/images/download.svg)](https://bintray.com/andriydruk/maven/rxdnssd/_latestVersion)
+# Android mDNSResponder [![Circle CI](https://circleci.com/gh/andriydruk/RxDNSSD.svg?style=shield&circle-token=5f0cb1ee907a20bdb08aa4b073b5690afbaaabe1)](https://circleci.com/gh/andriydruk/RxDNSSD) [![Download](https://api.bintray.com/packages/andriydruk/maven/dnssd/images/download.svg)](https://bintray.com/andriydruk/maven/rxdnssd/_latestVersion) [![Download](https://api.bintray.com/packages/andriydruk/maven/rxdnssd/images/download.svg)](https://bintray.com/andriydruk/maven/rxdnssd/_latestVersion)[ ![Download](https://api.bintray.com/packages/andriydruk/maven/rxdnssd/images/download.svg) ](https://bintray.com/andriydruk/maven/rxdnssd/_latestVersion)
 
 
 
@@ -13,7 +13,7 @@ Bindable version:
 
 ```
                                    +--------------------+       +--------------------+
-                                   |      RxDNSSD       |       |       RxDNSSD2     |
+                                   |      RxDNSSD       |       |       Rx2DNSSD     |
                                    +--------------------+       +--------------------+
                                            |                            |
                                            |   +--------------------+   |
@@ -35,7 +35,7 @@ Embedded version:
 
 ```
                      +--------------------+       +--------------------+
-                     |      RxDNSSD       |       |       RxDNSSD2     |
+                     |      RxDNSSD       |       |       Rx2DNSSD     |
                      +--------------------+       +--------------------+
                                 |                            |
                                 |   +--------------------+   |
@@ -58,19 +58,19 @@ Embedded version:
 My dnssd library:
 
 ```groovy
-compile 'com.github.andriydruk:dnssd:0.9.5'
+compile 'com.github.andriydruk:dnssd:0.9.7'
 ```
 
 My rxdnssd library:
 
 ```groovy
-compile 'com.github.andriydruk:rxdnssd:0.9.5'
+compile 'com.github.andriydruk:rxdnssd:0.9.7'
 ```
 
-My rxdnssd2 library:
+My rx2dnssd library:
 
 ```
-Still in progress ...
+compile 'com.github.andriydruk:rx2dnssd:0.9.7'
 ```
 
 * It's built with Andorid NDK r16 for all platforms (2.18 MB). If you prefer another NDK version or subset of platforms, please build it from source with command:
@@ -150,8 +150,6 @@ You can find more samples in app inside this repository.
 
 ### RxDNSSD
 
-RxDNSSD also provides two implementations of RxDnssd interface: 
-
 - RxDnssdBindable
 ```
 RxDnssd rxdnssd = new RxDnssdBindable(context); 
@@ -163,6 +161,7 @@ RxDnssd rxdnssd = new RxDnssdEmbedded();
 
 ##### Register service
 ```java
+BonjourService bs = new BonjourService.Builder(0, 0, Build.DEVICE, "_rxdnssd._tcp", null).port(123).build();
 Subscription subscription = rxdnssd.register(bonjourService)
       .observeOn(AndroidSchedulers.mainThread())
       .subscribe(service -> {
@@ -192,9 +191,46 @@ Subscription subscription = rxDnssd.browse("_http._tcp", "local.")
 	});
 ```
 
-### RxDNSSD2
+### Rx2DNSSD
 
-Still in progress ... (I recieve PR 😉)
+- Rx2DnssdBindable
+```
+Rx2Dnssd rxdnssd = new Rx2DnssdBindable(context); 
+```
+- Rx2DnssdEmbedded
+```
+Rx2Dnssd rxdnssd = new Rx2DnssdEmbedded(); 
+```
+
+##### Register service
+```java
+BonjourService bs = new BonjourService.Builder(0, 0, Build.DEVICE, "_rxdnssd._tcp", null).port(123).build();
+registerDisposable = rxDnssd.register(bs)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(bonjourService -> {
+            Log.i("TAG", "Register successfully " + bonjourService.toString());
+        }, throwable -> {
+            Log.e("TAG", "error", throwable);
+        });
+```
+
+##### Browse services example
+```java
+browseDisposable = rxDnssd.browse("_http._tcp", "local.")
+        .compose(rxDnssd.resolve())
+        .compose(rxDnssd.queryRecords())
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(bonjourService -> {
+            Log.d("TAG", bonjourService.toString());
+            if (bonjourService.isLost()) {
+                mServiceAdapter.remove(bonjourService);
+            } else {
+                mServiceAdapter.add(bonjourService);
+            }
+        }, throwable -> Log.e("TAG", "error", throwable));
+```
 
 License
 -------
