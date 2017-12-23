@@ -85,13 +85,10 @@ public class DnssdTest {
         mockStatic(InternalDNSSD.class);
         mockDNSSDServiceListener = mock(InternalDNSSDService.DnssdServiceListener.class);
         Handler mockedHandler = mock(Handler.class);
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                Runnable runnable = (Runnable) invocation.getArguments()[0];
-                runnable.run();
-                return null;
-            }
+        doAnswer(invocation -> {
+            Runnable runnable = (Runnable) invocation.getArguments()[0];
+            runnable.run();
+            return null;
         }).when(mockedHandler).post(any(Runnable.class));
         mDNSSD = new DNSSD("test", mockedHandler) {
 

@@ -137,12 +137,7 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
                 final String serviceNameStr = new String(serviceName, UTF_8);
                 final String regTypeStr = new String(regType, UTF_8);
                 final String domainStr = new String(domain, UTF_8);
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.serviceFound(services[0], flags, ifIndex, serviceNameStr, regTypeStr, domainStr);
-                    }
-                });
+                handler.post(() -> listener.serviceFound(services[0], flags, ifIndex, serviceNameStr, regTypeStr, domainStr));
             }
 
             @Override
@@ -150,22 +145,12 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
                 final String serviceNameStr = new String(serviceName, UTF_8);
                 final String regTypeStr = new String(regType, UTF_8);
                 final String domainStr = new String(domain, UTF_8);
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.serviceLost(services[0], flags, ifIndex, serviceNameStr, regTypeStr, domainStr);
-                    }
-                });
+                handler.post(() -> listener.serviceLost(services[0], flags, ifIndex, serviceNameStr, regTypeStr, domainStr));
             }
 
             @Override
             public void operationFailed(final DNSSDService service, final int errorCode) {
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.operationFailed(services[0], errorCode);
-                    }
-                });
+                handler.post(() -> listener.operationFailed(services[0], errorCode));
             }
         }));
         return services[0];
@@ -248,24 +233,18 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
                 final String hostNameStr =  new String(hostName, UTF_8);
                 final Map<String, String> record = parseTXTRecords(txtRecord);
                 handler.removeCallbacks(timeoutRunnable);
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.serviceResolved(services[0], flags, ifIndex, fullNameStr, hostNameStr, port, record);
-                        services[0].stop();
-                    }
+                handler.post(() -> {
+                    listener.serviceResolved(services[0], flags, ifIndex, fullNameStr, hostNameStr, port, record);
+                    services[0].stop();
                 });
             }
 
             @Override
             public void operationFailed(final DNSSDService service, final int errorCode) {
                 handler.removeCallbacks(timeoutRunnable);
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.operationFailed(services[0], errorCode);
-                        services[0].stop();
-                    }
+                handler.post(() -> {
+                    listener.operationFailed(services[0], errorCode);
+                    services[0].stop();
                 });
             }
         }));
@@ -339,22 +318,12 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
                 final String serviceNameStr =  new String(serviceName, UTF_8);
                 final String regTypeStr = new String(regType, UTF_8);
                 final String domainStr = new String(domain, UTF_8);
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.serviceRegistered(services[0], flags, serviceNameStr, regTypeStr, domainStr);
-                    }
-                });
+                handler.post(() -> listener.serviceRegistered(services[0], flags, serviceNameStr, regTypeStr, domainStr));
             }
 
             @Override
             public void operationFailed(DNSSDService service, final int errorCode) {
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.operationFailed(services[0], errorCode);
-                    }
-                });
+                handler.post(() -> listener.operationFailed(services[0], errorCode));
             }
         }));
         return services[0];
@@ -450,21 +419,15 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
                 handler.removeCallbacks(timeoutRunnable);
                 try {
                     final InetAddress address = InetAddress.getByAddress(rdata);
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            listener.queryAnswered(services[0], flags, ifIndex, fullNameStr, rrtype, rrclass, address, ttl);
-                            services[0].stop();
-                        }
+                    handler.post(() -> {
+                        listener.queryAnswered(services[0], flags, ifIndex, fullNameStr, rrtype, rrclass, address, ttl);
+                        services[0].stop();
                     });
                 } catch (UnknownHostException e) {
                     //TODO: add error code
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            listener.operationFailed(services[0], -1);
-                            services[0].stop();
-                        }
+                    handler.post(() -> {
+                        listener.operationFailed(services[0], -1);
+                        services[0].stop();
                     });
                 }
 
@@ -473,12 +436,9 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
             @Override
             public void operationFailed(DNSSDService service, final int errorCode) {
                 handler.removeCallbacks(timeoutRunnable);
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.operationFailed(services[0], errorCode);
-                        services[0].stop();
-                    }
+                handler.post(() -> {
+                    listener.operationFailed(services[0], errorCode);
+                    services[0].stop();
                 });
             }
         }));
@@ -518,33 +478,18 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
             @Override
             public void domainFound(DNSSDService domainEnum, final int flags, final int ifIndex, byte[] domain) {
                 final String domainStr = new String(domain, UTF_8);
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.domainFound(services[0], flags, ifIndex, domainStr);
-                    }
-                });
+                handler.post(() -> listener.domainFound(services[0], flags, ifIndex, domainStr));
             }
 
             @Override
             public void domainLost(DNSSDService domainEnum, final int flags, final int ifIndex, byte[] domain) {
                 final String domainStr = new String(domain, UTF_8);
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.domainLost(services[0], flags, ifIndex, domainStr);
-                    }
-                });
+                handler.post(() -> listener.domainLost(services[0], flags, ifIndex, domainStr));
             }
 
             @Override
             public void operationFailed(final DNSSDService service, final int errorCode) {
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.operationFailed(services[0], errorCode);
-                    }
-                });
+                handler.post(() -> listener.operationFailed(services[0], errorCode));
             }
         }));
         return services[0];

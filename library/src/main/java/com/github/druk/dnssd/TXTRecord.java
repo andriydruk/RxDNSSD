@@ -51,7 +51,7 @@ public class	TXTRecord
 
 	/** Constructs a new TXT record from a byte array in the standard format. */
 	public		TXTRecord( byte[] initBytes) 
-	{ fBytes = (byte[]) initBytes.clone(); }
+	{ fBytes = initBytes.clone(); }
 
 	/** Set a key/value pair in the TXT record. Setting an existing key will replace its value.<P>
 		@param	key

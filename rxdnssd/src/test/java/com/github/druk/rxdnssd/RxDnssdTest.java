@@ -75,7 +75,7 @@ public class RxDnssdTest {
     static BonjourService bonjourService = new BonjourService.Builder(FLAGS, IF_INDEX, SERVICE_NAME_STRING, REG_TYPE_STRING, DOMAIN_STRING).build();
     static BonjourService lostBonjourService = new BonjourService.Builder(BonjourService.LOST, IF_INDEX, SERVICE_NAME_STRING, REG_TYPE_STRING, DOMAIN_STRING).build();
     static BonjourService resolvedBonjourService = new BonjourService.Builder(bonjourService).port(PORT).hostname(HOSTNAME_STRING)
-            .dnsRecords(new HashMap<String, String>(0)).build();
+            .dnsRecords(new HashMap<>(0)).build();
 
     static Inet4Address inet4Address = PowerMockito.mock(Inet4Address.class);
     static Inet6Address inet6Address = PowerMockito.mock(Inet6Address.class);

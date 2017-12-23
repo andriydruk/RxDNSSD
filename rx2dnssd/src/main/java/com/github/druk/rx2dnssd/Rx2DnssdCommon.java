@@ -168,9 +168,7 @@ abstract class Rx2DnssdCommon implements Rx2Dnssd {
         @Override
         public void run() throws Exception {
             if (service != null) {
-                Flowable.just(service)
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(DNSSDService::stop);
+                service.stop();
                 service = null;
             }
         }
