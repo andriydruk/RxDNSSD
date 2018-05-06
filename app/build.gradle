@@ -29,7 +29,7 @@ android {
 }
 
 dependencies {
-    implementation project(':rx2dnssd')
+    compile 'com.github.andriydruk:rx2dnssd:0.9.6'
 
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
     implementation 'com.android.support:appcompat-v7:27.0.2'

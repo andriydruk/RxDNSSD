@@ -22,8 +22,11 @@ import android.support.annotation.Nullable;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -53,8 +56,7 @@ public class BonjourService implements Parcelable {
     private final String serviceName;
     private final String regType;
     private final String domain;
-    private final Inet4Address inet4Address;
-    private final Inet6Address inet6Address;
+    private final List<InetAddress> inetAddresses;
     private final Map<String, String> dnsRecords;
     private final int ifIndex;
     private final String hostname;
@@ -66,8 +68,7 @@ public class BonjourService implements Parcelable {
         this.regType = builder.regType;
         this.domain = builder.domain;
         this.ifIndex = builder.ifIndex;
-        this.inet4Address = builder.inet4Address;
-        this.inet6Address = builder.inet6Address;
+        this.inetAddresses = Collections.unmodifiableList(builder.inetAddresses);
         this.dnsRecords = Collections.unmodifiableMap(builder.dnsRecords);
         this.hostname = builder.hostname;
         this.port = builder.port;
@@ -79,11 +80,34 @@ public class BonjourService implements Parcelable {
         this.regType = in.readString();
         this.domain = in.readString();
         this.dnsRecords = readMap(in);
-        this.inet4Address = (Inet4Address) in.readSerializable();
-        this.inet6Address = (Inet6Address) in.readSerializable();
+        this.inetAddresses = readAddresses(in);
         this.ifIndex = in.readInt();
         this.hostname = in.readString();
         this.port = in.readInt();
+    }
+
+    private static void writeAddresses(Parcel dest, List<InetAddress> val) {
+        if (val == null) {
+            dest.writeInt(-1);
+            return;
+        }
+        int n = val.size();
+        dest.writeInt(n);
+        for (InetAddress address : val) {
+            dest.writeSerializable(address);
+        }
+    }
+
+    private static List<InetAddress> readAddresses(Parcel in) {
+        int n = in.readInt();
+        if (n < 0) {
+            return null;
+        }
+        List<InetAddress> result = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            result.add((InetAddress) in.readSerializable());
+        }
+        return Collections.unmodifiableList(result);
     }
 
     private static void writeMap(Parcel dest, Map<String, String> val) {
@@ -159,13 +183,27 @@ public class BonjourService implements Parcelable {
     /** Get ipv4 address */
     @Nullable
     public Inet4Address getInet4Address() {
-        return inet4Address;
+        for (InetAddress inetAddress : inetAddresses) {
+            if (inetAddress instanceof Inet4Address) {
+                return (Inet4Address) inetAddress;
+            }
+        }
+        return null;
     }
 
     /** Get ipv6 address */
     @Nullable
     public Inet6Address getInet6Address() {
-        return inet6Address;
+        for (InetAddress inetAddress : inetAddresses) {
+            if (inetAddress instanceof Inet6Address) {
+                return (Inet6Address) inetAddress;
+            }
+        }
+        return null;
+    }
+
+    public List<InetAddress> getInetAddresses() {
+        return inetAddresses;
     }
 
     /**
@@ -214,8 +252,7 @@ public class BonjourService implements Parcelable {
         dest.writeString(this.regType);
         dest.writeString(this.domain);
         writeMap(dest, this.dnsRecords);
-        dest.writeSerializable(this.inet4Address);
-        dest.writeSerializable(this.inet6Address);
+        writeAddresses(dest, this.inetAddresses);
         dest.writeInt(this.ifIndex);
         dest.writeString(this.hostname);
         dest.writeInt(this.port);
@@ -241,8 +278,7 @@ public class BonjourService implements Parcelable {
         private final String regType;
         private final String domain;
         private final int ifIndex;
-        private Inet4Address inet4Address;
-        private Inet6Address inet6Address;
+        private List<InetAddress> inetAddresses;
         //mutable version
         private Map<String, String> dnsRecords = new HashMap<>();
         private String hostname;
@@ -277,8 +313,7 @@ public class BonjourService implements Parcelable {
             this.domain = service.domain;
             this.ifIndex = service.ifIndex;
             this.dnsRecords = new HashMap<>(service.dnsRecords);
-            this.inet4Address = service.inet4Address;
-            this.inet6Address = service.inet6Address;
+            this.inetAddresses = new ArrayList<>(service.inetAddresses);
             this.hostname = service.hostname;
             this.port = service.port;
         }
@@ -327,7 +362,7 @@ public class BonjourService implements Parcelable {
          */
         @NonNull
         public Builder inet4Address(Inet4Address inet4Address) {
-            this.inet4Address = inet4Address;
+            this.inetAddresses.add(inet4Address);
             return this;
         }
 
@@ -339,7 +374,7 @@ public class BonjourService implements Parcelable {
          */
         @NonNull
         public Builder inet6Address(Inet6Address inet6Address) {
-            this.inet6Address = inet6Address;
+            this.inetAddresses.add(inet6Address);
             return this;
         }
 
