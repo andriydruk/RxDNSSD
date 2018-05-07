@@ -195,11 +195,9 @@ public class DnssdTest {
         verify(mockDNSSDServiceListener).onServiceStarting();
     }
 
-    @Ignore
     @Test
-    public void test_query_ipv4_records_successfully() throws DNSSDException, UnknownHostException {
+    public void test_query_ipv4_records_successfully() throws DNSSDException {
         PowerMockito.when(InternalDNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), any(InternalQueryListener.class))).thenReturn(mockService);
-        PowerMockito.when(InetAddress.getByAddress(any(byte[].class))).thenReturn(inet4Address);
         ArgumentCaptor<InternalQueryListener> propertiesCaptor = ArgumentCaptor.forClass(InternalQueryListener.class);
 
         QueryListener queryListener = mock(QueryListener.class);
@@ -208,7 +206,7 @@ public class DnssdTest {
         InternalDNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());
         propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, new byte[0], 0);
 
-        verify(queryListener).queryAnswered(eq(service), eq(FLAGS), eq(IF_INDEX), eq(HOSTNAME_STRING), eq(0), eq(0), eq(inet4Address), eq(0));
+        verify(queryListener).queryAnswered(eq(service), eq(FLAGS), eq(IF_INDEX), eq(HOSTNAME_STRING), eq(0), eq(0), eq(new byte[0]), eq(0));
     }
 
     @Test
@@ -224,22 +222,6 @@ public class DnssdTest {
         propertiesCaptor.getValue().operationFailed(mockService, 0);
 
         verify(queryListener).operationFailed(any(DNSSDService.class), eq(0));
-    }
-
-    @Test
-    public void test_query_records_exception() throws DNSSDException, UnknownHostException {
-        PowerMockito.when(InternalDNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), any(InternalQueryListener.class))).thenReturn(mockService);
-        PowerMockito.when(InetAddress.getByAddress(any(byte[].class))).thenThrow(new UnknownHostException());
-        ArgumentCaptor<InternalQueryListener> propertiesCaptor = ArgumentCaptor.forClass(InternalQueryListener.class);
-
-        QueryListener queryListener = mock(QueryListener.class);
-        mDNSSD.queryRecord(FLAGS, IF_INDEX, SERVICE_NAME_STRING, 1, 1, queryListener);
-
-        PowerMockito.verifyStatic();
-        InternalDNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());
-        propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, new byte[0], 0);
-
-        verify(queryListener).operationFailed(any(DNSSDService.class), eq(-1));
     }
 
 }

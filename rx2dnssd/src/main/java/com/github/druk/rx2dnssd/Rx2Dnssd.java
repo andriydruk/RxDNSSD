@@ -63,7 +63,16 @@ public interface Rx2Dnssd {
      * @return A {@link FlowableTransformer} that transform object without addresses to object with addresses.
      */
     @NonNull
+    @Deprecated //renamed: queryIPRecords
     FlowableTransformer<BonjourService, BonjourService> queryRecords();
+
+    /**
+     * Query ipv4 and ipv6 addresses
+     *
+     * @return A {@link FlowableTransformer} that transform object without addresses to object with addresses.
+     */
+    @NonNull
+    FlowableTransformer<BonjourService, BonjourService> queryIPRecords();
 
     /**
      * Query ipv4 address
@@ -80,6 +89,38 @@ public interface Rx2Dnssd {
      */
     @NonNull
     FlowableTransformer<BonjourService, BonjourService> queryIPV6Records();
+
+    /**
+     * Query ipv4 and ipv6 addresses
+     *
+     * @return A {@link Flowable} with ip addresses
+     */
+    @NonNull
+    Flowable<BonjourService> queryIPRecords(BonjourService bs);
+
+    /**
+     * Query ipv4 address
+     *
+     * @return A {@link Flowable}
+     */
+    @NonNull
+    Flowable<BonjourService> queryIPV4Records(BonjourService bs);
+
+    /**
+     * Query ipv6 address
+     *
+     * @return A {@link Flowable}
+     */
+    @NonNull
+    Flowable<BonjourService> queryIPV6Records(BonjourService bs);
+
+    /**
+     * Query ipv6 address
+     *
+     * @return A {@link Flowable}
+     */
+    @NonNull
+    Flowable<BonjourService> queryTXTRecords(BonjourService bs);
 
     @NonNull
     Flowable<BonjourService> register(@NonNull final BonjourService bs);

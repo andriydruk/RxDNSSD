@@ -60,15 +60,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.register).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (registerDisposable == null) {
-                    register((Button) v);
-                }
-                else {
-                    unregister((Button) v);
-                }
+        findViewById(R.id.register).setOnClickListener(v -> {
+            if (registerDisposable == null) {
+                register((Button) v);
+            }
+            else {
+                unregister((Button) v);
             }
         });
 

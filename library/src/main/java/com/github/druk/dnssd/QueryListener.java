@@ -16,41 +16,39 @@
 
 package com.github.druk.dnssd;
 
-import java.net.InetAddress;
-
 /**	A listener that receives results from {@link InternalDNSSD#queryRecord}. */
 
 public interface QueryListener extends BaseListener {
 	/** Called when a record query has been completed. Inspect flags 
-	    parameter to determine nature of query event.<P> 
+	    parameter to determine nature of query event.<P>
+	 * @param    query
+                 The active query object.
+     <P>
+	 * @param    flags
+            If kDNSServiceFlagsAdd bit is set, this is a newly discovered answer;
+            otherwise this is a previously discovered answer which has expired.
+            Other possible values are DNSSD.MORE_COMING.
+<P>
+	 * @param    ifIndex
+            The interface on which the query was resolved. (The index for a given
+            interface is determined via the if_nametoindex() family of calls.)
+<P>
+	 * @param    fullName
+            The resource record's full domain name.
+<P>
+	 * @param    rrtype
+            The resource record's type (e.g. PTR, SRV, etc) as defined by RFC 1035 and its updates.
+<P>
+	 * @param    rrclass
+            The class of the resource record, as defined by RFC 1035 and its updates.
+<P>
+	 * @param    rdata
+            The raw rdata of the resource record.
+<P>
+	 * @param    ttl
+            The resource record's time to live, in seconds.
 
-		@param	query
-					The active query object.
-		<P>
-		@param	flags
-					If kDNSServiceFlagsAdd bit is set, this is a newly discovered answer; 
-					otherwise this is a previously discovered answer which has expired.
-					Other possible values are DNSSD.MORE_COMING.
-		<P>
-		@param	ifIndex
-					The interface on which the query was resolved. (The index for a given 
-					interface is determined via the if_nametoindex() family of calls.) 
-		<P>
-		@param	fullName
-					The resource record's full domain name.
-		<P>
-		@param	rrtype
-					The resource record's type (e.g. PTR, SRV, etc) as defined by RFC 1035 and its updates.
-		<P>
-		@param	rrclass
-					The class of the resource record, as defined by RFC 1035 and its updates.
-		<P>
-		@param	rdata
-					The raw rdata of the resource record.
-		<P>
-		@param	ttl
-					The resource record's time to live, in seconds.
-	*/
-	void queryAnswered(DNSSDService query, int flags, int ifIndex, String fullName, int rrtype, int rrclass, InetAddress rdata, int ttl);
+	 */
+	void queryAnswered(DNSSDService query, int flags, int ifIndex, String fullName, int rrtype, int rrclass, byte[] rdata, int ttl);
 }
 

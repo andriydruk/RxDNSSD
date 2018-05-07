@@ -15,12 +15,13 @@
  */
 package com.github.druk.rx2dnssd;
 
+import com.github.druk.dnssd.DNSSD;
 import com.github.druk.dnssd.DNSSDService;
+import com.github.druk.dnssd.NSType;
 import com.github.druk.dnssd.QueryListener;
 
-import java.net.Inet4Address;
-import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import io.reactivex.FlowableEmitter;
 
@@ -28,24 +29,38 @@ class Rx2QueryListener implements QueryListener {
 
     private final FlowableEmitter<? super BonjourService> emitter;
     private final BonjourService.Builder builder;
+    private final boolean completable;
 
-    Rx2QueryListener(FlowableEmitter<? super BonjourService> emitter, BonjourService.Builder builder) {
+    Rx2QueryListener(FlowableEmitter<? super BonjourService> emitter, BonjourService.Builder builder, boolean completable) {
         this.emitter = emitter;
         this.builder = builder;
+        this.completable = completable;
     }
 
     @Override
-    public void queryAnswered(DNSSDService query, int flags, int ifIndex, String fullName, int rrtype, int rrclass, InetAddress address, int ttl) {
+    public void queryAnswered(DNSSDService query, int flags, int ifIndex, String fullName, int rrtype, int rrclass, byte[] rdata, int ttl) {
         if (emitter.isCancelled()) {
             return;
         }
-        if (address instanceof Inet4Address) {
-            builder.inet4Address((Inet4Address) address);
-        } else if (address instanceof Inet6Address) {
-            builder.inet6Address((Inet6Address) address);
+        if (rrtype == NSType.A || rrtype == NSType.AAAA) {
+            try {
+                InetAddress inetAddress = InetAddress.getByAddress(rdata);
+                builder.inetAddress(inetAddress);
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+                emitter.tryOnError(e);
+            }
+        }
+        else if (rrtype == NSType.TXT) {
+            builder.dnsRecords(DNSSD.parseTXTRecords(rdata));
+        }
+        else {
+            emitter.tryOnError(new Exception("Unsupported type of record: " + rrtype));
         }
         emitter.onNext(builder.build());
-        emitter.onComplete();
+        if (completable) {
+            emitter.onComplete();
+        }
     }
 
     @Override

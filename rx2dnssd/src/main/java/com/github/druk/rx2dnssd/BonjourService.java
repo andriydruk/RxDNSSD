@@ -278,7 +278,7 @@ public class BonjourService implements Parcelable {
         private final String regType;
         private final String domain;
         private final int ifIndex;
-        private List<InetAddress> inetAddresses;
+        private List<InetAddress> inetAddresses = new ArrayList<>();
         //mutable version
         private Map<String, String> dnsRecords = new HashMap<>();
         private String hostname;
@@ -388,5 +388,8 @@ public class BonjourService implements Parcelable {
             return new BonjourService(this);
         }
 
+        public void inetAddress(InetAddress inetAddress) {
+            this.inetAddresses.add(inetAddress);
+        }
     }
 }

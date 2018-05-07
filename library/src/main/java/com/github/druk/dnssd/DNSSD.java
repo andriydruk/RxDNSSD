@@ -402,35 +402,24 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
      @see    RuntimePermission
      */
     public DNSSDService queryRecord(int flags, int ifIndex, final String serviceName, int rrtype, int rrclass, final QueryListener listener) throws DNSSDException {
+        return this.queryRecord(flags, ifIndex, serviceName, rrtype, rrclass, false, listener);
+    }
+
+    public DNSSDService queryRecord(int flags, int ifIndex, final String serviceName, int rrtype, int rrclass, boolean withTimeout, final QueryListener listener) throws DNSSDException {
         onServiceStarting();
         final DNSSDService[] services = new DNSSDService[1];
 
-        final Runnable timeoutRunnable = new Runnable() {
-            @Override
-            public void run() {
-                services[0].stop();
-            }
-        };
+        final Runnable timeoutRunnable = () -> services[0].stop();
 
         services[0] = new InternalDNSSDService(this, InternalDNSSD.queryRecord(flags, ifIndex, serviceName, rrtype, rrclass, new InternalQueryListener() {
             @Override
             public void queryAnswered(DNSSDService query, final int flags, final int ifIndex, byte[] fullName, final int rrtype, final int rrclass, byte[] rdata, final int ttl) {
                 final String fullNameStr = new String(fullName, UTF_8);
                 handler.removeCallbacks(timeoutRunnable);
-                try {
-                    final InetAddress address = InetAddress.getByAddress(rdata);
-                    handler.post(() -> {
-                        listener.queryAnswered(services[0], flags, ifIndex, fullNameStr, rrtype, rrclass, address, ttl);
-                        services[0].stop();
-                    });
-                } catch (UnknownHostException e) {
-                    //TODO: add error code
-                    handler.post(() -> {
-                        listener.operationFailed(services[0], -1);
-                        services[0].stop();
-                    });
-                }
-
+                handler.post(() -> {
+                    listener.queryAnswered(services[0], flags, ifIndex, fullNameStr, rrtype, rrclass, rdata, ttl);
+                    services[0].stop();
+                });
             }
 
             @Override
@@ -443,7 +432,9 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
             }
         }));
 
-        handler.postDelayed(timeoutRunnable, serviceTimeout);
+        if (withTimeout) {
+            handler.postDelayed(timeoutRunnable, serviceTimeout);
+        }
 
         return services[0];
     }
@@ -569,7 +560,11 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
         return InternalDNSSD.getIfIndexForName(ifName);
     }
 
-    private static Map<String, String> parseTXTRecords(TXTRecord record) {
+    public static Map<String, String> parseTXTRecords(byte[] data) {
+        return parseTXTRecords(new TXTRecord(data));
+    }
+
+    static Map<String, String> parseTXTRecords(TXTRecord record) {
         Map<String, String> result = new HashMap<>(record.size());
         for (int i = 0; i < record.size(); i++) {
             try {

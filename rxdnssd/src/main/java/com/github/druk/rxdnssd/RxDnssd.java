@@ -18,6 +18,7 @@ package com.github.druk.rxdnssd;
 import android.support.annotation.NonNull;
 
 import com.github.druk.dnssd.DNSSD;
+import com.github.druk.dnssd.NSType;
 
 import rx.Observable;
 
@@ -62,7 +63,11 @@ public interface RxDnssd {
      * @return A {@link Observable.Transformer} that transform object without addresses to object with addresses.
      */
     @NonNull
+    @Deprecated //renamed: queryIPRecords
     Observable.Transformer<BonjourService, BonjourService> queryRecords();
+
+    @NonNull
+    Observable.Transformer<BonjourService, BonjourService> queryIPRecords();
 
     /**
      * Query ipv4 address
@@ -79,6 +84,38 @@ public interface RxDnssd {
      */
     @NonNull
     Observable.Transformer<BonjourService, BonjourService> queryIPV6Records();
+
+    /**
+     * Query ipv4 and ipv6 addresses
+     *
+     * @return A {@link Observable} with ip addresses
+     */
+    @NonNull
+    Observable<BonjourService> queryIPRecords(BonjourService bs);
+
+    /**
+     * Query ipv4 address
+     *
+     * @return A {@link Observable}
+     */
+    @NonNull
+    Observable<BonjourService> queryIPV4Records(BonjourService bs);
+
+    /**
+     * Query ipv6 address
+     *
+     * @return A {@link Observable}
+     */
+    @NonNull
+    Observable<BonjourService> queryIPV6Records(BonjourService bs);
+
+    /**
+     * Query ipv6 address
+     *
+     * @return A {@link Observable}
+     */
+    @NonNull
+    Observable<BonjourService> queryTXTRecords(BonjourService bs);
 
     @NonNull
     Observable<BonjourService> register(@NonNull final BonjourService bs);

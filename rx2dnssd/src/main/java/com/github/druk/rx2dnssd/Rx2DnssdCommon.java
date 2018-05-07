@@ -3,6 +3,8 @@ package com.github.druk.rx2dnssd;
 import com.github.druk.dnssd.DNSSD;
 import com.github.druk.dnssd.DNSSDException;
 import com.github.druk.dnssd.DNSSDService;
+import com.github.druk.dnssd.NSClass;
+import com.github.druk.dnssd.NSType;
 import com.github.druk.dnssd.TXTRecord;
 
 import android.support.annotation.NonNull;
@@ -81,6 +83,7 @@ abstract class Rx2DnssdCommon implements Rx2Dnssd {
      */
     @NonNull
     @Override
+    @Deprecated
     public FlowableTransformer<BonjourService, BonjourService> queryRecords() {
         return flowable -> flowable.flatMap(bs -> {
             if ((bs.getFlags() & BonjourService.LOST) == BonjourService.LOST) {
@@ -89,11 +92,36 @@ abstract class Rx2DnssdCommon implements Rx2Dnssd {
             BonjourService.Builder builder = new BonjourService.Builder(bs);
 
             Flowable<BonjourService> flowableV4 = createFlowable(emitter ->
-                    mDNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 1 /* ns_t_a */, 1 /* ns_c_in */,
-                            new Rx2QueryListener(emitter, builder)));
+                    mDNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), NSType.A, NSClass.IN, true,
+                            new Rx2QueryListener(emitter, builder, true)));
             Flowable<BonjourService> flowableV6 = createFlowable(emitter ->
-                    mDNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 28 /* ns_t_aaaa */, 1 /* ns_c_in */,
-                            new Rx2QueryListener(emitter, builder)));
+                    mDNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), NSType.AAAA, NSClass.IN, true,
+                            new Rx2QueryListener(emitter, builder, true)));
+
+            return flowableV4.mergeWith(flowableV6);
+        });
+    }
+
+    /**
+     * Query ipv4 and ipv6 addresses
+     *
+     * @return A {@link FlowableTransformer} that transform object without addresses to object with addresses.
+     */
+    @NonNull
+    @Override
+    public FlowableTransformer<BonjourService, BonjourService> queryIPRecords() {
+        return flowable -> flowable.flatMap(bs -> {
+            if ((bs.getFlags() & BonjourService.LOST) == BonjourService.LOST) {
+                return Flowable.just(bs);
+            }
+            BonjourService.Builder builder = new BonjourService.Builder(bs);
+
+            Flowable<BonjourService> flowableV4 = createFlowable(emitter ->
+                    mDNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), NSType.A, NSClass.IN, true,
+                            new Rx2QueryListener(emitter, builder, true)));
+            Flowable<BonjourService> flowableV6 = createFlowable(emitter ->
+                    mDNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), NSType.AAAA, NSClass.IN, true,
+                            new Rx2QueryListener(emitter, builder, true)));
 
             return flowableV4.mergeWith(flowableV6);
         });
@@ -112,8 +140,8 @@ abstract class Rx2DnssdCommon implements Rx2Dnssd {
                 return Flowable.just(bs);
             }
             return createFlowable(emitter ->
-                    mDNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 1 /* ns_t_a */, 1 /* ns_c_in */,
-                            new Rx2QueryListener(emitter, new BonjourService.Builder(bs))));
+                    mDNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), NSType.A, NSClass.IN, true,
+                            new Rx2QueryListener(emitter, new BonjourService.Builder(bs), true)));
         });
     }
 
@@ -130,9 +158,68 @@ abstract class Rx2DnssdCommon implements Rx2Dnssd {
                 return Flowable.just(bs);
             }
             return createFlowable(emitter ->
-                    mDNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), 28 /* ns_t_aaaa */, 1 /* ns_c_in */,
-                            new Rx2QueryListener(emitter, new BonjourService.Builder(bs))));
+                    mDNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), NSType.AAAA, NSClass.IN, true,
+                            new Rx2QueryListener(emitter, new BonjourService.Builder(bs), true)));
         });
+    }
+
+    /**
+     * Query ipv4 and ipv6 addresses
+     *
+     * @return A {@link Flowable} with ip addresses
+     */
+    @NonNull
+    @Override
+    public Flowable<BonjourService> queryIPRecords(BonjourService bs) {
+        if ((bs.getFlags() & BonjourService.LOST) == BonjourService.LOST) {
+            return Flowable.just(bs);
+        }
+        final BonjourService.Builder builder = new BonjourService.Builder(bs);
+        return createFlowable((DNSSDServiceCreator<BonjourService>) subscriber ->
+                mDNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), NSType.A, NSClass.IN, false, new Rx2QueryListener(subscriber, builder, false)))
+                .mergeWith(createFlowable(subscriber ->
+                        mDNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), NSType.AAAA, NSClass.IN, false, new Rx2QueryListener(subscriber, builder, false))));
+    }
+
+    /**
+     * Query ipv4 address
+     *
+     * @return A {@link Flowable}
+     */
+    @NonNull
+    @Override
+    public Flowable<BonjourService> queryIPV4Records(BonjourService bs) {
+        return queryRecords(bs, NSType.A);
+    }
+
+    /**
+     * Query ipv6 address
+     *
+     * @return A {@link Flowable}
+     */
+    @NonNull
+    @Override
+    public Flowable<BonjourService> queryIPV6Records(BonjourService bs) {
+        return queryRecords(bs, NSType.AAAA);
+    }
+
+    /**
+     * Query ipv6 address
+     *
+     * @return A {@link Flowable}
+     */
+    @NonNull
+    @Override
+    public Flowable<BonjourService> queryTXTRecords(BonjourService bs) {
+        return queryRecords(bs, NSType.TXT);
+    }
+
+    private Flowable<BonjourService> queryRecords(BonjourService bs, int type) {
+        if ((bs.getFlags() & BonjourService.LOST) == BonjourService.LOST) {
+            return Flowable.just(bs);
+        }
+        return createFlowable(subscriber -> mDNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), type, NSClass.IN, false,
+                new Rx2QueryListener(subscriber, new BonjourService.Builder(bs), false)));
     }
 
     @NonNull
