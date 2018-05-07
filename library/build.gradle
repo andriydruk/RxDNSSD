@@ -56,7 +56,7 @@ dependencies {
 publish {
     groupId = 'com.github.andriydruk'
     artifactId = 'dnssd'
-    publishVersion = '0.9.7'
+    publishVersion = '0.9.8-beta1'
     desc = 'Android library which is Rx wrapper for Apple DNSSD Java API'
     licences = ['Apache-2.0']
     website = 'https://github.com/andriydruk/RxDNSSD'

@@ -28,6 +28,7 @@ import com.github.druk.rx2dnssd.BonjourService;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.Set;
 
@@ -169,16 +170,22 @@ public class DNSSDActivity extends AppCompatActivity {
         try {
             QueryListener listener = new QueryListener() {
                 @Override
-                public void queryAnswered(DNSSDService query, final int flags, final int ifIndex, final String fullName, int rrtype, int rrclass, final InetAddress address, int ttl) {
+                public void queryAnswered(DNSSDService query, int flags, int ifIndex, String fullName, int rrtype, int rrclass, byte[] rdata, int ttl) {
                     Log.d("TAG", "Query address " + fullName);
                     mHandler.post(() -> {
                         BonjourService.Builder builder = new BonjourService.Builder(flags, ifIndex, serviceName, regType, domain).dnsRecords(txtRecord).port(port).hostname(hostName);
-                        if (address instanceof Inet4Address) {
-                            builder.inet4Address((Inet4Address) address);
-                        } else if (address instanceof Inet6Address) {
-                            builder.inet6Address((Inet6Address) address);
+                        try {
+                            InetAddress address = InetAddress.getByAddress(rdata);
+                            if (address instanceof Inet4Address) {
+                                builder.inet4Address((Inet4Address) address);
+                            } else if (address instanceof Inet6Address) {
+                                builder.inet6Address((Inet6Address) address);
+                            }
+                            mServiceAdapter.add(builder.build());
+                        } catch (UnknownHostException e) {
+                            e.printStackTrace();
                         }
-                        mServiceAdapter.add(builder.build());
+
                     });
                 }
 
