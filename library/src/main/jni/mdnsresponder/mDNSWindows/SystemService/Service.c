@@ -29,7 +29,7 @@
 #include	"uds_daemon.h"
 #include	"GenLinkedList.h"
 #include	"Service.h"
-#include	"EventLog.h"
+#include	"mDNSWindows/SystemService/EventLog.h"
 
 #include	"Resource.h"
 
