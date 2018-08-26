@@ -16,13 +16,13 @@
 
 package com.github.druk.dnssd;
 
+import android.content.Context;
+import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -70,29 +70,37 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
     public static final int     LOCALHOST_ONLY = -1;
 
     private static final Charset UTF_8 = Charset.forName("UTF-8");
+    private static final String MULTICAST_LOCK_NAME = "com.github.druk.dnssd.DNSSD";
 
     private final Handler handler;
+    private final Context context;
+
+    // Lock for multicast packages
+    private volatile WifiManager.MulticastLock multicastLock = null;
 
     /** Timeout for resolve and query records operations. Default value: {@value #DNSSD_DEFAULT_TIMEOUT} */
     private final int serviceTimeout;
 
-    DNSSD(String lib) {
-        this(lib, Looper.getMainLooper());
+    DNSSD(Context context, String lib) {
+        this(context, lib, Looper.getMainLooper());
     }
 
-    DNSSD(String lib, Looper looper) {
+    DNSSD(Context context, String lib, Looper looper) {
+        this.context = context.getApplicationContext();
         InternalDNSSD.init(lib);
         this.handler = new Handler(looper);
         this.serviceTimeout = DNSSD_DEFAULT_TIMEOUT;
     }
 
-    DNSSD(String lib, Handler handler) {
+    DNSSD(Context context, String lib, Handler handler) {
+        this.context = context.getApplicationContext();
         InternalDNSSD.init(lib);
         this.handler = handler;
         this.serviceTimeout = DNSSD_DEFAULT_TIMEOUT;
     }
 
-    DNSSD(String lib, Handler handler, int serviceTimeout) {
+    DNSSD(Context context, String lib, Handler handler, int serviceTimeout) {
+        this.context = context.getApplicationContext();
         InternalDNSSD.init(lib);
         this.handler = handler;
         this.serviceTimeout = serviceTimeout;
@@ -545,6 +553,34 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
         onServiceStarting();
         InternalDNSSD.reconfirmRecord(flags, ifIndex, fullName, rrtype, rrclass, rdata);
         onServiceStopped();
+    }
+
+    @Override
+    public void onServiceStarting() {
+        if (multicastLock == null) {
+            synchronized (this) { // Double-check lock
+                if (multicastLock == null) {
+                    WifiManager wifi = (WifiManager) context.getApplicationContext()
+                            .getSystemService(Context.WIFI_SERVICE);
+                    if (wifi == null) {
+                        Log.wtf("DNSSD", "Can't get WIFI Service");
+                        return;
+                    }
+                    multicastLock = wifi.createMulticastLock(MULTICAST_LOCK_NAME);
+                    multicastLock.setReferenceCounted(true);
+                }
+            }
+        }
+        multicastLock.acquire();
+    }
+
+    @Override
+    public void onServiceStopped() {
+        if (multicastLock == null) {
+            Log.wtf("DNSSD", "Multicast lock doesn't exist");
+            return;
+        }
+        multicastLock.release();
     }
 
     /** Return the index of a named interface.<P>

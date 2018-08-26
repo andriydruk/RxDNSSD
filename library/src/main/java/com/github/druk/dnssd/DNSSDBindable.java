@@ -29,7 +29,7 @@ public final class DNSSDBindable extends DNSSD {
     private final Context context;
 
     public DNSSDBindable(Context context) {
-        super("jdns_sd");
+        super(context, "jdns_sd");
         this.context = context.getApplicationContext();
     }
 

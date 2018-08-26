@@ -16,12 +16,9 @@
 package com.github.druk.dnssd;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
@@ -35,7 +32,6 @@ import android.os.Handler;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 
 import static org.mockito.Matchers.any;
@@ -90,7 +86,7 @@ public class DnssdTest {
             runnable.run();
             return null;
         }).when(mockedHandler).post(any(Runnable.class));
-        mDNSSD = new DNSSD("test", mockedHandler) {
+        mDNSSD = new DNSSD(context, "test", mockedHandler) {
 
             @Override
             public void onServiceStarting() {

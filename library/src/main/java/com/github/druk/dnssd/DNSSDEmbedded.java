@@ -16,6 +16,7 @@
 
 package com.github.druk.dnssd;
 
+import android.content.Context;
 import android.util.Log;
 
 import java.util.Timer;
@@ -35,12 +36,12 @@ public class DNSSDEmbedded extends DNSSD {
     private volatile boolean isStarted = false;
     private int serviceCount = 0;
 
-    public DNSSDEmbedded() {
-        this(DEFAULT_STOP_TIMER_DELAY);
+    public DNSSDEmbedded(Context context) {
+        this(context, DEFAULT_STOP_TIMER_DELAY);
     }
 
-    public DNSSDEmbedded(long stopTimerDelay) {
-        super("jdns_sd_embedded");
+    public DNSSDEmbedded(Context context, long stopTimerDelay) {
+        super(context, "jdns_sd_embedded");
         mStopTimerDelay = stopTimerDelay;
     }
 

@@ -15,6 +15,8 @@
  */
 package com.github.druk.rx2dnssd;
 
+import android.content.Context;
+
 import com.github.druk.dnssd.DNSSDEmbedded;
 
 /**
@@ -22,8 +24,8 @@ import com.github.druk.dnssd.DNSSDEmbedded;
  */
 public class Rx2DnssdEmbedded extends Rx2DnssdCommon {
 
-    public Rx2DnssdEmbedded() {
-        super(new DNSSDEmbedded());
+    public Rx2DnssdEmbedded(Context context) {
+        super(new DNSSDEmbedded(context));
     }
 
 }
