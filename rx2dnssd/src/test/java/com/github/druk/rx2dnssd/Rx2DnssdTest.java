@@ -19,6 +19,7 @@ import com.github.druk.dnssd.BrowseListener;
 import com.github.druk.dnssd.DNSSD;
 import com.github.druk.dnssd.DNSSDException;
 import com.github.druk.dnssd.DNSSDService;
+import com.github.druk.dnssd.NSType;
 import com.github.druk.dnssd.QueryListener;
 import com.github.druk.dnssd.ResolveListener;
 
@@ -27,20 +28,17 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 
 import io.reactivex.Flowable;
-import io.reactivex.Scheduler;
 import io.reactivex.android.plugins.RxAndroidPlugins;
-import io.reactivex.functions.Function;
-import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subscribers.TestSubscriber;
 
@@ -78,8 +76,17 @@ public class Rx2DnssdTest {
     static BonjourService resolvedBonjourService = new BonjourService.Builder(bonjourService).port(PORT).hostname(HOSTNAME_STRING)
             .dnsRecords(new HashMap<>(0)).build();
 
-    static Inet4Address inet4Address = PowerMockito.mock(Inet4Address.class);
-    static Inet6Address inet6Address = PowerMockito.mock(Inet6Address.class);
+    static Inet4Address inet4Address;
+    static Inet6Address inet6Address;
+
+    static {
+        try {
+            inet4Address = (Inet4Address) InetAddress.getByName("127.0.0.1");
+            inet6Address = (Inet6Address) InetAddress.getByName("[::1]");
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+    }
 
     static BonjourService resolvedBonjourServiceWithIpv4 = new BonjourService.Builder(resolvedBonjourService).inet4Address(inet4Address).build();
     static BonjourService resolvedBonjourServiceWithIpv6 = new BonjourService.Builder(resolvedBonjourService).inet6Address(inet6Address).build();
@@ -246,22 +253,22 @@ public class Rx2DnssdTest {
 
     @Test
     public void test_query_ipv4_records_unsubscribe() throws DNSSDException {
-        when(mockDNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), any(QueryListener.class))).thenReturn(mockService);
+        when(mockDNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), eq(true), any(QueryListener.class))).thenReturn(mockService);
         Flowable.just(resolvedBonjourService).compose(rxDnssd.queryIPV4Records()).test().dispose();
         verify(mockService).stop();
     }
 
     @Test
     public void test_query_ipv6_records_unsubscribe() throws DNSSDException {
-        when(mockDNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), any(QueryListener.class))).thenReturn(mockService);
+        when(mockDNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), eq(true), any(QueryListener.class))).thenReturn(mockService);
         Flowable.just(resolvedBonjourService).compose(rxDnssd.queryIPV6Records()).test().dispose();
         verify(mockService).stop();
     }
 
     @Test
     public void test_query_records_unsubscribe() throws DNSSDException {
-        when(mockDNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), any(QueryListener.class))).thenReturn(mockService);
-        when(mockDNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), any(QueryListener.class))).thenReturn(mockService);
+        when(mockDNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), eq(true), any(QueryListener.class))).thenReturn(mockService);
+        when(mockDNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), eq(true), any(QueryListener.class))).thenReturn(mockService);
         Flowable.just(resolvedBonjourService).compose(rxDnssd.queryRecords()).test().dispose();
         verify(mockService, times(2)).stop();
     }
@@ -297,8 +304,8 @@ public class Rx2DnssdTest {
 
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
         Flowable.just(resolvedBonjourService).compose(rxDnssd.queryIPV4Records()).subscribe(testSubscriber);
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());
-        propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, inet4Address.getAddress(), 0);
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), eq(true), propertiesCaptor.capture());
+        propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, NSType.A, 0, inet4Address.getAddress(), 0);
         assertServices(testSubscriber, resolvedBonjourServiceWithIpv4);
         testSubscriber.assertComplete();
     }
@@ -310,8 +317,8 @@ public class Rx2DnssdTest {
 
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
         Flowable.just(resolvedBonjourService).compose(rxDnssd.queryIPV6Records()).subscribe(testSubscriber);
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), propertiesCaptor.capture());
-        propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, inet6Address.getAddress(), 0);
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), eq(true), propertiesCaptor.capture());
+        propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, NSType.AAAA, 0, inet6Address.getAddress(), 0);
         assertServices(testSubscriber, resolvedBonjourServiceWithIpv6);
         testSubscriber.assertComplete();
     }
@@ -324,11 +331,11 @@ public class Rx2DnssdTest {
 
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
         Flowable.just(resolvedBonjourService).compose(rxDnssd.queryRecords()).subscribe(testSubscriber);
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());
-        propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, inet4Address.getAddress(), 0);
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), propertiesCaptor.capture());
-        propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, inet6Address.getAddress(), 0);
-        assertServices(testSubscriber, resolvedBonjourServiceWithIpv4, resolvedBonjourServiceWithBothIp);
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), eq(true), propertiesCaptor.capture());
+        propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, NSType.A, 0, inet4Address.getAddress(), 0);
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), eq(true), propertiesCaptor.capture());
+        propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, NSType.AAAA, 0, inet6Address.getAddress(), 0);
+        assertServices(testSubscriber, resolvedBonjourServiceWithBothIp, resolvedBonjourServiceWithBothIp);
         testSubscriber.assertComplete();
     }
 
@@ -340,11 +347,11 @@ public class Rx2DnssdTest {
 
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
         Flowable.just(resolvedBonjourService).compose(rxDnssd.queryRecords()).subscribe(testSubscriber);
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), propertiesCaptor.capture());
-        propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, inet6Address.getAddress(), 0);
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());
-        propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, inet4Address.getAddress(), 0);
-        assertServices(testSubscriber, resolvedBonjourServiceWithIpv6, resolvedBonjourServiceWithBothIp);
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), eq(true), propertiesCaptor.capture());
+        propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, NSType.AAAA, 0, inet6Address.getAddress(), 0);
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), eq(true), propertiesCaptor.capture());
+        propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, NSType.A, 0, inet4Address.getAddress(), 0);
+        assertServices(testSubscriber, resolvedBonjourServiceWithBothIp, resolvedBonjourServiceWithBothIp);
         testSubscriber.assertComplete();
     }
 
@@ -356,7 +363,7 @@ public class Rx2DnssdTest {
         Flowable.just(resolvedBonjourService).compose(rxDnssd.queryIPV4Records()).subscribe(testSubscriber);
 
         ArgumentCaptor<QueryListener> propertiesCaptor = ArgumentCaptor.forClass(QueryListener.class);
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), eq(true), propertiesCaptor.capture());
         QueryListener queryListener = propertiesCaptor.getValue();
 
         queryListener.operationFailed(mockService, -1);
@@ -371,7 +378,7 @@ public class Rx2DnssdTest {
         Flowable.just(resolvedBonjourService).compose(rxDnssd.queryIPV6Records()).subscribe(testSubscriber);
 
         ArgumentCaptor<QueryListener> propertiesCaptor = ArgumentCaptor.forClass(QueryListener.class);
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), propertiesCaptor.capture());
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), eq(true), propertiesCaptor.capture());
         QueryListener queryListener = propertiesCaptor.getValue();
 
         queryListener.operationFailed(mockService, -1);
@@ -386,11 +393,11 @@ public class Rx2DnssdTest {
 
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
         Flowable.just(resolvedBonjourService).compose(rxDnssd.queryRecords()).subscribe(testSubscriber);
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), eq(true), propertiesCaptor.capture());
         propertiesCaptor.getValue().operationFailed(mockService, -1);
 
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), propertiesCaptor.capture());
-        propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, inet6Address.getAddress(), 0);
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), eq(true), propertiesCaptor.capture());
+        propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, NSType.AAAA, 0, inet6Address.getAddress(), 0);
         testSubscriber.assertError(RuntimeException.class);
         testSubscriber.assertNoValues();
     }
@@ -404,10 +411,10 @@ public class Rx2DnssdTest {
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
         Flowable.just(resolvedBonjourService).compose(rxDnssd.queryRecords()).subscribe(testSubscriber);
 
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), propertiesCaptor.capture());
-        propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, inet6Address.getAddress(), 0);
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), eq(true), propertiesCaptor.capture());
+        propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, NSType.AAAA, 0, inet6Address.getAddress(), 0);
 
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), eq(true), propertiesCaptor.capture());
         propertiesCaptor.getValue().operationFailed(mockService, -1);
         assertServices(testSubscriber, resolvedBonjourServiceWithIpv6);
         testSubscriber.assertError(RuntimeException.class);
@@ -422,11 +429,11 @@ public class Rx2DnssdTest {
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
         Flowable.just(resolvedBonjourService).compose(rxDnssd.queryRecords()).subscribe(testSubscriber);
 
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), propertiesCaptor.capture());
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), eq(true), propertiesCaptor.capture());
         propertiesCaptor.getValue().operationFailed(mockService, -1);
 
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());
-        propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, inet4Address.getAddress(), 0);
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), eq(true), propertiesCaptor.capture());
+        propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, NSType.A, 0, inet4Address.getAddress(), 0);
         testSubscriber.assertError(RuntimeException.class);
         testSubscriber.assertNoValues();
     }
@@ -440,10 +447,10 @@ public class Rx2DnssdTest {
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
         Flowable.just(resolvedBonjourService).compose(rxDnssd.queryRecords()).subscribe(testSubscriber);
 
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());
-        propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, inet4Address.getAddress(), 0);
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), eq(true), propertiesCaptor.capture());
+        propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, NSType.A, 0, inet4Address.getAddress(), 0);
 
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), propertiesCaptor.capture());
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), eq(true), propertiesCaptor.capture());
         propertiesCaptor.getValue().operationFailed(mockService, -1);
         assertServices(testSubscriber, resolvedBonjourServiceWithIpv4);
         testSubscriber.assertError(RuntimeException.class);
@@ -457,7 +464,7 @@ public class Rx2DnssdTest {
         Flowable.just(resolvedBonjourService).compose(rxDnssd.queryIPV4Records()).test().dispose();
 
         ArgumentCaptor<QueryListener> propertiesCaptor = ArgumentCaptor.forClass(QueryListener.class);
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), eq(true), propertiesCaptor.capture());
         QueryListener queryListener = propertiesCaptor.getValue();
 
         queryListener.queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, inet4Address.getAddress(), 0);
@@ -473,7 +480,7 @@ public class Rx2DnssdTest {
         Flowable.just(resolvedBonjourService).compose(rxDnssd.queryIPV6Records()).test().dispose();
 
         ArgumentCaptor<QueryListener> propertiesCaptor = ArgumentCaptor.forClass(QueryListener.class);
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), propertiesCaptor.capture());
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), eq(true), propertiesCaptor.capture());
         QueryListener queryListener = propertiesCaptor.getValue();
 
         queryListener.queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, inet6Address.getAddress(), 0);
@@ -490,11 +497,11 @@ public class Rx2DnssdTest {
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
         Flowable.just(resolvedBonjourService).compose(rxDnssd.queryRecords()).test().dispose();
 
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());
-        propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, inet4Address.getAddress(), 0);
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), eq(true), propertiesCaptor.capture());
+        propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, NSType.A, 0, inet4Address.getAddress(), 0);
 
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), propertiesCaptor.capture());
-        propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, inet6Address.getAddress(), 0);
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), eq(true), propertiesCaptor.capture());
+        propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, NSType.AAAA, 0, inet6Address.getAddress(), 0);
 
         testSubscriber.assertNoValues();
         testSubscriber.assertNotTerminated();
@@ -508,7 +515,7 @@ public class Rx2DnssdTest {
         Flowable.just(resolvedBonjourService).compose(rxDnssd.queryIPV4Records()).subscribe(testSubscriber);
 
         ArgumentCaptor<QueryListener> propertiesCaptor = ArgumentCaptor.forClass(QueryListener.class);
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), eq(true), propertiesCaptor.capture());
         QueryListener queryListener = propertiesCaptor.getValue();
 
         queryListener.operationFailed(mockService, 0);
@@ -523,7 +530,7 @@ public class Rx2DnssdTest {
         Flowable.just(resolvedBonjourService).compose(rxDnssd.queryIPV6Records()).subscribe(testSubscriber);
 
         ArgumentCaptor<QueryListener> propertiesCaptor = ArgumentCaptor.forClass(QueryListener.class);
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), propertiesCaptor.capture());
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), eq(true), propertiesCaptor.capture());
         QueryListener queryListener = propertiesCaptor.getValue();
 
         queryListener.operationFailed(mockService, 0);
@@ -539,10 +546,10 @@ public class Rx2DnssdTest {
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
         Flowable.just(resolvedBonjourService).compose(rxDnssd.queryRecords()).subscribe(testSubscriber);
 
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), eq(true), propertiesCaptor.capture());
         propertiesCaptor.getValue().operationFailed(mockService, 0);
 
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), propertiesCaptor.capture());
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), eq(true), propertiesCaptor.capture());
         propertiesCaptor.getValue().operationFailed(mockService, 0);
 
         testSubscriber.assertError(RuntimeException.class);
@@ -556,7 +563,7 @@ public class Rx2DnssdTest {
         Flowable.just(resolvedBonjourService).compose(rxDnssd.queryIPV4Records()).test().dispose();
 
         ArgumentCaptor<QueryListener> propertiesCaptor = ArgumentCaptor.forClass(QueryListener.class);
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), eq(true), propertiesCaptor.capture());
         QueryListener queryListener = propertiesCaptor.getValue();
 
         queryListener.operationFailed(mockService, 0);
@@ -571,7 +578,7 @@ public class Rx2DnssdTest {
         Flowable.just(resolvedBonjourService).compose(rxDnssd.queryIPV6Records()).test().dispose();
 
         ArgumentCaptor<QueryListener> propertiesCaptor = ArgumentCaptor.forClass(QueryListener.class);
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), propertiesCaptor.capture());
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), eq(true), propertiesCaptor.capture());
         QueryListener queryListener = propertiesCaptor.getValue();
 
         queryListener.operationFailed(mockService, 0);
@@ -587,10 +594,10 @@ public class Rx2DnssdTest {
         TestSubscriber<BonjourService> testSubscriber = new TestSubscriber<>();
         Flowable.just(resolvedBonjourService).compose(rxDnssd.queryRecords()).test().dispose();
 
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), eq(true), propertiesCaptor.capture());
         propertiesCaptor.getValue().operationFailed(mockService, 0);
 
-        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), propertiesCaptor.capture());
+        verify(mockDNSSD).queryRecord(anyInt(), anyInt(), anyString(), eq(28), eq(1), eq(true), propertiesCaptor.capture());
         propertiesCaptor.getValue().operationFailed(mockService, 0);
 
         testSubscriber.assertNoErrors();
@@ -611,8 +618,10 @@ public class Rx2DnssdTest {
                 if (!origin.getServiceName().equals(service.getServiceName())) fail();
                 if (!origin.getRegType().equals(service.getRegType())) fail();
                 if (!origin.getDomain().equals(service.getDomain())) fail();
-                if (origin.getInet4Address() != service.getInet4Address()) fail();
-                if (origin.getInet6Address() != service.getInet6Address()) fail();
+                if (origin.getInet4Address() != null ? !origin.getInet4Address().equals(service.getInet4Address())
+                        : service.getInet4Address() != null) fail();
+                if (origin.getInet6Address() != null ? !origin.getInet6Address().equals(service.getInet6Address())
+                        : service.getInet6Address() != null) fail();
                 if (!origin.getTxtRecords().equals(service.getTxtRecords())) fail();
                 if (origin.getHostname() != null ? !origin.getHostname().equals(service.getHostname()) : service.getHostname() != null)
                     fail();

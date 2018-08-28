@@ -18,7 +18,6 @@ package com.github.druk.rxdnssd;
 import android.support.annotation.NonNull;
 
 import com.github.druk.dnssd.DNSSD;
-import com.github.druk.dnssd.NSType;
 
 import rx.Observable;
 

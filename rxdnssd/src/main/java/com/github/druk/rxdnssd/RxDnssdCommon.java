@@ -1,14 +1,13 @@
 package com.github.druk.rxdnssd;
 
+import android.support.annotation.NonNull;
+
 import com.github.druk.dnssd.DNSSD;
 import com.github.druk.dnssd.DNSSDException;
 import com.github.druk.dnssd.DNSSDService;
 import com.github.druk.dnssd.NSClass;
 import com.github.druk.dnssd.NSType;
-import com.github.druk.dnssd.QueryListener;
 import com.github.druk.dnssd.TXTRecord;
-
-import android.support.annotation.NonNull;
 
 import java.util.Map;
 

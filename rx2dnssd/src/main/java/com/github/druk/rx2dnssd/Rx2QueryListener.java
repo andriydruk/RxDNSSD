@@ -47,14 +47,11 @@ class Rx2QueryListener implements QueryListener {
                 InetAddress inetAddress = InetAddress.getByAddress(rdata);
                 builder.inetAddress(inetAddress);
             } catch (UnknownHostException e) {
-                e.printStackTrace();
                 emitter.tryOnError(e);
             }
-        }
-        else if (rrtype == NSType.TXT) {
+        } else if (rrtype == NSType.TXT) {
             builder.dnsRecords(DNSSD.parseTXTRecords(rdata));
-        }
-        else {
+        } else {
             emitter.tryOnError(new Exception("Unsupported type of record: " + rrtype));
         }
         emitter.onNext(builder.build());
