@@ -58,22 +58,22 @@ Embedded version:
 My dnssd library:
 
 ```groovy
-compile 'com.github.andriydruk:dnssd:0.9.7'
+compile 'com.github.andriydruk:dnssd:0.9.10'
 ```
 
 My rxdnssd library:
 
 ```groovy
-compile 'com.github.andriydruk:rxdnssd:0.9.7'
+compile 'com.github.andriydruk:rxdnssd:0.9.10'
 ```
 
 My rx2dnssd library:
 
 ```
-compile 'com.github.andriydruk:rx2dnssd:0.9.7'
+compile 'com.github.andriydruk:rx2dnssd:0.9.10'
 ```
 
-* It's built with Andorid NDK r16 for all platforms (2.18 MB). If you prefer another NDK version or subset of platforms, please build it from source with command:
+* It's built with Andorid NDK r17b for all platforms (1.7 MB). If you prefer another NDK version or subset of platforms, please build it from source with command:
 
 ```groovy
 ./gradlew clean build
