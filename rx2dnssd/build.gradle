@@ -1,5 +1,4 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.novoda.bintray-release'
 
 android {
     compileSdkVersion 28
@@ -29,10 +28,10 @@ android {
 }
 
 dependencies {
-    api project(':library')
+    api project(':dnssd')
+    //api "com.github.andriydruk:dnssd:$bintrayVersion"
 
     // Transitively export that dependencies to other modules
-    //api 'com.github.andriydruk:dnssd:0.9.8-beta1'
     api 'io.reactivex.rxjava2:rxandroid:2.1.0'
     api 'io.reactivex.rxjava2:rxjava:2.2.1'
     api 'com.android.support:support-annotations:27.0.2'
@@ -50,14 +49,7 @@ dependencies {
     }
 }
 
-publish {
-    groupId = 'com.github.andriydruk'
-    artifactId = 'rx2dnssd'
-    publishVersion = '0.9.8-beta1'
-    desc = 'Android library which is Rx wrapper for Apple DNSSD Java API'
-    licences = ['Apache-2.0']
-    website = 'https://github.com/andriydruk/RxDNSSD'
-}
+apply from: rootProject.file('bintray-publish.gradle')
 
 //Add PMD checks
 plugins.apply('pmd')

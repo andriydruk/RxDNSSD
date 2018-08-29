@@ -1,0 +1,79 @@
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
+// Publishing
+group = bintrayGroup
+version = bintrayVersion
+
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                packaging bintrayPackaging
+                groupId bintrayGroup
+                artifactId project.name
+
+                // Add your description here
+                name project.name
+                description bintrayLibraryDescription
+
+                // Set your license
+                licenses {
+                    license {
+                        name bintrayLicenseName
+                        url bintrayLicenseUrl
+                    }
+                }
+                developers {
+                    developer {
+                        id bintrayDeveloperId
+                        name bintrayDeveloperName
+                        email bintrayDeveloperEmail
+                    }
+                }
+            }
+        }
+    }
+}
+
+if (project.hasProperty("BINTRAY_USER") && project.hasProperty("BINTRAY_KEY")) {
+    bintray {
+        // define this in ~/.gradle/gradle.properties
+        user = BINTRAY_USER
+        key = BINTRAY_KEY
+        configurations = bintrayConfigurations
+        pkg {
+            repo = bintrayRepo
+            name = project.name
+            userOrg = bintrayDeveloperId
+            licenses = bintrayAllLicenses
+            desc = bintrayLibraryDescription
+            websiteUrl = bintrayWebsiteUrl
+            issueTrackerUrl = bintrayIssueTrackerUrl
+            vcsUrl = binstrayVCSUrl
+            publish = true
+        }
+    }
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    failOnError false
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
