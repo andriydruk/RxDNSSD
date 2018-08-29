@@ -37,6 +37,8 @@ test:
         # run tests  against the emulator.
         - ./gradlew check
         # copy the test results to the test results directory.
-        - cp -r library/build/reports/* $CIRCLE_TEST_REPORTS
+        - cp -r dnssd/build/reports/* $CIRCLE_TEST_REPORTS
         # copy the test results to the test results directory.
         - cp -r rxdnssd/build/reports/* $CIRCLE_TEST_REPORT
+        # copy the test results to the test results directory.
+        - cp -r rx2dnssd/build/reports/* $CIRCLE_TEST_REPORT
