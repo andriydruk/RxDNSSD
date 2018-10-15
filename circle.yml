@@ -2,43 +2,47 @@
 # Build configuration for Circle CI
 #
 
-general:
-    artifacts:
-        - /home/ubuntu/RxDNSSD/library/build/outputs/aar/
-
-machine:
+version: 2
+jobs:
+  build:
+    working_directory: ~/code
+    docker:
+      - image: circleci/android:api-28-ndk-r17b
     environment:
-        ANDROID_HOME: /usr/local/android-sdk-linux
-    java:
-        version: oraclejdk8
-
-checkout:
-    post:
-        - echo "ndk.dir=${ANDROID_NDK}" >> local.properties
-
-dependencies:
-    override:
-        - echo y | android update sdk --no-ui --all --filter "tools"
-        - echo y | android update sdk --no-ui --all --filter "platform-tools"
-
-        # WTF?
-        - yes | $ANDROID_HOME/tools/bin/sdkmanager "platforms;android-27"
-
-        - ANDROID_HOME=/usr/local/android-sdk-linux ./gradlew dependencies
-
-test:
-    override:
-        # start the emulator
-        # - emulator -avd circleci-android22 -no-audio -no-window:
-        #    background: true
-        #    parallel: true
-        # wait for it to have booted
-        # - circle-android wait-for-boot
-        # run tests  against the emulator.
-        - ./gradlew check
-        # copy the test results to the test results directory.
-        - cp -r dnssd/build/reports/* $CIRCLE_TEST_REPORTS
-        # copy the test results to the test results directory.
-        - cp -r rxdnssd/build/reports/* $CIRCLE_TEST_REPORT
-        # copy the test results to the test results directory.
-        - cp -r rx2dnssd/build/reports/* $CIRCLE_TEST_REPORT
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - checkout
+      - restore_cache:
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}-{{ checksum  "dnssd/build.gradle" }}-{{ checksum  "rxdnssd/build.gradle" }}-{{ checksum  "rx2dnssd/build.gradle" }}
+#      - run:
+#         name: Chmod permissions #if permission for Gradlew Dependencies fail, use this.
+#         command: sudo chmod +x ./gradlew
+      - run:
+          name: Download Dependencies
+          command: ./gradlew androidDependencies
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}-{{ checksum  "dnssd/build.gradle" }}-{{ checksum  "rxdnssd/build.gradle" }}-{{ checksum  "rx2dnssd/build.gradle" }}
+      - run:
+          name: Run Tests
+          command: ./gradlew check
+      - store_artifacts:
+          path: dnssd/build/reports/
+          destination: dnssd-reports
+      - store_test_results:
+          path: dnssd/build/test-results
+          destination: dnssd-tests
+      - store_artifacts:
+          path: rxdnssd/build/reports/
+          destination: rxdnssd-reports
+      - store_test_results:
+          path: rxdnssd/build/test-results
+          destination: rxdnssd-tests
+      - store_artifacts:
+          path: rx2dnssd/build/reports/
+          destination: rx2dnssd-reports
+      - store_test_results:
+          path: rx2dnssd/build/test-results
+          destination: rx2dnssd-tests
+          
