@@ -35,11 +35,13 @@ public final class DNSSDBindable extends DNSSD {
 
     @Override
     public void onServiceStarting() {
+        super.onServiceStarting();
         context.getSystemService(Context.NSD_SERVICE);
     }
 
     @Override
     public void onServiceStopped() {
+        super.onServiceStopped();
         // Not used in bindable version
     }
 

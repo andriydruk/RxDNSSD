@@ -127,12 +127,14 @@ public class DNSSDEmbedded extends DNSSD {
 
     @Override
     public void onServiceStarting() {
+        super.onServiceStarting();
         this.init();
         serviceCount++;
     }
 
     @Override
     public void onServiceStopped() {
+        super.onServiceStopped();
         serviceCount--;
         if (serviceCount == 0) {
             this.exit();
