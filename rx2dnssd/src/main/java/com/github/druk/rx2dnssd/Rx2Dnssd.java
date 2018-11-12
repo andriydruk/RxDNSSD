@@ -15,7 +15,7 @@
  */
 package com.github.druk.rx2dnssd;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.github.druk.dnssd.DNSSD;
 

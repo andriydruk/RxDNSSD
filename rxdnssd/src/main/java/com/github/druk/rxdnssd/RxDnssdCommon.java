@@ -1,6 +1,6 @@
 package com.github.druk.rxdnssd;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.github.druk.dnssd.DNSSD;
 import com.github.druk.dnssd.DNSSDException;

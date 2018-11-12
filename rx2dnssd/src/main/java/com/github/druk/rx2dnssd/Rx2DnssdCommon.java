@@ -7,7 +7,7 @@ import com.github.druk.dnssd.NSClass;
 import com.github.druk.dnssd.NSType;
 import com.github.druk.dnssd.TXTRecord;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import java.util.Map;
 

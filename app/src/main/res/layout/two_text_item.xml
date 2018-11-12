@@ -25,7 +25,7 @@
         android:paddingEnd="@dimen/activity_horizontal_margin"
         xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <android.support.v7.widget.AppCompatTextView
+    <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -33,14 +33,14 @@
             android:textColor="@color/primary_text"
             android:textAppearance="@style/TextAppearance.AppCompat.Title"/>
 
-    <android.support.v7.widget.AppCompatTextView
+    <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/secondary_text"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
 
-    <android.support.v7.widget.AppCompatTextView
+    <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
