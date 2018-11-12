@@ -227,12 +227,7 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
         onServiceStarting();
         final DNSSDService[] services = new DNSSDService[1];
 
-        final Runnable timeoutRunnable = new Runnable() {
-            @Override
-            public void run() {
-                services[0].stop();
-            }
-        };
+        final Runnable timeoutRunnable = () -> services[0].stop();
 
         services[0] = new InternalDNSSDService(this, InternalDNSSD.resolve(flags, ifIndex, serviceName, regType, domain, new InternalResolveListener() {
             @Override

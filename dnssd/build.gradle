@@ -77,7 +77,7 @@ task findbugs(type: FindBugs) {
             enabled = true
         }
     }
-    classes = files("${project.projectDir}/build/intermediates/classes/debug/com/github")
+    classes = files("${project.projectDir}/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/github/druk/dnssd")
     source = fileTree('src/main/java/com/github')
     classpath = files()
     excludeFilter = file("${buildscript.sourceFile.parent}/findbugs-filter.xml")

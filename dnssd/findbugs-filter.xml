@@ -72,4 +72,16 @@
       <Class name="com.github.druk.dnssd.TXTRecord" />
    </Match>
 
+  <Match>
+    <Class name="com.github.druk.dnssd.DNSSD" />
+    <Method name="resolve" />
+    <Bug pattern="SIC_INNER_SHOULD_BE_STATIC_ANON" />
+  </Match>
+
+    <Match>
+    <Class name="com.github.druk.dnssd.DNSSD" />
+    <Method name="onServiceStarting" />
+    <Bug pattern="DC_PARTIALLY_CONSTRUCTED" />
+  </Match>
+
 </FindBugsFilter>
