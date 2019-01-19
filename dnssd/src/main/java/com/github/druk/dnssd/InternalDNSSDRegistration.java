@@ -4,6 +4,7 @@ class InternalDNSSDRegistration implements DNSSDRegistration {
 
     final private InternalDNSSDService.DnssdServiceListener listener;
     final private DNSSDRegistration originalDNSSDService;
+    private boolean isStopped = false;
 
     InternalDNSSDRegistration(InternalDNSSDService.DnssdServiceListener listener, DNSSDRegistration registration) {
         this.listener = listener;
@@ -23,6 +24,11 @@ class InternalDNSSDRegistration implements DNSSDRegistration {
     @Override
     public void stop() {
         originalDNSSDService.stop();
-        listener.onServiceStopped();
+        synchronized (this) {
+            if (!isStopped) {
+                listener.onServiceStopped();
+                isStopped = true;
+            }
+        }
     }
 }

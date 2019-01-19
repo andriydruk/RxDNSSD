@@ -5,6 +5,7 @@ class InternalDNSSDRecordRegistrar implements DNSSDRecordRegistrar {
 
     final private InternalDNSSDService.DnssdServiceListener listener;
     final private DNSSDRecordRegistrar originalService;
+    private boolean isStopped = false;
 
     InternalDNSSDRecordRegistrar(InternalDNSSDService.DnssdServiceListener listener, DNSSDRecordRegistrar registration) {
         this.listener = listener;
@@ -19,6 +20,11 @@ class InternalDNSSDRecordRegistrar implements DNSSDRecordRegistrar {
     @Override
     public void stop() {
         originalService.stop();
-        listener.onServiceStopped();
+        synchronized (this) {
+            if (!isStopped) {
+                listener.onServiceStopped();
+                isStopped = true;
+            }
+        }
     }
 }

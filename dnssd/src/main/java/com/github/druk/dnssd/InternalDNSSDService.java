@@ -5,6 +5,7 @@ class InternalDNSSDService implements DNSSDService {
 
     final private DnssdServiceListener listener;
     final private DNSSDService originalDNSSDService;
+    private boolean isStopped = false;
 
     interface DnssdServiceListener {
         void onServiceStarting();
@@ -18,6 +19,11 @@ class InternalDNSSDService implements DNSSDService {
 
     public void stop() {
         originalDNSSDService.stop();
-        listener.onServiceStopped();
+        synchronized (this) {
+            if (!isStopped) {
+                listener.onServiceStopped();
+                isStopped = true;
+            }
+        }
     }
 }
