@@ -17,10 +17,9 @@
 package com.github.druk.dnssd;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
-
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * RxDnssd is implementation of RxDnssd with embedded DNS-SD  {@link InternalDNSSD}
@@ -31,7 +30,7 @@ public class DNSSDEmbedded extends DNSSD {
 
     private static final String TAG = "DNSSDEmbedded";
     private final long mStopTimerDelay;
-    private Timer mStopTimer;
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private Thread mThread;
     private volatile boolean isStarted = false;
     private int serviceCount = 0;
@@ -58,12 +57,10 @@ public class DNSSDEmbedded extends DNSSD {
      * Note: This method will block thread until DNS-SD initialization finish.
      */
     public void init() {
-        if (mStopTimer != null) {
-            mStopTimer.cancel();
-            mStopTimer.purge();
-        }
+        handler.removeCallbacks(DNSSDEmbedded::nativeExit);
 
         if (mThread != null && mThread.isAlive()) {
+            Log.i(TAG, "already started");
             waitUntilStarted();
             return;
         }
@@ -90,7 +87,7 @@ public class DNSSDEmbedded extends DNSSD {
             }
         };
         mThread.setPriority(Thread.MAX_PRIORITY);
-        mThread.setName("DNS-SD");
+        mThread.setName("DNS-SDEmbedded");
         mThread.start();
 
         waitUntilStarted();
@@ -103,17 +100,10 @@ public class DNSSDEmbedded extends DNSSD {
      */
     public void exit() {
         synchronized (DNSSDEmbedded.class) {
-            mStopTimer = new Timer();
-            mStopTimer.schedule(exitTask, mStopTimerDelay);
+            Log.i(TAG, "post exit");
+            handler.postDelayed(DNSSDEmbedded::nativeExit, mStopTimerDelay);
         }
     }
-
-    private static final TimerTask exitTask = new TimerTask() {
-        @Override
-        public void run() {
-            nativeExit();
-        }
-    };
 
     private void waitUntilStarted() {
         synchronized (DNSSDEmbedded.class) {
