@@ -45,7 +45,7 @@ dependencies {
         exclude module: 'hamcrest-core'
         exclude module: 'objenesis'
     }
-    testImplementation ('org.powermock:powermock-module-junit4:1.7.3') {
+    testImplementation ('org.powermock:powermock-module-junit4:2.0.4') {
         exclude module: 'hamcrest-core'
         exclude module: 'objenesis'
     }
