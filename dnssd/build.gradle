@@ -40,7 +40,7 @@ android {
 dependencies {
     testImplementation 'junit:junit:4.12'
     // Last version that support Power Mock: https://github.com/powermock/powermock/wiki/Mockito#supported-versions
-    testImplementation 'org.mockito:mockito-core:2.8.9'
+    testImplementation 'org.mockito:mockito-core:3.2.4'
     testImplementation ('org.powermock:powermock-api-mockito2:1.7.3') {
         exclude module: 'hamcrest-core'
         exclude module: 'objenesis'
