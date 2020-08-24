@@ -32,7 +32,7 @@ dependencies {
     //implementation 'com.github.andriydruk:rx2dnssd:0.9.8-beta1'
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'com.google.android.material:material:1.1.0-alpha01'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha2'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0'
 
     testImplementation 'junit:junit:4.12'
 }
