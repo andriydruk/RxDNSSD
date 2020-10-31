@@ -19,6 +19,7 @@ package com.github.druk.dnssd;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
+import android.util.Log;
 
 /**
  * RxDnssdBindable is implementation of RxDnssd with system's daemon {@link InternalDNSSD}
@@ -26,6 +27,7 @@ import android.os.Build;
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
 public final class DNSSDBindable extends DNSSD {
 
+    private static final String TAG = "DNSSDBindable";
     private final Context context;
 
     public DNSSDBindable(Context context) {
@@ -36,7 +38,12 @@ public final class DNSSDBindable extends DNSSD {
     @Override
     public void onServiceStarting() {
         super.onServiceStarting();
-        context.getSystemService(Context.NSD_SERVICE);
+        try {
+            context.getSystemService(Context.NSD_SERVICE);
+        }
+        catch (Exception e) {
+            Log.e(TAG, "Can't start NSD_SERVICE: ", e);
+        }
     }
 
     @Override
