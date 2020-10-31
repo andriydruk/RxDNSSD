@@ -36,9 +36,9 @@ public class DNSSDEmbeddedTest {
     @Test
     public void init() throws InterruptedException {
         mDNSSDEmbedded.init();
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(DNSSDEmbedded.class);
         DNSSDEmbedded.nativeInit();
-        PowerMockito.verifyStatic(timeout(TIMEOUT));
+        PowerMockito.verifyStatic(DNSSDEmbedded.class, timeout(TIMEOUT));
         DNSSDEmbedded.nativeLoop();
     }
 
@@ -46,34 +46,34 @@ public class DNSSDEmbeddedTest {
     public void initWithError() throws InterruptedException {
         PowerMockito.when(DNSSDEmbedded.nativeInit()).thenReturn(-1);
         mDNSSDEmbedded.init();
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(DNSSDEmbedded.class);
         DNSSDEmbedded.nativeInit();
-        PowerMockito.verifyStatic(after(TIMEOUT).never());
+        PowerMockito.verifyStatic(DNSSDEmbedded.class, after(TIMEOUT).never());
         DNSSDEmbedded.nativeLoop();
     }
 
     @Test
     public void exit() throws InterruptedException {
         mDNSSDEmbedded.exit();
-        PowerMockito.verifyStatic(timeout(2 * TIMEOUT));
+        PowerMockito.verifyStatic(DNSSDEmbedded.class, timeout(2 * TIMEOUT));
         DNSSDEmbedded.nativeExit();
     }
 
     @Test
     public void cancelStopTimer() throws InterruptedException {
         mDNSSDEmbedded.init();
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(DNSSDEmbedded.class);
         DNSSDEmbedded.nativeInit();
-        PowerMockito.verifyStatic(timeout(TIMEOUT));
+        PowerMockito.verifyStatic(DNSSDEmbedded.class, timeout(TIMEOUT));
         DNSSDEmbedded.nativeLoop();
         mDNSSDEmbedded.exit();
         Thread.sleep(TIMEOUT / 2);
         mDNSSDEmbedded.init();
         Thread.sleep(TIMEOUT / 2);
-        PowerMockito.verifyStatic(never());
+        PowerMockito.verifyStatic(DNSSDEmbedded.class, never());
         DNSSDEmbedded.nativeExit();
         mDNSSDEmbedded.exit();
-        PowerMockito.verifyStatic(timeout(2 * TIMEOUT));
+        PowerMockito.verifyStatic(DNSSDEmbedded.class, timeout(2 * TIMEOUT));
         DNSSDEmbedded.nativeExit();
     }
 

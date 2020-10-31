@@ -117,7 +117,7 @@ public class DnssdTest {
         mDNSSD.browse(REG_TYPE_STRING, browseListener);
 
         ArgumentCaptor<InternalBrowseListener> propertiesCaptor = ArgumentCaptor.forClass(InternalBrowseListener.class);
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(InternalDNSSD.class);
         InternalDNSSD.browse(anyInt(), anyInt(), anyString(), anyString(), propertiesCaptor.capture());
         propertiesCaptor.getValue().serviceFound(mockService, FLAGS, IF_INDEX, SERVICE_NAME, REG_TYPE, DOMAIN);
         browseListener.serviceFound(mockService, FLAGS, IF_INDEX, SERVICE_NAME_STRING, REG_TYPE_STRING, DOMAIN_STRING);
@@ -130,7 +130,7 @@ public class DnssdTest {
         mDNSSD.browse(REG_TYPE_STRING, browseListener);
 
         ArgumentCaptor<InternalBrowseListener> propertiesCaptor = ArgumentCaptor.forClass(InternalBrowseListener.class);
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(InternalDNSSD.class);
         InternalDNSSD.browse(anyInt(), anyInt(), anyString(), anyString(), propertiesCaptor.capture());
         propertiesCaptor.getValue().serviceLost(mockService, FLAGS, IF_INDEX, SERVICE_NAME, REG_TYPE, DOMAIN);
         verify(browseListener).serviceLost(any(DNSSDService.class), eq(FLAGS), eq(IF_INDEX), eq(SERVICE_NAME_STRING), eq(REG_TYPE_STRING), eq(DOMAIN_STRING));
@@ -143,7 +143,7 @@ public class DnssdTest {
         mDNSSD.browse(REG_TYPE_STRING, browseListener);
 
         ArgumentCaptor<InternalBrowseListener> propertiesCaptor = ArgumentCaptor.forClass(InternalBrowseListener.class);
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(InternalDNSSD.class);
         InternalDNSSD.browse(anyInt(), anyInt(), anyString(), anyString(), propertiesCaptor.capture());
         propertiesCaptor.getValue().operationFailed(mockService, -1);
         verify(browseListener).operationFailed(any(DNSSDService.class), eq(-1));
@@ -164,7 +164,7 @@ public class DnssdTest {
         mDNSSD.resolve(FLAGS, IF_INDEX, SERVICE_NAME_STRING, REG_TYPE_STRING, DOMAIN_STRING, resolveListener);
 
         ArgumentCaptor<InternalResolveListener> propertiesCaptor = ArgumentCaptor.forClass(InternalResolveListener.class);
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(InternalDNSSD.class);
         InternalDNSSD.resolve(anyInt(), anyInt(), anyString(), anyString(), anyString(), propertiesCaptor.capture());
         propertiesCaptor.getValue().serviceResolved(mockService, FLAGS, IF_INDEX, SERVICE_NAME, HOSTNAME, PORT, new TXTRecord());
         verify(resolveListener).serviceResolved(any(DNSSDService.class), eq(FLAGS), eq(IF_INDEX), eq(SERVICE_NAME_STRING), eq(HOSTNAME_STRING), eq(PORT), eq(new HashMap<String, String>()));
@@ -177,7 +177,7 @@ public class DnssdTest {
         mDNSSD.resolve(FLAGS, IF_INDEX, SERVICE_NAME_STRING, REG_TYPE_STRING, DOMAIN_STRING, resolveListener);
 
         ArgumentCaptor<InternalResolveListener> propertiesCaptor = ArgumentCaptor.forClass(InternalResolveListener.class);
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(InternalDNSSD.class);
         InternalDNSSD.resolve(anyInt(), anyInt(), anyString(), anyString(), anyString(), propertiesCaptor.capture());
         propertiesCaptor.getValue().operationFailed(mockService, 0);
         verify(resolveListener).operationFailed(any(DNSSDService.class), eq(0));
@@ -198,7 +198,7 @@ public class DnssdTest {
 
         QueryListener queryListener = mock(QueryListener.class);
         DNSSDService service = mDNSSD.queryRecord(FLAGS, IF_INDEX, SERVICE_NAME_STRING, 1, 1, queryListener);
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(InternalDNSSD.class);
         InternalDNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());
         propertiesCaptor.getValue().queryAnswered(mockService, FLAGS, IF_INDEX, HOSTNAME, 0, 0, new byte[0], 0);
 
@@ -213,7 +213,7 @@ public class DnssdTest {
         QueryListener queryListener = mock(QueryListener.class);
         mDNSSD.queryRecord(FLAGS, IF_INDEX, SERVICE_NAME_STRING, 1, 1, queryListener);
 
-        PowerMockito.verifyStatic();
+        PowerMockito.verifyStatic(InternalDNSSD.class);
         InternalDNSSD.queryRecord(anyInt(), anyInt(), anyString(), eq(1), eq(1), propertiesCaptor.capture());
         propertiesCaptor.getValue().operationFailed(mockService, 0);
 
