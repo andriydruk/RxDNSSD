@@ -24,6 +24,7 @@ import android.util.Log;
 /**
  * RxDnssd is implementation of RxDnssd with embedded DNS-SD  {@link InternalDNSSD}
  */
+@Deprecated
 public class DNSSDEmbedded extends DNSSD {
 
     public static final int DEFAULT_STOP_TIMER_DELAY = 5000; //5 sec
@@ -40,15 +41,10 @@ public class DNSSDEmbedded extends DNSSD {
     }
 
     public DNSSDEmbedded(Context context, long stopTimerDelay) {
-        super(context, "jdns_sd_embedded");
+        super(context, "jdns_sd");
         mStopTimerDelay = stopTimerDelay;
+        throw new UnsupportedOperationException("DNSSDEmbedded was deprecated");
     }
-
-    static native int nativeInit();
-
-    static native int nativeLoop();
-
-    static native void nativeExit();
 
     /**
      * Init DNS-SD thread and start event loop. Should be called before using any of DNSSD operations.
@@ -57,40 +53,7 @@ public class DNSSDEmbedded extends DNSSD {
      * Note: This method will block thread until DNS-SD initialization finish.
      */
     public void init() {
-        handler.removeCallbacks(DNSSDEmbedded::nativeExit);
-
-        if (mThread != null && mThread.isAlive()) {
-            Log.i(TAG, "already started");
-            waitUntilStarted();
-            return;
-        }
-
-        isStarted = false;
-
-        InternalDNSSD.getInstance();
-        mThread = new Thread() {
-            public void run() {
-                Log.i(TAG, "init");
-                int err = nativeInit();
-                synchronized (DNSSDEmbedded.class) {
-                    isStarted = true;
-                    DNSSDEmbedded.class.notifyAll();
-                }
-                if (err != 0) {
-                    Log.e(TAG, "error: " + err);
-                    return;
-                }
-                Log.i(TAG, "start");
-                int ret = nativeLoop();
-                isStarted = false;
-                Log.i(TAG, "finish with code: " + ret);
-            }
-        };
-        mThread.setPriority(Thread.MAX_PRIORITY);
-        mThread.setName("DNS-SDEmbedded");
-        mThread.start();
-
-        waitUntilStarted();
+        throw new UnsupportedOperationException("DNSSDEmbedded was deprecated");
     }
 
     /**
@@ -99,10 +62,7 @@ public class DNSSDEmbedded extends DNSSD {
      * Note: method isn't blocking, can be used from any thread.
      */
     public void exit() {
-        synchronized (DNSSDEmbedded.class) {
-            Log.i(TAG, "post exit");
-            handler.postDelayed(DNSSDEmbedded::nativeExit, mStopTimerDelay);
-        }
+        throw new UnsupportedOperationException("DNSSDEmbedded was deprecated");
     }
 
     private void waitUntilStarted() {
