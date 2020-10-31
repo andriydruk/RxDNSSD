@@ -34,74 +34,19 @@ dependencies {
     // Transitively export that dependencies to other modules
     api 'io.reactivex:rxandroid:1.2.1'
     api 'io.reactivex:rxjava:1.3.8'
-    api 'androidx.annotation:annotation:1.0.0'
+    api 'androidx.annotation:annotation:1.1.0'
 
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13.1'
     // Last version that support Power Mock: https://github.com/powermock/powermock/wiki/Mockito#supported-versions
-    testImplementation 'org.mockito:mockito-core:2.8.9'
-    testImplementation ('org.powermock:powermock-api-mockito2:1.7.3') {
+    testImplementation 'org.mockito:mockito-core:3.6.0'
+    testImplementation ('org.powermock:powermock-api-mockito2:2.0.7') {
         exclude module: 'hamcrest-core'
         exclude module: 'objenesis'
     }
-    testImplementation ('org.powermock:powermock-module-junit4:1.7.3') {
+    testImplementation ('org.powermock:powermock-module-junit4:2.0.7') {
         exclude module: 'hamcrest-core'
         exclude module: 'objenesis'
     }
 }
 
 apply from: rootProject.file('bintray-publish.gradle')
-
-//Add PMD checks
-plugins.apply('pmd')
-pmd {
-    toolVersion = '5.4.0'
-}
-task pmd(type: Pmd) {
-    ignoreFailures = false // Fail early.
-    ruleSetFiles = files("${buildscript.sourceFile.parent}/pmd.xml")
-    ruleSets = []
-    source = fileTree('src/main/java/com/github')
-}
-
-//Add findbugs
-plugins.apply('findbugs')
-task findbugs(type: FindBugs) {
-    ignoreFailures = false // Fail early.
-    effort = 'max'
-    reportLevel = 'low' // Report even low priority problems.
-    reports {
-        xml {
-            enabled = false
-        }
-        html {
-            enabled = true
-        }
-    }
-    classes = files("${project.projectDir}/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/github/druk/rxdnssd")
-    source = fileTree('src/main/java/com/github')
-    classpath = files()
-    excludeFilter = file("${buildscript.sourceFile.parent}/findbugs-filter.xml")
-}
-
-//Add checkstyle checks
-plugins.apply('checkstyle')
-checkstyle {
-    toolVersion = '6.15'
-}
-task checkstyle(type: Checkstyle) {
-    configFile file("${buildscript.sourceFile.parent}/checkstyle.xml")
-    ignoreFailures = false // Fail early.
-    showViolations false
-    source 'src/main/java/com/github'
-    include '**/*.java'
-    reports {
-        html.enabled = true
-    }
-    classpath = files()
-}
-
-check.doLast {
-    project.tasks.getByName("pmd").execute()
-    project.tasks.getByName("findbugs").execute()
-    project.tasks.getByName("checkstyle").execute()
-}

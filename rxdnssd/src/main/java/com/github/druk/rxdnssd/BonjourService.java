@@ -130,7 +130,11 @@ public class BonjourService implements Parcelable {
         }
         Map<String, String> result = new HashMap<>();
         for (int i = 0; i < n; i++) {
-            result.put(in.readString(), in.readString());
+            String key = in.readString();
+            String value = in.readString();
+            if (key != null && value != null) {
+                result.put(key, value);
+            }
         }
         return Collections.unmodifiableMap(result);
     }
@@ -258,6 +262,7 @@ public class BonjourService implements Parcelable {
         dest.writeInt(this.port);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "BonjourService{"

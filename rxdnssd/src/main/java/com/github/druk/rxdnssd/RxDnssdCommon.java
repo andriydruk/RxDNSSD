@@ -66,10 +66,13 @@ abstract class RxDnssdCommon implements RxDnssd {
             if ((bs.getFlags() & BonjourService.LOST) == BonjourService.LOST) {
                 return Observable.just(bs);
             }
-            return createObservable((DNSSDServiceCreator<BonjourService>) subscriber -> {
-                return mDNSSD.resolve(bs.getFlags(), bs.getIfIndex(), bs.getServiceName(), bs.getRegType(), bs.getDomain(),
-                        new RxResolveListener(subscriber, bs));
-            });
+            return createObservable((DNSSDServiceCreator<BonjourService>) subscriber ->
+                    mDNSSD.resolve(bs.getFlags(),
+                            bs.getIfIndex(),
+                            bs.getServiceName(),
+                            bs.getRegType(),
+                            bs.getDomain(),
+                            new RxResolveListener(subscriber, bs)));
         });
     }
 
@@ -100,6 +103,7 @@ abstract class RxDnssdCommon implements RxDnssd {
      *
      * @return A {@link Observable.Transformer} that transform object without addresses to object with addresses.
      */
+    @NonNull
     @Override
     public Observable.Transformer<BonjourService, BonjourService> queryIPRecords() {
         return observable -> observable.flatMap((Func1<BonjourService, Observable<? extends BonjourService>>) bs -> {
@@ -126,10 +130,14 @@ abstract class RxDnssdCommon implements RxDnssd {
             if ((bs.getFlags() & BonjourService.LOST) == BonjourService.LOST) {
                 return Observable.just(bs);
             }
-            return createObservable((DNSSDServiceCreator<BonjourService>) subscriber -> {
-                return mDNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), NSType.A, NSClass.IN, true,
-                        new RxQueryListener(subscriber, new BonjourService.Builder(bs), true));
-            });
+            return createObservable((DNSSDServiceCreator<BonjourService>) subscriber ->
+                    mDNSSD.queryRecord(0,
+                            bs.getIfIndex(),
+                            bs.getHostname(),
+                            NSType.A,
+                            NSClass.IN,
+                            true,
+                            new RxQueryListener(subscriber, new BonjourService.Builder(bs), true)));
         });
     }
 
@@ -145,10 +153,14 @@ abstract class RxDnssdCommon implements RxDnssd {
             if ((bs.getFlags() & BonjourService.LOST) == BonjourService.LOST) {
                 return Observable.just(bs);
             }
-            return createObservable((DNSSDServiceCreator<BonjourService>) subscriber -> {
-                return mDNSSD.queryRecord(0, bs.getIfIndex(), bs.getHostname(), NSType.AAAA, NSClass.IN, true,
-                        new RxQueryListener(subscriber, new BonjourService.Builder(bs), true));
-            });
+            return createObservable((DNSSDServiceCreator<BonjourService>) subscriber ->
+                    mDNSSD.queryRecord(0,
+                            bs.getIfIndex(),
+                            bs.getHostname(),
+                            NSType.AAAA,
+                            NSClass.IN,
+                            true,
+                            new RxQueryListener(subscriber, new BonjourService.Builder(bs), true)));
         });
     }
 
@@ -253,7 +265,7 @@ abstract class RxDnssdCommon implements RxDnssd {
 
     private <T> Observable<T> createObservable(DNSSDServiceCreator<T> creator) {
         DNSSDServiceAction<T> action = new DNSSDServiceAction<>(creator);
-        return Observable.create(action).doOnUnsubscribe(action);
+        return Observable.unsafeCreate(action).doOnUnsubscribe(action);
     }
 
     private static TXTRecord createTxtRecord(Map<String, String> records) {

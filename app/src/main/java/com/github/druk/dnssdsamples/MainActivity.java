@@ -1,22 +1,23 @@
 package com.github.druk.dnssdsamples;
 
-import com.github.druk.rx2dnssd.BonjourService;
-import com.github.druk.rx2dnssd.Rx2Dnssd;
-import com.github.druk.rx2dnssd.Rx2DnssdBindable;
-import com.github.druk.rx2dnssd.Rx2DnssdEmbedded;
-
 import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.github.druk.rx2dnssd.BonjourService;
+import com.github.druk.rx2dnssd.Rx2Dnssd;
+import com.github.druk.rx2dnssd.Rx2DnssdEmbedded;
+
+import java.util.Objects;
 import java.util.Set;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -55,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
             Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
             for (Thread thread : threadSet) {
                 // We only interested in main group
-                if (thread.getThreadGroup().getName().equals("main")) {
+                if (Objects.requireNonNull(thread.getThreadGroup()).getName().equals("main")) {
                     Log.v("Thread", thread.getName());
                 }
             }
@@ -115,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
         Log.i("TAG", "start browse");
         browseDisposable = rxDnssd.browse("_rxdnssd._tcp", "local.")
                 .compose(rxDnssd.resolve())
-                .compose(rxDnssd.queryRecords())
+                .compose(rxDnssd.queryIPRecords())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(bonjourService -> {
