@@ -541,13 +541,16 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
      @param	rdata
      The raw rdata of the resource record.
 
+     @return		Error DNSServiceErrorType
+
      @throws SecurityException If a security manager is present and denies <tt>RuntimePermission("getDNSSDInstance")</tt>.
      @see    RuntimePermission
      */
-    public void reconfirmRecord(int flags, int ifIndex, String fullName, int rrtype, int rrclass, byte[] rdata) {
+    public int reconfirmRecord(int flags, int ifIndex, String fullName, int rrtype, int rrclass, byte[] rdata) {
         onServiceStarting();
-        InternalDNSSD.reconfirmRecord(flags, ifIndex, fullName, rrtype, rrclass, rdata);
+        int error = InternalDNSSD.reconfirmRecord(flags, ifIndex, fullName, rrtype, rrclass, rdata);
         onServiceStopped();
+        return error;
     }
 
     @Override

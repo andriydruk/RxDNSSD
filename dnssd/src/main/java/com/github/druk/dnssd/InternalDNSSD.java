@@ -398,12 +398,14 @@ abstract class InternalDNSSD
 		@param	rdata
 					The raw rdata of the resource record.
 
+	 	@return		Error DNSServiceErrorType
+
 		@throws SecurityException If a security manager is present and denies <tt>RuntimePermission("getDNSSDInstance")</tt>.
 		@see    RuntimePermission
 	*/
-	public static void		reconfirmRecord( int flags, int ifIndex, String fullName, int rrtype,
+	public static int		reconfirmRecord( int flags, int ifIndex, String fullName, int rrtype,
 										int rrclass, byte[] rdata)
-	{ getInstance()._reconfirmRecord( flags, ifIndex, fullName, rrtype, rrclass, rdata); }
+	{ return getInstance()._reconfirmRecord( flags, ifIndex, fullName, rrtype, rrclass, rdata); }
 
 	/** Return the canonical name of a particular interface index.<P>
 		@param	ifIndex
@@ -466,7 +468,7 @@ abstract class InternalDNSSD
 	abstract protected String		_constructFullName( String serviceName, String regType, String domain)
 	throws DNSSDException;
 
-	abstract protected void			_reconfirmRecord( int flags, int ifIndex, String fullName, int rrtype,
+	abstract protected int			_reconfirmRecord( int flags, int ifIndex, String fullName, int rrtype,
 										int rrclass, byte[] rdata);
 
 	abstract protected String		_getNameForIfIndex( int ifIndex);
@@ -611,10 +613,10 @@ class	AppleDNSSD extends InternalDNSSD
 		return responseHolder[0];
 	}
 
-	protected void				_reconfirmRecord( int flags, int ifIndex, String fullName, int rrtype,
+	protected int				_reconfirmRecord( int flags, int ifIndex, String fullName, int rrtype,
 										int rrclass, byte[] rdata)
 	{
-		ReconfirmRecord( flags, ifIndex, fullName, rrtype, rrclass, rdata);
+		return ReconfirmRecord( flags, ifIndex, fullName, rrtype, rrclass, rdata);
 	}
 
 	protected String			_getNameForIfIndex( int ifIndex)
@@ -630,7 +632,7 @@ class	AppleDNSSD extends InternalDNSSD
 
 	protected native int	ConstructName( String serviceName, String regType, String domain, String[] pOut);
 
-	protected native void	ReconfirmRecord( int flags, int ifIndex, String fullName, int rrtype,
+	protected native int	ReconfirmRecord( int flags, int ifIndex, String fullName, int rrtype,
 										int rrclass, byte[] rdata);
 
 	protected native byte[]	GetNameForIfIndex( int ifIndex);
