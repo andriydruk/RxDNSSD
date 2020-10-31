@@ -241,7 +241,7 @@ abstract class Rx2DnssdCommon implements Rx2Dnssd {
         }
 
         @Override
-        public void subscribe(FlowableEmitter<T> emitter) throws Exception {
+        public void subscribe(FlowableEmitter<T> emitter) {
             if (!emitter.isCancelled() && creator != null) {
                 try {
                     service = creator.getService(emitter);
@@ -252,7 +252,7 @@ abstract class Rx2DnssdCommon implements Rx2Dnssd {
         }
 
         @Override
-        public void run() throws Exception {
+        public void run() {
             if (service != null) {
                 service.stop();
                 service = null;

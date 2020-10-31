@@ -30,6 +30,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class DNSSDActivity extends AppCompatActivity {
@@ -63,7 +64,7 @@ public class DNSSDActivity extends AppCompatActivity {
             Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
             for (Thread thread : threadSet) {
                 // We only interested in main group
-                if (thread.getThreadGroup().getName().equals("main")) {
+                if (Objects.requireNonNull(thread.getThreadGroup()).getName().equals("main")) {
                     Log.v("Thread", thread.getName());
                 }
             }
@@ -153,7 +154,7 @@ public class DNSSDActivity extends AppCompatActivity {
                 @Override
                 public void serviceResolved(DNSSDService resolver, int flags, int ifIndex, String fullName, String hostName, int port, Map<String, String> txtRecord) {
                     Log.d("TAG", "Resolved " + hostName);
-                    startQueryRecords(flags, ifIndex, serviceName, regType, domain, hostName, port, txtRecord);
+                    startQueryRecords(ifIndex, serviceName, regType, domain, hostName, port, txtRecord);
                 }
 
                 @Override
@@ -166,7 +167,7 @@ public class DNSSDActivity extends AppCompatActivity {
         }
     }
 
-    private void startQueryRecords(int flags, int ifIndex, final String serviceName, final String regType, final String domain, final String hostName, final int port, final Map<String, String> txtRecord) {
+    private void startQueryRecords(int ifIndex, final String serviceName, final String regType, final String domain, final String hostName, final int port, final Map<String, String> txtRecord) {
         try {
             QueryListener listener = new QueryListener() {
                 @Override

@@ -45,3 +45,4 @@ keys/
 # Native libaries
 *.so
 .externalNativeBuild
+dnssd/.cxx
