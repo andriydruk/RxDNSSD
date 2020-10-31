@@ -306,7 +306,7 @@ JNIEXPORT jint JNICALL Java_com_github_druk_dnssd_AppleService_BlockForData( JNI
 JNIEXPORT jint JNICALL Java_com_github_druk_dnssd_AppleService_ProcessResults( JNIEnv *pEnv, jobject pThis)
 /* Call through to DNSServiceProcessResult() while data remains on socket. */
 {
-#if !AUTO_CALLBACKS	// ProcessResults() not supported with AUTO_CALLBACKS 
+#if !AUTO_CALLBACKS	// ProcessResults() not supported with AUTO_CALLBACKS
 
 	jclass			cls = (*pEnv)->GetObjectClass( pEnv, pThis);
 	jfieldID		contextField = (*pEnv)->GetFieldID( pEnv, cls, "fNativeContext", "J");
@@ -955,23 +955,25 @@ JNIEXPORT jint JNICALL Java_com_github_druk_dnssd_AppleDNSSD_ConstructName( JNIE
 	return err;
 }
 
-JNIEXPORT void JNICALL Java_com_github_druk_dnssd_AppleDNSSD_ReconfirmRecord( JNIEnv *pEnv, jobject pThis _UNUSED,
+JNIEXPORT jint JNICALL Java_com_github_druk_dnssd_AppleDNSSD_ReconfirmRecord( JNIEnv *pEnv, jobject pThis _UNUSED,
 							jint flags, jint ifIndex, jstring fullName,
 							jint rrtype, jint rrclass, jbyteArray rdata)
 {
 	jbyte					*pBytes;
 	jsize					numBytes;
 	const char				*nameStr = SafeGetUTFChars( pEnv, fullName);
+	DNSServiceErrorType		err = kDNSServiceErr_NoError;
 
 	pBytes = (*pEnv)->GetByteArrayElements( pEnv, rdata, NULL);
 	numBytes = (*pEnv)->GetArrayLength( pEnv, rdata);
 
-	DNSServiceReconfirmRecord( flags, ifIndex, nameStr, rrtype, rrclass, numBytes, pBytes);
+	err = DNSServiceReconfirmRecord( flags, ifIndex, nameStr, rrtype, rrclass, numBytes, pBytes);
 
 	if ( pBytes != NULL)
 		(*pEnv)->ReleaseByteArrayElements( pEnv, rdata, pBytes, 0);
 
 	SafeReleaseUTFChars( pEnv, fullName, nameStr);
+	return err;
 }
 
 #define LOCAL_ONLY_NAME "loo"
