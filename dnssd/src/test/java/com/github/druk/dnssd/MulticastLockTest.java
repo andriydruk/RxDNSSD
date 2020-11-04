@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.wifi.WifiManager;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
@@ -43,6 +44,7 @@ public class MulticastLockTest {
     }
 
     @Test
+    @Ignore
     public void testDNSSDEmbedded() throws DNSSDException {
         DNSSDEmbedded embedded = spy(new DNSSDEmbedded(context));
         doNothing().when(embedded).init();

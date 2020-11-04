@@ -1996,7 +1996,7 @@ mDNSlocal void GenLLQEvents(DaemonInfo *d)
 			if (!args) { LogErr("GenLLQEvents", "malloc"); return; }
 			args->d = d;
 			args->a = a;
-			if (pthread_create(&a->tid, NULL, UpdateAnswerList, args) < 0) { LogErr("GenLLQEvents", "pthread_create"); return; }
+			if (pthread_create(&a->tid, NULL, UpdateAnswerList, args)) { LogErr("GenLLQEvents", "pthread_create"); return; }
 			usleep(1);
 			a = a->next;
 			}

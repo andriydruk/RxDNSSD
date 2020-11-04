@@ -35,11 +35,9 @@
 #include "uDNS.h"
 #include "uds_daemon.h"
 
-#ifndef EMBEDDED
 #ifdef __ANDROID__
 #include "cutils/sockets.h"
 #endif
-#endif 
 
 // Normally we append search domains only for queries with a single label that are not
 // fully qualified. This can be overridden to apply search domains for queries (that are

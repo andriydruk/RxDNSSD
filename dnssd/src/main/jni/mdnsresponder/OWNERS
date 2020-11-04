@@ -1,0 +1,5 @@
+# Default code reviewers picked from top 3 or more developers.
+# Please update this list if you find better candidates.
+sadmac@google.com
+include platform/system/core:/adb/OWNERS
+include platform/system/netd:/OWNERS
