@@ -43,7 +43,7 @@ ext {
     bintrayConfigurations = ['archives']
 
     bintrayGroup = 'com.github.andriydruk'
-    bintrayVersion = '0.9.13'
+    bintrayVersion = '0.9.14'
 
     bintrayLibraryDescription = 'Android version of Apple DNSSD Java API'
 
