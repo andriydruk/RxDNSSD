@@ -99,7 +99,7 @@ abstract class RxDnssdCommon implements RxDnssd {
     }
 
     /**
-     * Query ipv4 and ipv6 addresses
+     * Query ipv4 and ipv6 addresses with auto-stop (first response or timeout)
      *
      * @return A {@link Observable.Transformer} that transform object without addresses to object with addresses.
      */
@@ -119,7 +119,7 @@ abstract class RxDnssdCommon implements RxDnssd {
     }
 
     /**
-     * Query ipv4 address
+     * Query ipv4 address with auto-stop (first response or timeout)
      *
      * @return A {@link Observable.Transformer} that transform object without address to object with address.
      */
@@ -142,7 +142,7 @@ abstract class RxDnssdCommon implements RxDnssd {
     }
 
     /**
-     * Query ipv6 address
+     * Query ipv6 address with auto-stop (first response or timeout)
      *
      * @return A {@link Observable.Transformer} that transform object without address to object with address.
      */
@@ -205,7 +205,7 @@ abstract class RxDnssdCommon implements RxDnssd {
     }
 
     /**
-     * Query ipv6 address
+     * Query TXT records
      *
      * @return A {@link Observable}
      */
