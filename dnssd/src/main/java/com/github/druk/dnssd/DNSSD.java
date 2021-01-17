@@ -369,7 +369,7 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
      @throws SecurityException If a security manager is present and denies <tt>RuntimePermission("getDNSSDInstance")</tt>.
      @see    RuntimePermission
      */
-    public InternalDNSSDRecordRegistrar createRecordRegistrar(RegisterRecordListener listener) throws DNSSDException {
+    public DNSSDRecordRegistrar createRecordRegistrar(RegisterRecordListener listener) throws DNSSDException {
         onServiceStarting();
         return new InternalDNSSDRecordRegistrar(this, InternalDNSSD.createRecordRegistrar(listener));
     }
