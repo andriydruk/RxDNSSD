@@ -138,31 +138,39 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
      */
     public DNSSDService browse(int flags, int ifIndex, String regType, String domain, final BrowseListener listener) throws DNSSDException {
         onServiceStarting();
-        final InternalDNSSDService[] services = new InternalDNSSDService[1];
-        services[0] = new InternalDNSSDService(this, InternalDNSSD.browse(flags, ifIndex, regType, domain, new InternalBrowseListener() {
+        class Browse extends ServiceHandler implements InternalBrowseListener {
+
+            protected Browse(DNSSD dnssd) throws DNSSDException {
+                super(dnssd);
+            }
+
             @Override
-            public void serviceFound(final DNSSDService browser, final int flags, final int ifIndex, final byte[] serviceName, final byte[] regType, final byte[] domain) {
+            protected DNSSDService createService() throws DNSSDException {
+                return InternalDNSSD.browse(flags, ifIndex, regType, domain, this);
+            }
+
+            @Override
+            public void serviceFound(DNSSDService browser, int flags, int ifIndex, byte[] serviceName, byte[] regType, byte[] domain) {
                 final String serviceNameStr = new String(serviceName, UTF_8);
                 final String regTypeStr = new String(regType, UTF_8);
                 final String domainStr = new String(domain, UTF_8);
-                handler.post(() -> listener.serviceFound(services[0], flags, ifIndex, serviceNameStr, regTypeStr, domainStr));
+                handler.post(() -> listener.serviceFound(getService(), flags, ifIndex, serviceNameStr, regTypeStr, domainStr));
             }
 
             @Override
-            public void serviceLost(DNSSDService browser, final int flags, final int ifIndex, byte[] serviceName, byte[] regType, byte[] domain) {
+            public void serviceLost(DNSSDService browser, int flags, int ifIndex, byte[] serviceName, byte[] regType, byte[] domain) {
                 final String serviceNameStr = new String(serviceName, UTF_8);
                 final String regTypeStr = new String(regType, UTF_8);
                 final String domainStr = new String(domain, UTF_8);
-                handler.post(() -> listener.serviceLost(services[0], flags, ifIndex, serviceNameStr, regTypeStr, domainStr));
+                handler.post(() -> listener.serviceLost(getService(), flags, ifIndex, serviceNameStr, regTypeStr, domainStr));
             }
 
             @Override
-            public void operationFailed(final DNSSDService service, final int errorCode) {
-                handler.post(() -> listener.operationFailed(services[0], errorCode));
+            public void operationFailed(DNSSDService service, int errorCode) {
+                handler.post(() -> listener.operationFailed(getService(), errorCode));
             }
-        }));
-        return services[0];
-
+        }
+        return new Browse(this).getService();
     }
 
     /** Browse for instances of a service. Use default flags, ifIndex and domain.<P>
@@ -225,35 +233,41 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
      */
     public DNSSDService resolve(int flags, int ifIndex, String serviceName, String regType, String domain, final ResolveListener listener) throws DNSSDException {
         onServiceStarting();
-        final DNSSDService[] services = new DNSSDService[1];
+        class Resolve extends ServiceHandler implements InternalResolveListener {
 
-        final Runnable timeoutRunnable = () -> services[0].stop();
+            protected Resolve(DNSSD dnssd) throws DNSSDException {
+                super(dnssd);
+                handler.postDelayed(stopRunnable, serviceTimeout);
+            }
 
-        services[0] = new InternalDNSSDService(this, InternalDNSSD.resolve(flags, ifIndex, serviceName, regType, domain, new InternalResolveListener() {
+            @Override
+            protected DNSSDService createService() throws DNSSDException {
+                return InternalDNSSD.resolve(flags, ifIndex, serviceName, regType, domain, this);
+            }
+
             @Override
             public void serviceResolved(final DNSSDService resolver, final int flags, final int ifIndex, byte[] fullName, byte[] hostName, final int port, TXTRecord txtRecord) {
                 final String fullNameStr =  new String(fullName, UTF_8);
                 final String hostNameStr =  new String(hostName, UTF_8);
                 final Map<String, String> record = parseTXTRecords(txtRecord);
-                handler.removeCallbacks(timeoutRunnable);
+                handler.removeCallbacks(stopRunnable);
                 handler.post(() -> {
-                    listener.serviceResolved(services[0], flags, ifIndex, fullNameStr, hostNameStr, port, record);
-                    services[0].stop();
+                    listener.serviceResolved(getService(), flags, ifIndex, fullNameStr, hostNameStr, port, record);
+                    stopRunnable.run();
                 });
             }
 
             @Override
             public void operationFailed(final DNSSDService service, final int errorCode) {
-                handler.removeCallbacks(timeoutRunnable);
+                handler.removeCallbacks(stopRunnable);
                 handler.post(() -> {
-                    listener.operationFailed(services[0], errorCode);
-                    services[0].stop();
+                    listener.operationFailed(getService(), errorCode);
+                    stopRunnable.run();
                 });
             }
-        }));
+        }
 
-        handler.postDelayed(timeoutRunnable, serviceTimeout);
-        return services[0];
+        return new Resolve(this).getService();
     }
 
     /** Register a service, to be discovered via browse() and resolve() calls.<P>
@@ -312,24 +326,38 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
     public DNSSDRegistration register(int flags, int ifIndex, String serviceName, String regType, String domain, String host, int port, TXTRecord txtRecord,
                                       final RegisterListener listener) throws DNSSDException {
         onServiceStarting();
-        final DNSSDRegistration[] services = new DNSSDRegistration[1];
-        services[0] = new InternalDNSSDRegistration(this, InternalDNSSD.register(flags, ifIndex, serviceName, regType, domain, host, port, txtRecord,
-                new InternalRegisterListener() {
+        class Register implements InternalRegisterListener {
+
+            private final InternalDNSSDRegistration service;
+            private final Object lock = new Object();
+
+            protected Register(DNSSD dnssd) throws DNSSDException {
+                synchronized (lock) {
+                    DNSSDRegistration service = InternalDNSSD.register(flags, ifIndex, serviceName, regType, domain, host, port, txtRecord, this);
+                    this.service = new InternalDNSSDRegistration(dnssd, service);
+                }
+            }
+
+            protected InternalDNSSDRegistration getService() {
+                synchronized (lock) {
+                    return service;
+                }
+            }
 
             @Override
             public void serviceRegistered(DNSSDRegistration registration, final int flags, final byte[] serviceName, byte[] regType, final byte[] domain) {
                 final String serviceNameStr =  new String(serviceName, UTF_8);
                 final String regTypeStr = new String(regType, UTF_8);
                 final String domainStr = new String(domain, UTF_8);
-                handler.post(() -> listener.serviceRegistered(services[0], flags, serviceNameStr, regTypeStr, domainStr));
+                handler.post(() -> listener.serviceRegistered(getService(), flags, serviceNameStr, regTypeStr, domainStr));
             }
 
             @Override
             public void operationFailed(DNSSDService service, final int errorCode) {
-                handler.post(() -> listener.operationFailed(services[0], errorCode));
+                handler.post(() -> listener.operationFailed(getService(), errorCode));
             }
-        }));
-        return services[0];
+        }
+        return new Register(this).getService();
     }
 
     /** Register a service, to be discovered via browse() and resolve() calls. Use default flags, ifIndex, domain, host and txtRecord.<P>
@@ -410,36 +438,40 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
 
     public DNSSDService queryRecord(int flags, int ifIndex, final String serviceName, int rrtype, int rrclass, boolean withTimeout, final QueryListener listener) throws DNSSDException {
         onServiceStarting();
-        final DNSSDService[] services = new DNSSDService[1];
+        class QueryRecord extends ServiceHandler implements InternalQueryListener {
 
-        final Runnable timeoutRunnable = () -> services[0].stop();
+            protected QueryRecord(DNSSD dnssd) throws DNSSDException {
+                super(dnssd);
+                if (withTimeout) {
+                    handler.postDelayed(stopRunnable, serviceTimeout);
+                }
+            }
 
-        services[0] = new InternalDNSSDService(this, InternalDNSSD.queryRecord(flags, ifIndex, serviceName, rrtype, rrclass, new InternalQueryListener() {
+            @Override
+            protected DNSSDService createService() throws DNSSDException {
+                return InternalDNSSD.queryRecord(flags, ifIndex, serviceName, rrtype, rrclass, this);
+            }
+
             @Override
             public void queryAnswered(DNSSDService query, final int flags, final int ifIndex, byte[] fullName, final int rrtype, final int rrclass, byte[] rdata, final int ttl) {
                 final String fullNameStr = new String(fullName, UTF_8);
-                handler.removeCallbacks(timeoutRunnable);
+                handler.removeCallbacks(stopRunnable);
                 handler.post(() -> {
-                    listener.queryAnswered(services[0], flags, ifIndex, fullNameStr, rrtype, rrclass, rdata, ttl);
-                    services[0].stop();
+                    listener.queryAnswered(getService(), flags, ifIndex, fullNameStr, rrtype, rrclass, rdata, ttl);
+                    stopRunnable.run();
                 });
             }
 
             @Override
             public void operationFailed(DNSSDService service, final int errorCode) {
-                handler.removeCallbacks(timeoutRunnable);
+                handler.removeCallbacks(stopRunnable);
                 handler.post(() -> {
-                    listener.operationFailed(services[0], errorCode);
-                    services[0].stop();
+                    listener.operationFailed(getService(), errorCode);
+                    stopRunnable.run();
                 });
             }
-        }));
-
-        if (withTimeout) {
-            handler.postDelayed(timeoutRunnable, serviceTimeout);
         }
-
-        return services[0];
+        return new QueryRecord(this).getService();
     }
 
     /** Asynchronously enumerate domains available for browsing and registration.<P>
@@ -467,26 +499,35 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
      */
     public DNSSDService enumerateDomains(int flags, int ifIndex, final DomainListener listener) throws DNSSDException {
         onServiceStarting();
-        final DNSSDService[] services = new DNSSDService[1];
-        services[0] = new InternalDNSSDService(this, InternalDNSSD.enumerateDomains(flags, ifIndex, new InternalDomainListener() {
+        class Enumerate extends ServiceHandler implements InternalDomainListener {
+
+            protected Enumerate(DNSSD dnssd) throws DNSSDException {
+                super(dnssd);
+            }
+
+            @Override
+            protected DNSSDService createService() throws DNSSDException {
+                return InternalDNSSD.enumerateDomains(flags, ifIndex, this);
+            }
+
             @Override
             public void domainFound(DNSSDService domainEnum, final int flags, final int ifIndex, byte[] domain) {
                 final String domainStr = new String(domain, UTF_8);
-                handler.post(() -> listener.domainFound(services[0], flags, ifIndex, domainStr));
+                handler.post(() -> listener.domainFound(getService(), flags, ifIndex, domainStr));
             }
 
             @Override
             public void domainLost(DNSSDService domainEnum, final int flags, final int ifIndex, byte[] domain) {
                 final String domainStr = new String(domain, UTF_8);
-                handler.post(() -> listener.domainLost(services[0], flags, ifIndex, domainStr));
+                handler.post(() -> listener.domainLost(getService(), flags, ifIndex, domainStr));
             }
 
             @Override
             public void operationFailed(final DNSSDService service, final int errorCode) {
-                handler.post(() -> listener.operationFailed(services[0], errorCode));
+                handler.post(() -> listener.operationFailed(getService(), errorCode));
             }
-        }));
-        return services[0];
+        }
+        return new Enumerate(this).getService();
     }
 
     /**	Concatenate a three-part domain name (as provided to the listeners) into a
@@ -610,6 +651,34 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
             }
         }
         return result;
+    }
+
+    private static abstract class ServiceHandler {
+
+        private final DNSSDService service;
+        private final Object lock = new Object();
+
+        protected ServiceHandler(DNSSD dnssd) throws DNSSDException {
+            synchronized (lock) {
+                DNSSDService service = createService();
+                this.service = new InternalDNSSDService(dnssd, service);
+            }
+        }
+
+        protected DNSSDService getService() {
+            synchronized (lock) {
+                return service;
+            }
+        }
+
+        protected final Runnable stopRunnable = () -> {
+            DNSSDService service = getService();
+            if (service != null) {
+                service.stop();
+            }
+        };
+
+        protected abstract DNSSDService createService() throws DNSSDException;
     }
 
 }
