@@ -81,8 +81,16 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
     /** Timeout for resolve and query records operations. Default value: {@value #DNSSD_DEFAULT_TIMEOUT} */
     private final int serviceTimeout;
 
+    private boolean lockEnabled = true;
+
     DNSSD(Context context, String lib) {
         this(context, lib, Looper.getMainLooper());
+    }
+
+    // optional boolean to control our use of the multicastLock
+    DNSSD(Context context, String lib, boolean enableMulticastLock) {
+        this(context, lib, Looper.getMainLooper());
+        this.lockEnabled = enableMulticastLock;
     }
 
     DNSSD(Context context, String lib, Looper looper) {
@@ -104,6 +112,14 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
         InternalDNSSD.init(lib);
         this.handler = handler;
         this.serviceTimeout = serviceTimeout;
+    }
+
+    DNSSD(Context context, String lib, Handler handler, int serviceTimeout, boolean enableMulticastLock) {
+        this.context = context.getApplicationContext();
+        InternalDNSSD.init(lib);
+        this.handler = handler;
+        this.serviceTimeout = serviceTimeout;
+        this.lockEnabled = enableMulticastLock;
     }
 
     /** Browse for instances of a service.<P>
@@ -316,19 +332,19 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
         services[0] = new InternalDNSSDRegistration(this, InternalDNSSD.register(flags, ifIndex, serviceName, regType, domain, host, port, txtRecord,
                 new InternalRegisterListener() {
 
-            @Override
-            public void serviceRegistered(DNSSDRegistration registration, final int flags, final byte[] serviceName, byte[] regType, final byte[] domain) {
-                final String serviceNameStr =  new String(serviceName, UTF_8);
-                final String regTypeStr = new String(regType, UTF_8);
-                final String domainStr = new String(domain, UTF_8);
-                handler.post(() -> listener.serviceRegistered(services[0], flags, serviceNameStr, regTypeStr, domainStr));
-            }
+                    @Override
+                    public void serviceRegistered(DNSSDRegistration registration, final int flags, final byte[] serviceName, byte[] regType, final byte[] domain) {
+                        final String serviceNameStr =  new String(serviceName, UTF_8);
+                        final String regTypeStr = new String(regType, UTF_8);
+                        final String domainStr = new String(domain, UTF_8);
+                        handler.post(() -> listener.serviceRegistered(services[0], flags, serviceNameStr, regTypeStr, domainStr));
+                    }
 
-            @Override
-            public void operationFailed(DNSSDService service, final int errorCode) {
-                handler.post(() -> listener.operationFailed(services[0], errorCode));
-            }
-        }));
+                    @Override
+                    public void operationFailed(DNSSDService service, final int errorCode) {
+                        handler.post(() -> listener.operationFailed(services[0], errorCode));
+                    }
+                }));
         return services[0];
     }
 
@@ -555,30 +571,41 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
 
     @Override
     public void onServiceStarting() {
-        if (multicastLock == null) {
-            synchronized (this) { // Double-check lock
-                if (multicastLock == null) {
-                    WifiManager wifi = (WifiManager) context.getApplicationContext()
-                            .getSystemService(Context.WIFI_SERVICE);
-                    if (wifi == null) {
-                        Log.wtf("DNSSD", "Can't get WIFI Service");
-                        return;
+        if(lockEnabled) { // optional enable/disable (default enabled)
+            if (multicastLock == null) {
+                synchronized (this) { // Double-check lock
+                    if (multicastLock == null) {
+                        WifiManager wifi = (WifiManager) context.getApplicationContext()
+                                .getSystemService(Context.WIFI_SERVICE);
+                        if (wifi == null) {
+                            Log.wtf("DNSSD", "Can't get WIFI Service");
+                            return;
+                        }
+                        multicastLock = wifi.createMulticastLock(MULTICAST_LOCK_NAME);
+                        multicastLock.setReferenceCounted(true);
                     }
-                    multicastLock = wifi.createMulticastLock(MULTICAST_LOCK_NAME);
-                    multicastLock.setReferenceCounted(true);
                 }
             }
+            synchronized (this) {
+                // prevent multiple calls to acquire if we have it held
+                // onServiceStarting may be called multiple times
+                // fixes fatal crash on too many multicast locks held
+                if(!multicastLock.isHeld()) multicastLock.acquire();
+            }
         }
-        multicastLock.acquire();
     }
 
     @Override
     public void onServiceStopped() {
-        if (multicastLock == null) {
-            Log.wtf("DNSSD", "Multicast lock doesn't exist");
-            return;
+        if(lockEnabled) {
+            if (multicastLock == null) {
+                Log.wtf("DNSSD", "Multicast lock doesn't exist");
+                return;
+            }
+            synchronized (this) {
+                if (multicastLock.isHeld()) multicastLock.release();
+            }
         }
-        multicastLock.release();
     }
 
     /** Return the index of a named interface.<P>

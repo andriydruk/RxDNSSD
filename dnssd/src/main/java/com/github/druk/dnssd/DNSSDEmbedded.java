@@ -39,10 +39,20 @@ public class DNSSDEmbedded extends DNSSD {
         this(context, DEFAULT_STOP_TIMER_DELAY);
     }
 
+    public DNSSDEmbedded(Context context, boolean enableMulticastLock) {
+        this(context, DEFAULT_STOP_TIMER_DELAY, enableMulticastLock);
+    }
+
     public DNSSDEmbedded(Context context, long stopTimerDelay) {
         super(context, "jdns_sd_embedded");
         mStopTimerDelay = stopTimerDelay;
     }
+
+    public DNSSDEmbedded(Context context, long stopTimerDelay, boolean enableMulticastLock) {
+        super(context, "jdns_sd_embedded", enableMulticastLock);
+        mStopTimerDelay = stopTimerDelay;
+    }
+
 
     static native int nativeInit();
 

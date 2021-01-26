@@ -50,6 +50,7 @@ public class DNSSDActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         dnssd = new DNSSDBindable(this);
+        //dnssd = new DNSSDBindable(this, toggleMultiCastLockOnOff);
 
         mHandler = new Handler(Looper.getMainLooper());
 

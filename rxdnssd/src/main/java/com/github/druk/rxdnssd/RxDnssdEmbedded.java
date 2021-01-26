@@ -28,4 +28,8 @@ public class RxDnssdEmbedded extends RxDnssdCommon {
         super(new DNSSDEmbedded(context));
     }
 
+    public RxDnssdEmbedded(Context context, boolean enableMulticastLock) {
+        super(new DNSSDEmbedded(context, enableMulticastLock));
+    }
+
 }

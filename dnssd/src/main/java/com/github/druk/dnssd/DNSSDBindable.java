@@ -35,6 +35,11 @@ public final class DNSSDBindable extends DNSSD {
         this.context = context.getApplicationContext();
     }
 
+    public DNSSDBindable(Context context, boolean enableMulticastLock) {
+        super(context, "jdns_sd", enableMulticastLock);
+        this.context = context.getApplicationContext();
+    }
+
     @Override
     public void onServiceStarting() {
         super.onServiceStarting();

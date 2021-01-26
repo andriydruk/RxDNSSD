@@ -32,4 +32,8 @@ public class Rx2DnssdBindable extends Rx2DnssdCommon {
         super(new DNSSDBindable(context));
     }
 
+    public Rx2DnssdBindable(Context context, boolean enableMulticastLock) {
+        super(new DNSSDBindable(context, enableMulticastLock));
+    }
+
 }
