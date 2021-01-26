@@ -42,20 +42,20 @@ ext {
     bintrayPackaging = 'aar'
     bintrayConfigurations = ['archives']
 
-    bintrayGroup = 'com.github.andriydruk'
+    bintrayGroup = 'com.github.neveroffline'
     bintrayVersion = '0.9.14'
 
     bintrayLibraryDescription = 'Android version of Apple DNSSD Java API'
 
-    bintrayDeveloperId = 'andriydruk'
-    bintrayDeveloperName = 'Andriy Druk'
-    bintrayDeveloperEmail = 'andriy.druk@gmail.com'
+    bintrayDeveloperId = 'neveroffline'
+    bintrayDeveloperName = 'Dustin Brand'
+    bintrayDeveloperEmail = 'dustinbrand@gmail.com'
 
     bintrayLicenseName = 'The Apache Software License, Version 2.0'
     bintrayLicenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
     bintrayAllLicenses = ["Apache-2.0"]
 
-    bintrayWebsiteUrl = "https://github.com/andriydruk/RxDNSSD"
-    bintrayIssueTrackerUrl = "https://github.com/andriydruk/RxDNSSD/issues"
-    binstrayVCSUrl = "https://github.com/andriydruk/RxDNSSD.git"
+    bintrayWebsiteUrl = "https://github.com/neveroffline/RxDNSSD-1"
+    bintrayIssueTrackerUrl = "https://github.com/neveroffline/RxDNSSD-1/issues"
+    binstrayVCSUrl = "https://github.com/neveroffline/RxDNSSD-1.git"
 }

@@ -586,12 +586,7 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
                     }
                 }
             }
-            synchronized (this) {
-                // prevent multiple calls to acquire if we have it held
-                // onServiceStarting may be called multiple times
-                // fixes fatal crash on too many multicast locks held
-                if(!multicastLock.isHeld()) multicastLock.acquire();
-            }
+            multicastLock.acquire();
         }
     }
 
@@ -602,9 +597,7 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
                 Log.wtf("DNSSD", "Multicast lock doesn't exist");
                 return;
             }
-            synchronized (this) {
-                if (multicastLock.isHeld()) multicastLock.release();
-            }
+            multicastLock.release();
         }
     }
 
