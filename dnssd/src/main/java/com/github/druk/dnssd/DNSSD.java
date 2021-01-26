@@ -137,7 +137,6 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
      @see    RuntimePermission
      */
     public DNSSDService browse(int flags, int ifIndex, String regType, String domain, final BrowseListener listener) throws DNSSDException {
-        onServiceStarting();
         class Browse extends ServiceHandler implements InternalBrowseListener {
 
             protected Browse(DNSSD dnssd) throws DNSSDException {
@@ -232,7 +231,6 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
      @see    RuntimePermission
      */
     public DNSSDService resolve(int flags, int ifIndex, String serviceName, String regType, String domain, final ResolveListener listener) throws DNSSDException {
-        onServiceStarting();
         class Resolve extends ServiceHandler implements InternalResolveListener {
 
             protected Resolve(DNSSD dnssd) throws DNSSDException {
@@ -437,7 +435,6 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
     }
 
     public DNSSDService queryRecord(int flags, int ifIndex, final String serviceName, int rrtype, int rrclass, boolean withTimeout, final QueryListener listener) throws DNSSDException {
-        onServiceStarting();
         class QueryRecord extends ServiceHandler implements InternalQueryListener {
 
             protected QueryRecord(DNSSD dnssd) throws DNSSDException {
@@ -498,7 +495,6 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
      @see    RuntimePermission
      */
     public DNSSDService enumerateDomains(int flags, int ifIndex, final DomainListener listener) throws DNSSDException {
-        onServiceStarting();
         class Enumerate extends ServiceHandler implements InternalDomainListener {
 
             protected Enumerate(DNSSD dnssd) throws DNSSDException {

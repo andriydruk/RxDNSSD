@@ -15,6 +15,9 @@ class InternalDNSSDService implements DNSSDService {
     InternalDNSSDService(DnssdServiceListener listener, DNSSDService DNSSDService) {
         this.listener = listener;
         this.originalDNSSDService = DNSSDService;
+        synchronized (this) {
+            listener.onServiceStarting();
+        }
     }
 
     public void stop() {
