@@ -408,7 +408,40 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
         return this.queryRecord(flags, ifIndex, serviceName, rrtype, rrclass, false, listener);
     }
 
-    public DNSSDService queryRecord(int flags, int ifIndex, final String serviceName, int rrtype, int rrclass, boolean withTimeout, final QueryListener listener) throws DNSSDException {
+    /** Query for an arbitrary DNS record.<P>
+     @param	flags
+     Possible values are: MORE_COMING.
+     <P>
+     @param	ifIndex
+     If non-zero, specifies the interface on which to issue the query
+     (the index for a given interface is determined via the if_nametoindex()
+     family of calls.)  Passing 0 causes the name to be queried for on all
+     interfaces.  Passing -1 causes the name to be queried for only on the
+     local host.
+     <P>
+     @param	serviceName
+     The full domain name of the resource record to be queried for.
+     <P>
+     @param	rrtype
+     The numerical type of the resource record to be queried for (e.g. PTR, SRV, etc)
+     as defined in nameser.h.
+     <P>
+     @param	rrclass
+     The class of the resource record, as defined in nameser.h
+     (usually 1 for the Internet class).
+     <P>
+     @param	autoStop
+     Stop querying after the first response or timeout
+     <P>
+     @param	listener
+     This object will get called when the query completes.
+     <P>
+     @return		A {@link DNSSDService} that controls the active query.
+
+     @throws SecurityException If a security manager is present and denies <tt>RuntimePermission("getDNSSDInstance")</tt>.
+     @see    RuntimePermission
+     */
+    public DNSSDService queryRecord(int flags, int ifIndex, final String serviceName, int rrtype, int rrclass, boolean autoStop, final QueryListener listener) throws DNSSDException {
         onServiceStarting();
         final DNSSDService[] services = new DNSSDService[1];
 
@@ -421,7 +454,9 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
                 handler.removeCallbacks(timeoutRunnable);
                 handler.post(() -> {
                     listener.queryAnswered(services[0], flags, ifIndex, fullNameStr, rrtype, rrclass, rdata, ttl);
-                    services[0].stop();
+                    if (autoStop) {
+                        services[0].stop();
+                    }
                 });
             }
 
@@ -435,7 +470,7 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
             }
         }));
 
-        if (withTimeout) {
+        if (autoStop) {
             handler.postDelayed(timeoutRunnable, serviceTimeout);
         }
 

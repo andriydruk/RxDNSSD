@@ -103,7 +103,7 @@ abstract class Rx2DnssdCommon implements Rx2Dnssd {
     }
 
     /**
-     * Query ipv4 and ipv6 addresses
+     * Query ipv4 and ipv6 addresses with auto-stop (first response or timeout)
      *
      * @return A {@link FlowableTransformer} that transform object without addresses to object with addresses.
      */
@@ -128,7 +128,7 @@ abstract class Rx2DnssdCommon implements Rx2Dnssd {
     }
 
     /**
-     * Query ipv4 address
+     * Query ipv4 address with auto-stop (first response or timeout)
      *
      * @return A {@link FlowableTransformer} that transform object without address to object with address.
      */
@@ -146,7 +146,7 @@ abstract class Rx2DnssdCommon implements Rx2Dnssd {
     }
 
     /**
-     * Query ipv6 address
+     * Query ipv6 address with auto-stop (first response or timeout)
      *
      * @return A {@link FlowableTransformer} that transform object without address to object with address.
      */
@@ -204,7 +204,7 @@ abstract class Rx2DnssdCommon implements Rx2Dnssd {
     }
 
     /**
-     * Query ipv6 address
+     * Query TXT records
      *
      * @return A {@link Flowable}
      */
