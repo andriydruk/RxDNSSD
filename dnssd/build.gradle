@@ -5,11 +5,11 @@ repositories {
 }
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 30
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 28
+        targetSdkVersion 30
         versionCode 1
         versionName "1.0"
     }
@@ -36,7 +36,7 @@ android {
         }
     }
 
-    ndkVersion "21.3.6528147"
+    ndkVersion "21.4.7075529"
 }
 
 dependencies {
@@ -53,4 +53,10 @@ dependencies {
     }
 }
 
-apply from: rootProject.file('bintray-publish.gradle')
+ext {
+    // Provide your own coordinates here
+    PUBLISH_GROUP_ID = 'com.github.andriydruk'
+    PUBLISH_ARTIFACT_ID = 'dnssd'
+}
+
+apply from: "${rootProject.projectDir}/publish-module.gradle"

@@ -1,11 +1,11 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 30
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 28
+        targetSdkVersion 30
         versionCode 1
         versionName "1.0"
     }
@@ -29,7 +29,7 @@ android {
 
 dependencies {
     api project(':dnssd')
-    //api "com.github.andriydruk:dnssd:$bintrayVersion"
+    //api "com.github.andriydruk:dnssd:$mavenCentralVersion"
 
     // Transitively export that dependencies to other modules
     api 'io.reactivex.rxjava2:rxandroid:2.1.1'
@@ -49,4 +49,9 @@ dependencies {
     }
 }
 
-apply from: rootProject.file('bintray-publish.gradle')
+ext {
+    PUBLISH_GROUP_ID = 'com.github.andriydruk'
+    PUBLISH_ARTIFACT_ID = 'rx2dnssd'
+}
+
+apply from: "${rootProject.projectDir}/publish-module.gradle"

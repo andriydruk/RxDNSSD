@@ -1,4 +1,6 @@
-# Android mDNSResponder [![Circle CI](https://circleci.com/gh/andriydruk/RxDNSSD.svg?style=shield&circle-token=5f0cb1ee907a20bdb08aa4b073b5690afbaaabe1)](https://circleci.com/gh/andriydruk/RxDNSSD) [![Download](https://api.bintray.com/packages/andriydruk/maven/dnssd/images/download.svg)](https://bintray.com/andriydruk/maven/rxdnssd/_latestVersion) [![Download](https://api.bintray.com/packages/andriydruk/maven/rxdnssd/images/download.svg)](https://bintray.com/andriydruk/maven/rxdnssd/_latestVersion)[ ![Download](https://api.bintray.com/packages/andriydruk/maven/rxdnssd/images/download.svg) ](https://bintray.com/andriydruk/maven/rxdnssd/_latestVersion)
+# Android mDNSResponder [![Circle CI](https://circleci.com/gh/andriydruk/RxDNSSD.svg?style=shield&circle-token=5f0cb1ee907a20bdb08aa4b073b5690afbaaabe1)](https://circleci.com/gh/andriydruk/RxDNSSD) [![Download](https://img.shields.io/maven-central/v/com.github.andriydruk/dnssd?label=DNSSD)](https://search.maven.org/artifact/com.github.andriydruk/dnssd) [![Download](https://img.shields.io/maven-central/v/com.github.andriydruk/rxdnssd?label=RxDNSSD)](https://search.maven.org/artifact/com.github.andriydruk/rxdnssd) [![Download](https://img.shields.io/maven-central/v/com.github.andriydruk/rx2dnssd?label=Rx2DNSSD) ](https://search.maven.org/artifact/com.github.andriydruk/rx2dnssd)
+
+
 
 
 
@@ -53,27 +55,27 @@ Embedded version:
 
 ```
 
-## Binaries
+## Binaries on MavenCentral
 
-My dnssd library:
-
-```groovy
-compile 'com.github.andriydruk:dnssd:0.9.13'
-```
-
-My rxdnssd library:
+DNSSD library:
 
 ```groovy
-compile 'com.github.andriydruk:rxdnssd:0.9.13'
+compile 'com.github.andriydruk:dnssd:0.9.15'
 ```
 
-My rx2dnssd library:
+RxDNSSD library:
+
+```groovy
+compile 'com.github.andriydruk:rxdnssd:0.9.15'
+```
+
+Rx2DNSSD library:
 
 ```
-compile 'com.github.andriydruk:rx2dnssd:0.9.13'
+compile 'com.github.andriydruk:rx2dnssd:0.9.15'
 ```
 
-* It's built with Andorid NDK r18b for all platforms (1.7 MB). If you prefer another NDK version or subset of platforms, please build it from source with command:
+* It's built with Andorid NDK 21 for all platforms (1.7 MB). If you prefer another NDK version or subset of platforms, please build it from source with command:
 
 ```groovy
 ./gradlew clean build
@@ -234,7 +236,7 @@ browseDisposable = rxDnssd.browse("_http._tcp", "local.")
 
 License
 -------
-	Copyright (C) 2016 Andriy Druk
+	Copyright (C) 2021 Andriy Druk
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.

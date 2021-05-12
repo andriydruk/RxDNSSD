@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.druk.rx2dnssd.BonjourService;
 import com.github.druk.rx2dnssd.Rx2Dnssd;
+import com.github.druk.rx2dnssd.Rx2DnssdBindable;
 import com.github.druk.rx2dnssd.Rx2DnssdEmbedded;
 
 import java.util.Objects;
@@ -41,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        rxDnssd = new Rx2DnssdEmbedded(this);
+        rxDnssd = new Rx2DnssdBindable(this);
 
         findViewById(R.id.check_threads).setOnClickListener(v -> {
             /*
