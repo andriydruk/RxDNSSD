@@ -28,8 +28,8 @@ android {
 }
 
 dependencies {
-    //api project(':dnssd')
-    api "com.github.andriydruk:dnssd:$mavenCentralVersion"
+    api project(':dnssd')
+    //api "com.github.andriydruk:dnssd:$mavenCentralVersion"
 
     // Transitively export that dependencies to other modules
     api 'io.reactivex:rxandroid:1.2.1'
