@@ -637,7 +637,7 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
         Map<String, String> result = new HashMap<>(record.size());
         for (int i = 0; i < record.size(); i++) {
             try {
-                if (!TextUtils.isEmpty(record.getKey(i)) && TextUtils.isEmpty(record.getValueAsString(i))) {
+                if (!TextUtils.isEmpty(record.getKey(i))) {
                     result.put(record.getKey(i), record.getValueAsString(i));
                 }
             } catch (Exception e) {
