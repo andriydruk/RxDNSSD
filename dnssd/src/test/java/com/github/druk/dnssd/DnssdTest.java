@@ -15,6 +15,7 @@
  */
 package com.github.druk.dnssd;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,11 +29,14 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
+import android.text.TextUtils;
+import android.util.Log;
 
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -218,6 +222,40 @@ public class DnssdTest {
         propertiesCaptor.getValue().operationFailed(mockService, 0);
 
         verify(queryListener).operationFailed(any(DNSSDService.class), eq(0));
+    }
+
+    @Test
+    public void test_txt_record_parse_empty() {
+        TXTRecord record = new TXTRecord();
+        Map<String, String> map = DNSSD.parseTXTRecords(record);
+        Assert.assertTrue(map.isEmpty());
+    }
+
+    @Test
+    public void test_txt_record_parse_empty_value() {
+        TXTRecord record = new TXTRecord();
+        record.set("key", (String) null);
+        Map<String, String> map = DNSSD.parseTXTRecords(record);
+        Assert.assertEquals(map.size(), 1);
+        Assert.assertNull(map.get("key"));
+    }
+
+    @Test
+    public void test_txt_record_parse_with_string_value() {
+        TXTRecord record = new TXTRecord();
+        record.set("key", "value");
+        Map<String, String> map = DNSSD.parseTXTRecords(record);
+        Assert.assertEquals(map.size(), 1);
+        Assert.assertEquals(map.get("key"), "value");
+    }
+
+    @Test
+    public void test_txt_record_parse_with_byte_value() {
+        TXTRecord record = new TXTRecord();
+        record.set("key", "value".getBytes());
+        Map<String, String> map = DNSSD.parseTXTRecords(record);
+        Assert.assertEquals(map.size(), 1);
+        Assert.assertEquals(map.get("key"), "value");
     }
 
 }
