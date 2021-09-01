@@ -28,4 +28,8 @@ public class Rx2DnssdEmbedded extends Rx2DnssdCommon {
         super(new DNSSDEmbedded(context));
     }
 
+    public Rx2DnssdEmbedded(Context context, long stopTimeDelay) {
+        super(new DNSSDEmbedded(context, stopTimeDelay));
+    }
+
 }
