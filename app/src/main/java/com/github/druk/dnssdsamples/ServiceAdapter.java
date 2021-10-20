@@ -22,6 +22,8 @@ import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,6 +32,7 @@ import android.widget.TextView;
 
 import com.github.druk.rx2dnssd.BonjourService;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,14 +57,16 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHold
     public void onBindViewHolder(ViewHolder holder, int position) {
         BonjourService bs = getItem(position);
         holder.text1.setText(bs.getServiceName() + "." + bs.getRegType());
-        if (bs.getInet4Address() != null) {
-            holder.text2.setText("Address: " + bs.getInet4Address().toString() + ":" + bs.getPort());
-        }
-        else if (bs.getInet6Address() != null) {
-            holder.text2.setText("Address: " + bs.getInet6Address().toString() + ":" + bs.getPort());
-        }
-        else {
+        List<InetAddress> ipAddresses = bs.getInetAddresses();
+        Log.i("TAG", "Addresses: " + ipAddresses);
+        if (ipAddresses.isEmpty()) {
             holder.text2.setText(R.string.unresolved);
+        } else {
+            StringBuilder sb = new StringBuilder("Address: ");
+            for (int i = 0; i < ipAddresses.size(); i++) {
+                sb.append(ipAddresses.get(i).toString()).append(":").append(bs.getPort()).append("\n");
+            }
+            holder.text2.setText(sb.toString());
         }
         holder.text3.setText("Interface: " + bs.getIfIndex());
     }
@@ -86,8 +91,25 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHold
     }
 
     public void add(BonjourService service) {
-        this.services.add(service);
+        if (!alreadyExists(service)) {
+            this.services.add(service);
+        }
         notifyDataSetChanged();
+    }
+
+    private boolean alreadyExists(BonjourService service) {
+        if (this.services.isEmpty()) return false;
+        for (int i = 0; i < this.services.size(); i++) {
+            BonjourService curService = this.services.get(i);
+            // Same service and the new service's number of addresses are greater, so replace it.
+            if (curService.getRegType().equals(service.getRegType()) &&
+                    curService.getInetAddresses().size() <= service.getInetAddresses().size()) {
+                this.services.remove(curService);
+                this.services.add(service);
+                return true;
+            }
+        }
+        return false;
     }
 
     public void remove(BonjourService bonjourService) {

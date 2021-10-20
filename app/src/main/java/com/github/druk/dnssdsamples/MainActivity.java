@@ -115,9 +115,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void startBrowse() {
         Log.i("TAG", "start browse");
-        browseDisposable = rxDnssd.browse("_rxdnssd._tcp", "local.")
+        browseDisposable = rxDnssd.browse("_rxdnssd._tcp" +
+                "", "local.")
                 .compose(rxDnssd.resolve())
                 .compose(rxDnssd.queryIPRecords())
+                // Use queryIPRecords that takes in the BonjourService as a param to get multiple
+                // IPv6 results.
+                //.flatMap(bonjourService -> rxDnssd.queryIPRecords(bonjourService))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(bonjourService -> {
