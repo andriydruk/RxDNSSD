@@ -234,7 +234,7 @@ browseDisposable = rxDnssd.browse("_http._tcp", "local.")
         }, throwable -> Log.e("TAG", "error", throwable));
 ```
 
-Note that the `queryIPRecords()` method has auto stop enabled, stop querying after the first response or timeout.
+Note that because `queryIPRecords()` method has auto stop enabled, the above code will stop querying after the first response or timeout.
 If the environment supports IPv6, which can have multiple addresses, it will only return the first IPv6 address.
 If you'd like to query all of them, use the `queryIPRecords(BonjourService bs)` method instead like below:
 
