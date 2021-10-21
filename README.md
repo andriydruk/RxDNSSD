@@ -234,7 +234,11 @@ browseDisposable = rxDnssd.browse("_http._tcp", "local.")
         }, throwable -> Log.e("TAG", "error", throwable));
 ```
 
-##### Browse services for multiple IPv6 addresses
+Note that the `queryIPRecords()` method has auto stop enabled, stop querying after the first response or timeout.
+If the environment supports IPv6, which can have multiple addresses, it will only return the first IPv6 address.
+If you'd like to query all of them, use the `queryIPRecords(BonjourService bs)` method instead like below:
+
+##### Browse services without auto stop
 ```java
 browseDisposable = rxDnssd.browse("_http._tcp", "local.")
         .compose(rxDnssd.resolve())
