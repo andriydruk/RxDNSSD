@@ -62,9 +62,9 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHold
         if (ipAddresses.isEmpty()) {
             holder.text2.setText(R.string.unresolved);
         } else {
-            StringBuilder sb = new StringBuilder("Address: ");
+            StringBuilder sb = new StringBuilder("IP Addresses:\n");
             for (int i = 0; i < ipAddresses.size(); i++) {
-                sb.append(ipAddresses.get(i).toString()).append(":").append(bs.getPort()).append("\n");
+                sb.append(ipAddresses.get(i).toString().replaceAll("/","")).append(":").append(bs.getPort()).append("\n");
             }
             holder.text2.setText(sb.toString());
         }
@@ -91,25 +91,8 @@ public class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHold
     }
 
     public void add(BonjourService service) {
-        if (!alreadyExists(service)) {
-            this.services.add(service);
-        }
+        this.services.add(service);
         notifyDataSetChanged();
-    }
-
-    private boolean alreadyExists(BonjourService service) {
-        if (this.services.isEmpty()) return false;
-        for (int i = 0; i < this.services.size(); i++) {
-            BonjourService curService = this.services.get(i);
-            // Same service and the new service's number of addresses are greater, so replace it.
-            if (curService.getRegType().equals(service.getRegType()) &&
-                    curService.getInetAddresses().size() <= service.getInetAddresses().size()) {
-                this.services.remove(curService);
-                this.services.add(service);
-                return true;
-            }
-        }
-        return false;
     }
 
     public void remove(BonjourService bonjourService) {

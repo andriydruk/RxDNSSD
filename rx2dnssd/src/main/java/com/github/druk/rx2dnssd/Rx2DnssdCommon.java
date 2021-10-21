@@ -194,7 +194,8 @@ abstract class Rx2DnssdCommon implements Rx2Dnssd {
     }
 
     /**
-     * Query ipv6 addresses
+     * Query ipv6 addresses without auto-stop. In other words, if there are multiple
+     * IPv6 addresses, this query will continue to report results as it discovers them.
      *
      * @return A {@link Flowable}
      */
