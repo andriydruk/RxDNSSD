@@ -353,7 +353,9 @@ static void DNSSD_API	ServiceBrowseReply( DNSServiceRef sdRef _UNUSED, DNSServic
 
 	SetupCallbackState( &pContext->Env);
 
-	if ( pContext->ClientObj != NULL && pContext->Callback != NULL)
+	jobject clientObj = (*pContext->Env)->NewLocalRef(pContext->Env, pContext->ClientObj);
+
+	if ( clientObj != NULL && pContext->Callback != NULL)
 	{
 		if ( errorCode == kDNSServiceErr_NoError)
 		{
@@ -363,7 +365,7 @@ static void DNSSD_API	ServiceBrowseReply( DNSServiceRef sdRef _UNUSED, DNSServic
 			(*pContext->Env)->SetByteArrayRegion (pContext->Env, jRegType, 0, (jsize)strlen(regtype), (const jbyte *) regtype);
 			jbyteArray jReplyDomain = (*pContext->Env)->NewByteArray(pContext->Env, (jsize)strlen(replyDomain));
 			(*pContext->Env)->SetByteArrayRegion (pContext->Env, jReplyDomain, 0, (jsize)strlen(replyDomain), (const jbyte *) replyDomain);
-			(*pContext->Env)->CallVoidMethod( pContext->Env, pContext->ClientObj,
+			(*pContext->Env)->CallVoidMethod( pContext->Env, clientObj,
 								( flags & kDNSServiceFlagsAdd) != 0 ? pContext->Callback : pContext->Callback2,
 								pContext->JavaObj, flags, interfaceIndex, jServiceName, jRegType, jReplyDomain);
 			(*pContext->Env)->DeleteLocalRef( pContext->Env, jServiceName);
@@ -371,7 +373,9 @@ static void DNSSD_API	ServiceBrowseReply( DNSServiceRef sdRef _UNUSED, DNSServic
 			(*pContext->Env)->DeleteLocalRef( pContext->Env, jReplyDomain);
 		}
 		else
-			ReportError( pContext->Env, pContext->ClientObj, pContext->JavaObj, errorCode);
+			ReportError( pContext->Env, clientObj, pContext->JavaObj, errorCode);
+
+		(*pContext->Env)->DeleteLocalRef(pContext->Env, clientObj);
 	}
 
 	TeardownCallbackState();

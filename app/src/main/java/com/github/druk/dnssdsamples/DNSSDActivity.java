@@ -4,19 +4,20 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.github.druk.dnssd.BrowseListener;
 import com.github.druk.dnssd.DNSSD;
-import com.github.druk.dnssd.DNSSDBindable;
+import com.github.druk.dnssd.DNSSDEmbedded;
 import com.github.druk.dnssd.DNSSDException;
 import com.github.druk.dnssd.DNSSDRegistration;
 import com.github.druk.dnssd.DNSSDService;
@@ -49,7 +50,7 @@ public class DNSSDActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        dnssd = new DNSSDBindable(this);
+        dnssd = new DNSSDEmbedded(this);
 
         mHandler = new Handler(Looper.getMainLooper());
 

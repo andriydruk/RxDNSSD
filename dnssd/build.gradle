@@ -10,8 +10,6 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
     }
 
     buildTypes {
@@ -36,13 +34,13 @@ android {
         }
     }
 
-    ndkVersion "21.4.7075529"
+    ndkVersion "23.1.7779620"
 }
 
 dependencies {
-    testImplementation 'junit:junit:4.13.1'
+    testImplementation 'junit:junit:4.13.2'
     // Last version that support Power Mock: https://github.com/powermock/powermock/wiki/Mockito#supported-versions
-    testImplementation 'org.mockito:mockito-core:3.6.0'
+    testImplementation 'org.mockito:mockito-core:4.1.0'
     testImplementation ('org.powermock:powermock-api-mockito2:2.0.9') {
         exclude module: 'hamcrest-core'
         exclude module: 'objenesis'
