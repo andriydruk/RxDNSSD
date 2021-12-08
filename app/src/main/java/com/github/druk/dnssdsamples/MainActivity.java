@@ -117,6 +117,8 @@ public class MainActivity extends AppCompatActivity {
         browseDisposable = rxDnssd.browse("_rxdnssd._tcp", "local.")
                 .compose(rxDnssd.resolve())
                 .compose(rxDnssd.queryIPRecords())
+                /** Use {@link Rx2Dnssd#queryIPRecords(BonjourService)} to get multiple IPv6 results. */
+                //.flatMap(bonjourService -> rxDnssd.queryIPRecords(bonjourService))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(bonjourService -> {

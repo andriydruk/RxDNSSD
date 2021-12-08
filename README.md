@@ -71,7 +71,7 @@ compile 'com.github.andriydruk:rxdnssd:0.9.15'
 
 Rx2DNSSD library:
 
-```
+```groovy
 compile 'com.github.andriydruk:rx2dnssd:0.9.15'
 ```
 
@@ -177,7 +177,7 @@ Subscription subscription = rxdnssd.register(bonjourService)
 ```java
 Subscription subscription = rxDnssd.browse("_http._tcp", "local.")
 	.compose(rxDnssd.resolve())
-    .compose(rxDnssd.queryRecords())
+    .compose(rxDnssd.queryIPRecords())
     .subscribeOn(Schedulers.io())
     .observeOn(AndroidSchedulers.mainThread())
     .subscribe(new Action1<BonjourService>() {
@@ -221,7 +221,28 @@ registerDisposable = rxDnssd.register(bs)
 ```java
 browseDisposable = rxDnssd.browse("_http._tcp", "local.")
         .compose(rxDnssd.resolve())
-        .compose(rxDnssd.queryRecords())
+        .compose(rxDnssd.queryIPRecords())
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(bonjourService -> {
+            Log.d("TAG", bonjourService.toString());
+            if (bonjourService.isLost()) {
+                mServiceAdapter.remove(bonjourService);
+            } else {
+                mServiceAdapter.add(bonjourService);
+            }
+        }, throwable -> Log.e("TAG", "error", throwable));
+```
+
+Note that because `queryIPRecords()` method has auto stop enabled, the above code will stop querying after the first response or timeout.
+If the environment supports IPv6, which can have multiple addresses, it will only return the first IPv6 address.
+If you'd like to query all of them, use the `queryIPRecords(BonjourService bs)` method instead like below:
+
+##### Browse services without auto stop
+```java
+browseDisposable = rxDnssd.browse("_http._tcp", "local.")
+        .compose(rxDnssd.resolve())
+        .flatMap(bonjourService -> rxDnssd.queryIPRecords(bonjourService))
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(bonjourService -> {

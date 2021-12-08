@@ -67,7 +67,7 @@ public interface Rx2Dnssd {
     FlowableTransformer<BonjourService, BonjourService> queryRecords();
 
     /**
-     * Query ipv4 and ipv6 addresses
+     * Query ipv4 and ipv6 addresses with auto-stop (first response or timeout)
      *
      * @return A {@link FlowableTransformer} that transform object without addresses to object with addresses.
      */
@@ -91,7 +91,8 @@ public interface Rx2Dnssd {
     FlowableTransformer<BonjourService, BonjourService> queryIPV6Records();
 
     /**
-     * Query ipv4 and ipv6 addresses
+     * Query ipv4 and ipv6 addresses without auto-stop. In other words, if there are multiple
+     * IPv6 addresses, this query will continue to report results as it discovers them.
      *
      * @return A {@link Flowable} with ip addresses
      */
@@ -107,7 +108,8 @@ public interface Rx2Dnssd {
     Flowable<BonjourService> queryIPV4Records(BonjourService bs);
 
     /**
-     * Query ipv6 address
+     * Query ipv6 addresses without auto-stop. In other words, if there are multiple
+     * IPv6 addresses, this query will continue to report results as it discovers them.
      *
      * @return A {@link Flowable}
      */
@@ -115,7 +117,7 @@ public interface Rx2Dnssd {
     Flowable<BonjourService> queryIPV6Records(BonjourService bs);
 
     /**
-     * Query ipv6 address
+     * Query TXT records
      *
      * @return A {@link Flowable}
      */
