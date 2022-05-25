@@ -9,7 +9,7 @@ My [explanation](http://andriydruk.com/post/mdnsresponder/) about why jmDNS, And
 
 ## Hierarchy
 
-There are two version of mDNSReposder. 
+There are two version of mDNSReposder.
 
 Bindable version:
 
@@ -43,7 +43,7 @@ Embedded version:
                                 |   +--------------------+   |
                                  -->| Android Java DNSSD |<--
                                     +--------------------+
-                                    |   Apple Java DNSSD |    
+                                    |   Apple Java DNSSD |
                                     +--------------------+
                                     |    mDNS Client     |
                                     +--------------------+
@@ -75,9 +75,9 @@ Rx2DNSSD library:
 compile 'com.github.andriydruk:rx2dnssd:0.9.15'
 ```
 
-* It's built with Andorid NDK 21 for all platforms (1.7 MB). If you prefer another NDK version or subset of platforms, please build it from source with command:
+* It's built with Android NDK 21 for all platforms (1.7 MB). If you prefer another NDK version or subset of platforms, please build it from source with command:
 
-```groovy
+```command
 ./gradlew clean build
 ```
 
@@ -85,28 +85,28 @@ compile 'com.github.andriydruk:rx2dnssd:0.9.15'
 
 ### DNSSD
 
-Dnssd library provides two implementations of DNSSD interface: 
+Dnssd library provides two implementations of DNSSD interface:
 
-DNSSDBindable is an implementation of DNSSD with system's daemon. Use it for Android project with min API higher than 4.1 for an economy of battery consumption (Also some Samsung devices can don't work with this implementation).
+`DNSSDBindable` is an implementation of DNSSD with system's daemon. Use it for Android project with min API higher than 4.1 for an economy of battery consumption (Also some Samsung devices can don't work with this implementation).
 
 ```
-DNSSD dnssd = new DNSSDBindable(context); 
+DNSSD dnssd = new DNSSDBindable(context);
 ```
 
 DNSSDEmbedded is an implementation of RxDnssd with embedded DNS-SD core. Can be used for any Android device with min API higher than Android 4.0.
 
 ```
-DNSSD dnssd = new DNSSDEmbedded(); 
+DNSSD dnssd = new DNSSDEmbedded();
 ```
 
 ##### Register service
 ```java
 try {
-	registerService = dnssd.register("service_name", "_rxdnssd._tcp", 123,  
+	registerService = dnssd.register("service_name", "_rxdnssd._tcp", 123,
    		new RegisterListener() {
 
 			@Override
-			public void serviceRegistered(DNSSDRegistration registration, int flags, 
+			public void serviceRegistered(DNSSDRegistration registration, int flags,
 				String serviceName, String regType, String domain) {
 				Log.i("TAG", "Register successfully ");
 			}
@@ -125,15 +125,15 @@ try {
 ```java
 try {
 	browseService = dnssd.browse("_rxdnssd._tcp", new BrowseListener() {
-                
+
  		@Override
-		public void serviceFound(DNSSDService browser, int flags, int ifIndex, 
+		public void serviceFound(DNSSDService browser, int flags, int ifIndex,
 			final String serviceName, String regType, String domain) {
 			Log.i("TAG", "Found " + serviceName);
 		}
 
 		@Override
-		public void serviceLost(DNSSDService browser, int flags, int ifIndex, 
+		public void serviceLost(DNSSDService browser, int flags, int ifIndex,
 			String serviceName, String regType, String domain) {
 			Log.i("TAG", "Lost " + serviceName);
 		}
@@ -141,7 +141,7 @@ try {
 		@Override
 		public void operationFailed(DNSSDService service, int errorCode) {
 			Log.e("TAG", "error: " + errorCode);
-		}        
+		}
 	});
 } catch (DNSSDException e) {
 	Log.e("TAG", "error", e);
@@ -154,11 +154,11 @@ You can find more samples in app inside this repository.
 
 - RxDnssdBindable
 ```
-RxDnssd rxdnssd = new RxDnssdBindable(context); 
+RxDnssd rxdnssd = new RxDnssdBindable(context);
 ```
 - RxDnssdEmbedded
 ```
-RxDnssd rxdnssd = new RxDnssdEmbedded(); 
+RxDnssd rxdnssd = new RxDnssdEmbedded();
 ```
 
 ##### Register service
@@ -197,11 +197,11 @@ Subscription subscription = rxDnssd.browse("_http._tcp", "local.")
 
 - Rx2DnssdBindable
 ```
-Rx2Dnssd rxdnssd = new Rx2DnssdBindable(context); 
+Rx2Dnssd rxdnssd = new Rx2DnssdBindable(context);
 ```
 - Rx2DnssdEmbedded
 ```
-Rx2Dnssd rxdnssd = new Rx2DnssdEmbedded(); 
+Rx2Dnssd rxdnssd = new Rx2DnssdEmbedded();
 ```
 
 ##### Register service
