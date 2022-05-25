@@ -145,7 +145,13 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
                 final String serviceNameStr = new String(serviceName, UTF_8);
                 final String regTypeStr = new String(regType, UTF_8);
                 final String domainStr = new String(domain, UTF_8);
-                handler.post(() -> listener.serviceFound(services[0], flags, ifIndex, serviceNameStr, regTypeStr, domainStr));
+
+                handler.post(() -> {
+                    DNSSDService service = services[0];
+                    if (service != null) {
+                        listener.serviceFound(service, flags, ifIndex, serviceNameStr, regTypeStr, domainStr);
+                    }
+                });
             }
 
             @Override
