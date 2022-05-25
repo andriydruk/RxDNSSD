@@ -46,3 +46,6 @@ keys/
 *.so
 .externalNativeBuild
 dnssd/.cxx
+
+# macOS
+.DS_Store
