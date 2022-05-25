@@ -237,8 +237,11 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
                 final Map<String, String> record = parseTXTRecords(txtRecord);
                 handler.removeCallbacks(timeoutRunnable);
                 handler.post(() -> {
-                    listener.serviceResolved(services[0], flags, ifIndex, fullNameStr, hostNameStr, port, record);
-                    services[0].stop();
+                    DNSSDService service = services[0];
+                    if (service != null) {
+                        listener.serviceResolved(service, flags, ifIndex, fullNameStr, hostNameStr, port, record);
+                        service.stop();
+                    }
                 });
             }
 
