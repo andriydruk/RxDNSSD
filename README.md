@@ -1,5 +1,5 @@
 
-# THE PROJECT IS ARCHIVED DUE TO RUSSIAN INVASION TO UKRAINE
+# THE PROJECT IS ARCHIVED DUE TO THE RUSSIAN INVASION OF UKRAINE
 
 # 🇺🇦 #StandWithUkraine
 On Feb. 24, 2022 Russia declared an [unprovoked war on Ukraine](https://war.ukraine.ua/russia-war-crimes/) and launched a full-scale invasion. Russia is currently bombing peaceful Ukrainian cities, including schools and hospitals and attacking civilians who are fleeing conflict zones.
