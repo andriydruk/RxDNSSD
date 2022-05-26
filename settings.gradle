@@ -1,1 +1,1 @@
-include ':app', ':dnssd', ':rxdnssd', ':rx2dnssd'
+include ':app', ':dnssd', ':rxdnssd', ':rx2dnssd', ':rx3dnssd'
