@@ -26,7 +26,7 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    ndkVersion "23.1.7779620"
+    ndkVersion "24.0.8215888"
 }
 
 dependencies {
