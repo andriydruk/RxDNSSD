@@ -48,7 +48,7 @@ dependencies {
 }
 
 ext {
-    PUBLISH_GROUP_ID = 'com.github.andriydruk'
+    PUBLISH_GROUP_ID = 'live.ditto'
     PUBLISH_ARTIFACT_ID = 'rx2dnssd'
 }
 
