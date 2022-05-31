@@ -30,7 +30,7 @@ afterEvaluate {
                 if (project.plugins.findPlugin("com.android.library")) {
                     from components.release
                 } else {
-                    artifact("$buildDir/libs/${project.getName()}-${version}.jar")
+                    artifact("$buildDir/libs/${project.name}-${version}.jar")
                 }
 
                 artifact androidSourcesJar
@@ -39,27 +39,27 @@ afterEvaluate {
               pom {
                     name = PUBLISH_ARTIFACT_ID
                     description = 'Android version of Apple DNSSD Java API'
-                    url = 'https://github.com/andriydruk/RxDNSSD'
+                    url = 'https://github.com/getditto/RxDNSSD'
                     licenses {
                         license {
                             name = 'The Apache Software License, Version 2.0'
-                            url = 'https://github.com/andriydruk/RxDNSSD/blob/master/LICENSE'
+                            url = 'https://github.com/getditto/RxDNSSD/blob/master/LICENSE'
                         }
                     }
                     developers {
                         developer {
-                          id = 'andriydruk'
+                          id = 'getditto'
                           name = 'Andrew Druk'
                           email = 'adriy.druk@gmail.com'
                         }
                     }
 
-                // Version control info - if you're using GitHub, follow the 
-                // format as seen here
-                scm {
-                        connection = 'scm:git:github.com/andriydruk/RxDNSSD.git'
-                        developerConnection = 'scm:git:ssh://github.com/andriydruk/RxDNSSD.git'
-                        url = 'https://github.com/andriydruk/RxDNSSD/tree/master'
+                    // Version control info - if you're using GitHub, follow the
+                    // format as seen here
+                    scm {
+                        connection = 'scm:git:github.com/getditto/RxDNSSD.git'
+                        developerConnection = 'scm:git:ssh://github.com/getditto/RxDNSSD.git'
+                        url = 'https://github.com/getditto/RxDNSSD/tree/master'
                     }
                 }
             }
