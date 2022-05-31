@@ -49,8 +49,8 @@ afterEvaluate {
                     developers {
                         developer {
                           id = 'getditto'
-                          name = 'Andrew Druk'
-                          email = 'adriy.druk@gmail.com'
+                          name = 'Ben Chatelain'
+                          email = 'ben@ditto.live'
                         }
                     }
 
@@ -72,5 +72,6 @@ ext["signing.password"] = rootProject.ext["signing.password"]
 ext["signing.secretKeyRingFile"] = rootProject.ext["signing.secretKeyRingFile"]
 
 signing {
+    useGpgCmd()
     sign publishing.publications
 }
