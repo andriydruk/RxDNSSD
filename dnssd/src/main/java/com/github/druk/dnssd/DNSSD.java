@@ -159,12 +159,17 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
                 final String serviceNameStr = new String(serviceName, UTF_8);
                 final String regTypeStr = new String(regType, UTF_8);
                 final String domainStr = new String(domain, UTF_8);
-                handler.post(() -> listener.serviceLost(services[0], flags, ifIndex, serviceNameStr, regTypeStr, domainStr));
+                handler.post(() -> {
+                    DNSSDService service = services[0];
+                    if (service != null) {
+                        listener.serviceLost(service, flags, ifIndex, serviceNameStr, regTypeStr, domainStr);
+                    }
+                });
             }
 
             @Override
             public void operationFailed(final DNSSDService service, final int errorCode) {
-                handler.post(() -> listener.operationFailed(services[0], errorCode));
+                handler.post(() -> listener.operationFailed(service, errorCode));
             }
         }));
         return services[0];
@@ -233,7 +238,12 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
         onServiceStarting();
         final DNSSDService[] services = new DNSSDService[1];
 
-        final Runnable timeoutRunnable = () -> services[0].stop();
+        final Runnable timeoutRunnable = () -> {
+            DNSSDService service = services[0];
+            if (service != null) {
+                service.stop();
+            }
+        };
 
         services[0] = new InternalDNSSDService(this, InternalDNSSD.resolve(flags, ifIndex, serviceName, regType, domain, new InternalResolveListener() {
             @Override
@@ -255,8 +265,11 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
             public void operationFailed(final DNSSDService service, final int errorCode) {
                 handler.removeCallbacks(timeoutRunnable);
                 handler.post(() -> {
-                    listener.operationFailed(services[0], errorCode);
-                    services[0].stop();
+                    DNSSDService sharedService = services[0];
+                    if (sharedService != null) {
+                        listener.operationFailed(sharedService, errorCode);
+                        sharedService.stop();
+                    }
                 });
             }
         }));
@@ -330,12 +343,22 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
                 final String serviceNameStr =  new String(serviceName, UTF_8);
                 final String regTypeStr = new String(regType, UTF_8);
                 final String domainStr = new String(domain, UTF_8);
-                handler.post(() -> listener.serviceRegistered(services[0], flags, serviceNameStr, regTypeStr, domainStr));
+                handler.post(() -> {
+                    DNSSDRegistration service = services[0];
+                    if (service != null) {
+                        listener.serviceRegistered(service, flags, serviceNameStr, regTypeStr, domainStr);
+                    }
+                });
             }
 
             @Override
             public void operationFailed(DNSSDService service, final int errorCode) {
-                handler.post(() -> listener.operationFailed(services[0], errorCode));
+                handler.post(() -> {
+                    DNSSDService dnsService = services[0];
+                    if (dnsService != null) {
+                        listener.operationFailed(dnsService, errorCode);
+                    }
+                });
             }
         }));
         return services[0];
@@ -454,7 +477,12 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
         onServiceStarting();
         final DNSSDService[] services = new DNSSDService[1];
 
-        final Runnable timeoutRunnable = () -> services[0].stop();
+        final Runnable timeoutRunnable = () -> {
+            DNSSDService service = services[0];
+            if (service != null) {
+                service.stop();
+            }
+        };
 
         services[0] = new InternalDNSSDService(this, InternalDNSSD.queryRecord(flags, ifIndex, serviceName, rrtype, rrclass, new InternalQueryListener() {
             @Override
@@ -462,9 +490,12 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
                 final String fullNameStr = new String(fullName, UTF_8);
                 handler.removeCallbacks(timeoutRunnable);
                 handler.post(() -> {
-                    listener.queryAnswered(services[0], flags, ifIndex, fullNameStr, rrtype, rrclass, rdata, ttl);
-                    if (autoStop) {
-                        services[0].stop();
+                    DNSSDService service = services[0];
+                    if (service != null) {
+                        listener.queryAnswered(service, flags, ifIndex, fullNameStr, rrtype, rrclass, rdata, ttl);
+                        if (autoStop) {
+                            service.stop();
+                        }
                     }
                 });
             }
@@ -473,8 +504,11 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
             public void operationFailed(DNSSDService service, final int errorCode) {
                 handler.removeCallbacks(timeoutRunnable);
                 handler.post(() -> {
-                    listener.operationFailed(services[0], errorCode);
-                    services[0].stop();
+                    DNSSDService sharedService = services[0];
+                    if (sharedService != null) {
+                        listener.operationFailed(sharedService, errorCode);
+                        sharedService.stop();
+                    }
                 });
             }
         }));
@@ -516,18 +550,33 @@ public abstract class DNSSD implements InternalDNSSDService.DnssdServiceListener
             @Override
             public void domainFound(DNSSDService domainEnum, final int flags, final int ifIndex, byte[] domain) {
                 final String domainStr = new String(domain, UTF_8);
-                handler.post(() -> listener.domainFound(services[0], flags, ifIndex, domainStr));
+                handler.post(() -> {
+                    DNSSDService sharedService = services[0];
+                    if (sharedService != null) {
+                        listener.domainFound(sharedService, flags, ifIndex, domainStr);
+                    }
+                });
             }
 
             @Override
             public void domainLost(DNSSDService domainEnum, final int flags, final int ifIndex, byte[] domain) {
                 final String domainStr = new String(domain, UTF_8);
-                handler.post(() -> listener.domainLost(services[0], flags, ifIndex, domainStr));
+                handler.post(() -> {
+                    DNSSDService sharedService = services[0];
+                    if (sharedService != null) {
+                        listener.domainLost(sharedService, flags, ifIndex, domainStr);
+                    }
+                });
             }
 
             @Override
             public void operationFailed(final DNSSDService service, final int errorCode) {
-                handler.post(() -> listener.operationFailed(services[0], errorCode));
+                handler.post(() -> {
+                    DNSSDService sharedService = services[0];
+                    if (sharedService != null) {
+                        listener.operationFailed(sharedService, errorCode);
+                    }
+                });
             }
         }));
         return services[0];
